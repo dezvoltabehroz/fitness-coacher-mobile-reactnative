@@ -27,11 +27,11 @@ import { TextInputMask } from "react-native-masked-text";
 
 import NetInfo from "@react-native-community/netinfo";
 import { coachRegister } from "../../../services/registerCoach";
-import * as userLoginService from "../../../services/LoginUser";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { logindatakey } from "../../helper/globalKey";
 import GlobalVariables from "../../helper/GlobalVariables";
+import { AuthServices } from "../../services";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -93,20 +93,24 @@ const SplashScreen = (props) => {
       password: loginPassword,
     });
     // console.log("userdata is", loginDetails);
-
-    try {
-      let response = await userLoginService.userLoginFunc(loginDetails);
-      if (response.status == 200) {
-        GlobalVariables.userDetails = response.data.userData.userInfo;
-        GlobalVariables.authenticationToken = response.data.userData.tokenInfo;
-        storeData(response);
-      } else {
-        console.log("error in service");
-      }
-    } catch (error) {
-      alert("Invalid email or password");
-      console.log(error);
-    }
+    AuthServices.userLogin(loginDetails)
+      .then((res) => {
+        console.log(res.data)
+      })
+      .catch((err) => console.log(err))
+    // try {
+    // let response = await userLoginService.userLoginFunc(loginDetails);
+    // if (response.status == 200) {
+    //   GlobalVariables.userDetails = response.data.userData.userInfo;
+    //   GlobalVariables.authenticationToken = response.data.userData.tokenInfo;
+    //   storeData(response);
+    // } else {
+    //   console.log("error in service");
+    // }
+    // } catch (error) {
+    // alert("Invalid email or password");
+    // console.log(error);
+    // }
   };
 
   const storeData = async (value) => {
@@ -275,8 +279,8 @@ const SplashScreen = (props) => {
                   ? "-20%"
                   : "-30%"
                 : screenHeight > 667
-                ? "20%"
-                : "15%",
+                  ? "20%"
+                  : "15%",
           },
         ]}
       />

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import type {Node} from 'react';
+import type { Node } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -26,6 +26,9 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import Router from './app/navigation/Router';
+import { Provider } from "react-redux";
+import createStore from "./app/redux/CreateStore";
+const store = createStore();
 
 
 const App: () => Node = () => {
@@ -36,7 +39,9 @@ const App: () => Node = () => {
   };
 
   return (
-   <Router/>
+    <Provider store={store}>
+      <Router />
+    </Provider>
   );
 };
 
