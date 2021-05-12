@@ -33,10 +33,10 @@ const SplashScreen = props => {
         style={styles.image}>
         <View
           style={{flex: 0.5, alignItems: 'center', justifyContent: 'center'}}>
-          <Image
+          {/* <Image
             source={require('../../assets/logo.png')}
             style={styles.logo}
-          />
+          /> */}
         </View>
         <View
           style={{flex: 0.5, alignItems: 'center', justifyContent: 'center'}}>

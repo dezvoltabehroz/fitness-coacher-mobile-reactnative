@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -11,25 +11,32 @@ import {
   AsyncStorage,
   NativeModules,
   Platform,
+  ActivityIndicator,
   Dimensions,
   TextInput,
   TouchableOpacity,
 } from 'react-native';
-import {color} from 'react-native-reanimated';
-import {Colors} from '../style/colors';
+import { color } from 'react-native-reanimated';
+import { Colors } from '../style/colors';
 const height = Dimensions.get('window').height;
-import {FontFamily} from '../style/typograpy';
+import { FontFamily } from '../style/typograpy';
 
-const Button = ({text, onPress, flag}) => {
-  useEffect(() => {});
+const Button = ({ text, onPress, flag, loading }) => {
+  useEffect(() => { });
   return (
     <TouchableOpacity
       style={[
         styles.container,
-        {backgroundColor: flag ? '#030e2d' : Colors.buttonColor},
+        { backgroundColor: flag ? '#030e2d' : Colors.buttonColor },
       ]}
       onPress={onPress}>
-      <Text style={[styles.text]}>{text}</Text>
+      {
+        loading ?
+          <ActivityIndicator size={20} color="white" />
+          :
+          <Text style={[styles.text]}>{text}</Text>
+      }
+
     </TouchableOpacity>
   );
 };

@@ -13,14 +13,19 @@ import { FontFamily } from "../../style/typograpy";
 import { Colors } from "../../style/colors";
 import * as resetPasswordService from "../../../services/ResetPassword";
 import NetInfo from "@react-native-community/netinfo";
+import { ActivityIndicator } from "react-native";
+import { AuthServices } from "../../services";
 
 const ResetPassword = ({ navigation, route }) => {
-  const newOtp = route.params;
-  console.log("new otp is", newOtp);
+  console.log(navigation)
+  console.log(route)
+  const newOtp = route.params.email;
+  console.log("new otp is", route.params.email);
 
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [checkCode, setCheckCode] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [checkPassword, setCheckPassword] = useState(false);
   const [updateEmail, setUpdateEmail] = useState(false);
 
@@ -37,7 +42,7 @@ const ResetPassword = ({ navigation, route }) => {
     console.log("email is: ", updateEmail);
   };
 
-  _onHandleChange = (name, value) => {
+  const _onHandleChange = (name, value) => {
     // if (name == "email") {
     //   setCheckEmail(false);
     //   setState({
@@ -84,6 +89,7 @@ const ResetPassword = ({ navigation, route }) => {
     } else if (String(code).length <= 3) {
       alert("Code must be 4 characters");
     } else {
+      setLoading(true);
       resetPasswordDetails();
     }
   };
@@ -95,27 +101,29 @@ const ResetPassword = ({ navigation, route }) => {
   // };
 
   const resetPasswordDetails = async () => {
-    let newCredentials = JSON.stringify({
-      // email: state.email,
+    let newCredentials = {
+      email: updateEmail,
       password: password,
       otp: Number(code),
-    });
+    };
     console.log("userdata is", newCredentials);
-
-    try {
-      let response = await resetPasswordService.resetPasswordFunc(
-        newCredentials
-      );
-      if (response.data.success != undefined && response.data.success == true) {
-        console.log("response", response);
-        navigation.navigate("Login");
-      } else {
-        console.log("error in service");
-      }
-    } catch (error) {
-      alert(error);
-      console.log(error);
-    }
+    AuthServices.resetPassword(newCredentials)
+      .then((response) => {
+        if (response.data.success != undefined && response.data.success == true) {
+          setLoading(false);
+          navigation.navigate("Login");
+        } else {
+          setLoading(false);
+          alert(response.data.msg);
+          console.log("error in service");
+        }
+      })
+      .catch((error) => {
+        alert(error);
+        setLoading(false)
+        console.log(error);
+      })
+  
   };
 
   return (
@@ -143,7 +151,7 @@ const ResetPassword = ({ navigation, route }) => {
           {checkEmail == true && (
             <Text style={styles.errorStyle}>Code cannot be empty</Text>
           )}  */}
-          <Text>{newOtp}</Text>
+          <Text style={{ textAlign: "center" }}>{newOtp}</Text>
           <Input
             text={"Enter your new password here"}
             secureTextEntry={true}
@@ -171,8 +179,11 @@ const ResetPassword = ({ navigation, route }) => {
           <TouchableOpacity
             style={styles.btnStyle}
             onPress={() => checkNetwork()}
-          >
-            <Text style={styles.btnText}>Update</Text>
+          >{
+              loading ?
+                <ActivityIndicator color={"white"} />
+                :
+                <Text style={styles.btnText}>Update</Text>}
           </TouchableOpacity>
         </View>
       </ScrollView>

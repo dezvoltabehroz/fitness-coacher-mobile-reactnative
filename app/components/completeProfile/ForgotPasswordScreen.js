@@ -14,17 +14,19 @@ import { Colors } from "../../style/colors";
 import * as verifyEmailService from "../../../services/VerifyEmail";
 import * as resendOtpService from "../../../services/ForgotPassword";
 import NetInfo from "@react-native-community/netinfo";
+import { AuthServices } from "../../services";
+import { ActivityIndicator } from "react-native";
 
 const ForgotPassword = (props) => {
   const [code, setCode] = useState("");
-
+  const [loading, setLoading] = useState(false);
   const [state, setState] = useState({
     email: "",
   });
 
   const [checkEmail, setCheckEmail] = useState(false);
 
-  _onHandleChange = (name, value) => {
+  const _onHandleChange = (name, value) => {
     if (name == "email") {
       setCheckEmail(false);
       setState({
@@ -53,6 +55,7 @@ const ForgotPassword = (props) => {
     } else if (!validateEmail()) {
       alert("Please enter a proper email");
     } else {
+      setLoading(true);
       resetPassword();
     }
   };
@@ -68,18 +71,32 @@ const ForgotPassword = (props) => {
       email: state.email,
     };
     console.log("new OTP is", newOtp);
-    try {
-      let response = await resendOtpService.resendOtpFunc(newOtp);
-      if (response.data.success != undefined && response.data.success == true) {
-        console.log("response", response);
-        props.navigation.navigate("ResetPassword");
-      } else {
-        console.log("error in service");
-      }
-    } catch (error) {
-      alert(error);
-      console.log(error);
-    }
+    AuthServices.forgotPassword(state.email)
+      .then((response) => {
+        if (response.data.success != undefined && response.data.success == true) {
+          console.log("response", response.data);
+          props.navigation.navigate("ResetPassword", { email: newOtp.email });
+          setLoading(false)
+        } else {
+          console.log("error in service");
+        }
+      })
+      .catch((err) => {
+        alert(err);
+        console.log(err);
+      })
+    // try {
+    //   let response = await resendOtpService.resendOtpFunc(newOtp);
+    //   if (response.data.success != undefined && response.data.success == true) {
+    //     console.log("response", response);
+    //     props.navigation.navigate("ResetPassword");
+    //   } else {
+    //     console.log("error in service");
+    //   }
+    // } catch (error) {
+    //   alert(error);
+    //   console.log(error);
+    // }
   };
 
   return (
@@ -110,8 +127,11 @@ const ForgotPassword = (props) => {
           <TouchableOpacity
             style={styles.btnStyle}
             onPress={() => checkNetwork()}
-          >
-            <Text style={styles.btnText}>Get new OTP</Text>
+          >{
+              loading ?
+                <ActivityIndicator color={'white'} />
+                :
+                <Text style={styles.btnText}>Get new OTP</Text>}
           </TouchableOpacity>
         </View>
       </ScrollView>

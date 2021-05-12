@@ -66,7 +66,7 @@ const SplashScreen = (props) => {
   const [checkDob, setCheckDob] = useState(false);
   const [checkCountry, setCheckCountry] = useState(false);
   const [checkRole, setCheckRole] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const onHandleLoginInputs = (name, value) => {
     if (name == "loginEmail") {
       setCheckLoginEmail(false);
@@ -88,29 +88,16 @@ const SplashScreen = (props) => {
   };
 
   const loginService = async () => {
-    let loginDetails = JSON.stringify({
+    setLoading(true);
+    let loginDetails = {
       email: loginEmail,
       password: loginPassword,
-    });
-    // console.log("userdata is", loginDetails);
+    };
     AuthServices.userLogin(loginDetails)
       .then((res) => {
-        console.log(res.data)
+        console.log("res :", res)
       })
-      .catch((err) => console.log(err))
-    // try {
-    // let response = await userLoginService.userLoginFunc(loginDetails);
-    // if (response.status == 200) {
-    //   GlobalVariables.userDetails = response.data.userData.userInfo;
-    //   GlobalVariables.authenticationToken = response.data.userData.tokenInfo;
-    //   storeData(response);
-    // } else {
-    //   console.log("error in service");
-    // }
-    // } catch (error) {
-    // alert("Invalid email or password");
-    // console.log(error);
-    // }
+      .catch((err) => { setLoading(false); console.log(err) })
   };
 
   const storeData = async (value) => {
@@ -337,6 +324,7 @@ const SplashScreen = (props) => {
 
               <View style={{ paddingHorizontal: 20 }}>
                 <Button
+                  loading={loading}
                   text={"Login"}
                   onPress={() => {
                     loginValidations();
