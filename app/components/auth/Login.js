@@ -116,36 +116,22 @@ const SplashScreen = (props) => {
     }
   };
 
-  _onHandleChange = (name, value) => {
+  const _onHandleChange = (name, value) => {
     if (name == "first_name") {
       setCheckFirstname(false);
       setFirstname(value);
+    } else if (name == "email") {
+      setCheckEmail(false);
+      setState({ email: value });
     } else if (name == "last_name") {
       setCheckLastname(false);
       setLastname(value);
-    } else if (name == "email") {
-      setCheckEmail(false);
-      setState({
-        email: value,
-      });
     } else if (name == "password") {
       setCheckPassword(false);
       setPassword(value);
-    } else if (name == "phone") {
-      setCheckPhone(false);
-      setPhone(value);
-    } else if (name == "address") {
-      setCheckAddress(false);
-      setAddress(value);
-    } else if (name == "dob") {
-      setCheckDob(false);
-      setDob(value);
-    } else if (name == "country") {
-      setCheckCountry(false);
-      setCountry(value);
-    } else if (name == "role") {
-      setCheckRole(false);
-      setRole(value);
+    } else if (name == "confirmPassword") {
+      setCheckConfirmPassword(false);
+      setConfirmPassword(value);
     }
   };
 
@@ -172,16 +158,8 @@ const SplashScreen = (props) => {
       setCheckEmail(true);
     } else if (password == "") {
       setCheckPassword(true);
-    } else if (phone == "") {
-      setCheckPhone(true);
-    } else if (address == "") {
-      setCheckAddress(true);
-    } else if (country == "") {
-      setCheckCountry(true);
-    } else if (dob == "") {
-      setCheckDob(true);
-    } else if (role == "") {
-      setCheckRole(true);
+    } else if (password == "") {
+      setCheckConfirmPassword(true);
     } else if (String(first_name).length <= 2) {
       alert("firstname must be atleast 3 characters");
     } else if (String(last_name).length <= 2) {
@@ -190,10 +168,8 @@ const SplashScreen = (props) => {
       alert("Please enter a proper email");
     } else if (String(password).length <= 7) {
       alert("Password must be between 8 to 16 characters");
-    } else if (String(phone).length <= 10) {
-      alert("Phone number must be 11 digits");
-    } else if (String(address).length <= 5) {
-      alert("Address must be atleast 6 characters");
+    } else if (confirmPassword != password) {
+      alert("Password Mismatch");
     } else {
       navigateToNextScreen();
     }
@@ -211,11 +187,7 @@ const SplashScreen = (props) => {
       lastName: last_name,
       email: state.email,
       password: password,
-      phone: phone,
-      address: address,
-      dob: dob,
-      country: country,
-      role: role,
+      confirmPassword: confirmPassword,
     };
     props.navigation.navigate("CompleteProfile", data);
     console.log("data is ", data);
@@ -351,7 +323,9 @@ const SplashScreen = (props) => {
               }}
               showsVerticalScrollIndicator={false}
             >
-              <View style={{ height: 610 }}>
+              <View style={{
+                // height: 610
+              }}>
                 <Input
                   text={"First Name"}
                   value={first_name}
@@ -362,7 +336,7 @@ const SplashScreen = (props) => {
                 />
                 {checkFirst_name == true && (
                   <Text style={styles.errorStyle}>
-                    First Name cannot be empty
+                    Fisrt Name cannot be empty
                   </Text>
                 )}
                 <Input
@@ -370,16 +344,17 @@ const SplashScreen = (props) => {
                   value={last_name}
                   onChangeText={(value) => {
                     _onHandleChange("last_name", value);
-                    setCheckLastname(false);
+                    setCheckFirstname(false);
                   }}
                 />
-                {checkLast_name == true && (
+                {checkFirst_name == true && (
                   <Text style={styles.errorStyle}>
                     Last Name cannot be empty
                   </Text>
                 )}
+
                 <Input
-                  text={"Email-Address"}
+                  text={"Email Address"}
                   value={state.email}
                   onChangeText={(value) => {
                     _onHandleChange("email", value);
@@ -404,6 +379,20 @@ const SplashScreen = (props) => {
                   </Text>
                 )}
                 <Input
+                  secureTextEntry={true}
+                  text={"Confirm Password"}
+                  value={confirmPassword}
+                  onChangeText={(value) => {
+                    _onHandleChange("confirmPassword", value);
+                    setCheckPassword(false);
+                  }}
+                />
+                {checkPassword == true && (
+                  <Text style={styles.errorStyle}>
+                    Password cannot be empty
+                  </Text>
+                )}
+                {/* <Input
                   text={"Phone No."}
                   keyboardType="phone-pad"
                   value={phone}
@@ -470,11 +459,12 @@ const SplashScreen = (props) => {
                 />
                 {checkRole == true && (
                   <Text style={styles.errorStyle}>Role cannot be empty</Text>
-                )}
+                )} */}
 
                 <View style={{ paddingHorizontal: 20 }}>
                   <Button
                     text={"Next"}
+                    loading={loading}
                     // onPress={() => props.navigation.navigate("CompleteProfile")}
                     onPress={() => checkNetwork()}
                   />

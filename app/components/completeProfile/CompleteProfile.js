@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -31,13 +31,15 @@ import { CheckBox } from "react-native-elements";
 import { fetchCategories } from "../../../services/FetchCategories";
 import { fetchSubCategories } from "../../../services/FetchSubCategories";
 import { fetchSkills } from "../../../services/FetchSkills";
-
+import { TrainingCategoryServices } from '../../services'
 // import {Checkbox} from '../../common/Checkbox';
-
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import NetInfo from "@react-native-community/netinfo";
 import * as coachRegister from "../../../services/registerCoach";
 import { debug } from "react-native-reanimated";
-
+import moment from 'moment';
+import PhoneInput from 'react-native-phone-input';
+import CountryPicker, { FlagButton } from 'react-native-country-picker-modal';
 const height = Dimensions.get("window").height;
 
 function CompleteProfile({ navigation, route }) {
@@ -63,62 +65,48 @@ function CompleteProfile({ navigation, route }) {
 
   const [selectInstruction, setSelectInstruction] = useState({});
   const [selectInstructor, setSelectInstructor] = useState({});
-
+  const [dob, setDob] = useState("")
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [coachSkills, setCoachSkills] = useState([]);
-
+  const [country, setCountry] = useState("")
   const [dummy, setDummy] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [countryModal, setCountryModal] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState(`+1535483498`);
+  const [date, setDate] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
   // const [subCategoriesLoading, setSubCategoriesLoading] = useState(true);
   const [skillsLoading, setSkillsLoading] = useState(true);
+  const phoneRef = useRef(null);
 
   useEffect(() => {
     // getCategories();
     // getSkills();
   }, []);
 
-  const getCategories = async () => {
-    setTimeout(() => {
-      setCategoriesLoading(false);
-    }, 1000);
-    await fetchCategories(
-      "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoyLCJuYW1lIjoiTXVoYW1tYWQgSmFsZWVsIEFzbGFtIiwiZW1haWwiOiJmYXplZWwuYnNzZTI4OTRAaWl1LmVkdS5wayIsInBob25lIjoiMDA5MjM0MjU0OTU3NDcifSwiaWF0IjoxNjE0MzM1ODUzLCJleHAiOjE3OTQzMzU4NTN9.I_Qf57UxPt7CZkzemkISFRz85NXfWULPOYeQEJFQz3c"
-    )
+  const getCategories = () => {
+    TrainingCategoryServices.allTrainingTypes()
       .then((response) => {
-        setCategories(response.data.trainingCategory.rows);
+        setCategoriesLoading(false)
+        console.log(response)
+        setCategories(response.data.trainingTypes);
       })
-      .catch((err) => {
-        console.log("error =", err.msg);
-      });
-    console.log("categories =", categories);
+      .catch((err) => console.log(err))
   };
 
-  const getSubCategories = async (item) => {
-    // setTimeout(() => {
-    //   setSubCategoriesLoading(false);
-    // }, 1000);
-    await fetchSubCategories(
-      "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoyLCJuYW1lIjoiTXVoYW1tYWQgSmFsZWVsIEFzbGFtIiwiZW1haWwiOiJmYXplZWwuYnNzZTI4OTRAaWl1LmVkdS5wayIsInBob25lIjoiMDA5MjM0MjU0OTU3NDcifSwiaWF0IjoxNjE0MzM1ODUzLCJleHAiOjE3OTQzMzU4NTN9.I_Qf57UxPt7CZkzemkISFRz85NXfWULPOYeQEJFQz3c",
-      item.id
-    )
+  const getSubCategories = (item) => {
+    TrainingCategoryServices.subCategories(item.id)
       .then((response) => {
+        setCategoriesLoading(false)
         setSubCategories(response.data.subCategories);
       })
-      .catch((err) => {
-        console.log("error =", err.msg);
-      });
-    console.log("subCategories =", subCategories);
+      .catch((err) => console.log(err))
   };
 
   const getSkills = async (item) => {
-    setTimeout(() => {
-      setSkillsLoading(false);
-    }, 1000);
-    await fetchSkills(
-      "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxLCJlbWFpbCI6ImZhemVlbC5ic3NlMjg5NEBpaXUuZWR1LnBrIiwicGhvbmUiOiIwMDkyMzQyNTQ5NTc0NyIsInJvbGUiOiJhZG1pbiJ9LCJpYXQiOjE2MTk2ODM1MzUsImV4cCI6MTc5OTY4MzUzNX0.WUrphl2cLbMz7X8QJnFju12hPl_N8_tUtQlKcA5VDX8",
-      item.id
-    )
+    console.log(item)
+    TrainingCategoryServices.getSkillsBy(item.TrainingTypeId)
       .then((response) => {
         var skill = response.data.skills;
         console.log("skill level", skill);
@@ -128,9 +116,8 @@ function CompleteProfile({ navigation, route }) {
         setCoachSkills(skill);
       })
       .catch((err) => {
-        console.log("error =", err.msg);
+        console.log("error =", err);
       });
-    console.log("skill level is =", skill);
   };
 
   const checkNetwork = async () => {
@@ -238,6 +225,46 @@ function CompleteProfile({ navigation, route }) {
     setDummy(!dummy);
   };
 
+  const hideDatePicker = () => {
+    setShowDatePicker(!showDatePicker);
+  };
+
+  const handleConfirm = (selectedDate) => {
+    var date = moment(selectedDate).format('YYYY-MM-DD')
+    setDate(date);
+    hideDatePicker();
+  };
+
+  const onSelect = async (country) => {
+    console.log(country)
+    console.log(phoneRef?.current)
+    await setCountry(country.name);
+    await setPhoneNumber(`+${country.callingCode[0]}`);
+    await phoneRef?.current?.selectCountry(country.cca2);
+    await phoneRef?.current?.setState({ iputValue: `+${country.callingCode[0]}` });
+
+    await setCountryModal(false)
+
+  };
+  const _flagButton = () => {
+    return (
+      <TouchableOpacity activeOpacity={0.9} onPress={() => setCountryModal(!countryModal)} >
+        <View style={{}}>
+          <FlagButton
+            onOpen={() => setCountryModal(!countryModal)}
+            onClose={() => setCountryModal(!countryModal)}
+            placeholder={""}
+            withEmoji={false}
+            withFlagButton={false}
+            // countryCode={countryCode != "" ? countryCode : ""}
+            containerButtonStyle={{ height: 0 }}
+          />
+        </View>
+      </TouchableOpacity>
+    )
+  }
+
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -288,7 +315,7 @@ function CompleteProfile({ navigation, route }) {
             }}
           >
             {selectInstructor != undefined &&
-            Object.keys(selectInstructor).length > 0 ? (
+              Object.keys(selectInstructor).length > 0 ? (
               // setCheckInstructorTypes(false)
               <Text style={styles.innertext}>{selectInstructor.title}</Text>
             ) : (
@@ -303,18 +330,111 @@ function CompleteProfile({ navigation, route }) {
         {checkInstructorTypes == true && (
           <Text style={styles.errorStyle}>Instructor Type cannot be empty</Text>
         )}
+
+        <Text style={styles.text}>Date Of Birth</Text>
+        <View style={styles.outerView}>
+          <TouchableOpacity
+            style={styles.dropDown}
+            onPress={() => {
+              setShowDatePicker(!showDatePicker)
+              console.log("showDatePicker: ", showDatePicker)
+            }}
+          >
+            {date != undefined && date != '' ? (
+              // setCheckInstructorTypes(false)
+              <Text style={styles.innertext}>{moment(date).format('M / DD / YYYY')}</Text>
+            ) : (
+              <Text style={styles.innertext}>- / -- / ----</Text>
+            )}
+            <Image
+              source={require("../../assets/drop-down.png")}
+              style={styles.dropImage}
+            />
+          </TouchableOpacity>
+          <DateTimePickerModal
+            isVisible={showDatePicker}
+            onConfirm={(date) => handleConfirm(date)}
+            onCancel={() => hideDatePicker}
+          />
+        </View>
+        {checkInstructorTypes == true && (
+          <Text style={styles.errorStyle}>Please select your date of birth</Text>
+        )}
+
+        <Text style={styles.text}>Country</Text>
+        <View style={styles.outerView}>
+          <TouchableOpacity
+            style={styles.dropDown}
+            onPress={() => {
+              setCountryModal(!countryModal)
+              console.log("countryModal : ", countryModal)
+            }}
+          >
+            {country != undefined && country != '' ? (
+              // setCheckInstructorTypes(false)
+              <Text style={styles.innertext}>{country}</Text>
+            ) : (
+              <Text style={styles.innertext}>Select</Text>
+            )}
+            <Image
+              source={require("../../assets/drop-down.png")}
+              style={styles.dropImage}
+            />
+          </TouchableOpacity>
+        </View>
+        {checkInstructorTypes == true && (
+          <Text style={styles.errorStyle}>Please select a Country</Text>
+        )}
+        <Text style={styles.text}>Phone</Text>
+
+        <View style={styles.outerView}>
+          <View style={styles.dropDown}>
+            <PhoneInput
+              ref={phoneRef}
+              onPressFlag={() => setCountryModal(!countryModal)}
+              autoFormat={true}
+              allowZeroAfterCountryCode={false}
+              textStyle={{
+                marginTop: 2,
+                lineHeight: 25,
+                // fontFamily: 'Nunito-Regular',
+                fontSize: 14,
+                color: 'black',
+              }}
+              returnKeyType="next"
+              // blur={() => this.disabled()}
+              onChangePhoneNumber={(phonenumber) => { console.log(phonenumber); setPhoneNumber(phonenumber) }}
+              value={phoneNumber}
+              textProps={{
+                placeholder: 'Phone Number *',
+                placeholderTextColor: "grey",
+              }}
+            />
+            <View >
+
+            </View>
+          </View>
+        </View>
         <Text style={styles.text}>Instruction Types</Text>
 
         <View style={styles.outerView}>
           <TouchableOpacity
             style={styles.dropDown}
             onPress={() => {
-              setInstructionModalVisible(true);
+              if (categories.length != 0) {
+                setInstructionModalVisible(true);
+
+              } else {
+                alert("Please select instructor first")
+              }
+
+
+
               // setSubCategoriesLoading(true);
             }}
           >
             {selectInstruction.title != undefined &&
-            Object.keys(selectInstruction).length > 0 ? (
+              Object.keys(selectInstruction).length > 0 ? (
               <Text style={styles.innertext}>{selectInstruction.title}</Text>
             ) : (
               <Text style={styles.innertext}>Select</Text>
@@ -474,8 +594,8 @@ function CompleteProfile({ navigation, route }) {
         modalVisible={ageModalVisible}
         setModalVisible={setAgeModalVisible}
         setAge={setAge}
-        // setGroupAge={categories}
-        // selectInstruction={settingValue}
+      // setGroupAge={categories}
+      // selectInstruction={settingValue}
       />
       <RegisterationModal
         modalVisible={modalVisible}
@@ -494,9 +614,22 @@ function CompleteProfile({ navigation, route }) {
         setModalVisible={setInstructionModalVisible}
         setInstructionType={subCategories}
         selectInstruction={settingValue}
-        // isLoaderActive={subCategoriesLoading}
+      // isLoaderActive={subCategoriesLoading}
       />
-    </View>
+
+      <CountryPicker
+        // countryCodes={['PK']}
+        theme={styles.themeText}
+        withFilter={true}
+        visible={countryModal}
+        onSelect={(country) => onSelect(country)}
+        withAlphaFilter={true}
+        withCountryNameButton={true}
+        renderFlagButton={_flagButton}
+      >
+        <View />
+      </CountryPicker>
+    </View >
   );
 }
 
@@ -596,7 +729,7 @@ const styles = StyleSheet.create({
   },
   innertext: {
     fontFamily: FontFamily.helveticaBold,
-    fontSize: height > 667 ? 12 : 9,
+    fontSize: height > 667 ? 14 : 12,
     // paddingRight: 25,
   },
 
