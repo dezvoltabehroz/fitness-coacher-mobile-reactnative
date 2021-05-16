@@ -427,9 +427,6 @@ function CompleteProfile({ navigation, route }) {
               } else {
                 alert("Please select instructor first")
               }
-
-
-
               // setSubCategoriesLoading(true);
             }}
           >
