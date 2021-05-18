@@ -1,20 +1,14 @@
 import React, { useEffect, useState, useRef, createRef } from "react";
 import {
-  SafeAreaView,
   StyleSheet,
   ScrollView,
   View,
   Text,
   StatusBar,
-  ImageBackground,
   Image,
-  AsyncStorage,
-  NativeModules,
-  Platform,
   Dimensions,
   TouchableOpacity,
   FlatList,
-  ActivityIndicator,
 } from "react-native";
 import { Colors } from "../../style/colors";
 import { FontFamily } from "../../style/typograpy";
@@ -25,18 +19,11 @@ import RegisterationModal from "../../common/RegisterationModal";
 import AgeGroupModal from "../../common/ageGroupModal";
 import InstructorTypeModal from "../../common/instructorTypeModal";
 import InstructionTypeModal from "../../common/instructionTypeModal";
-import * as ImagePicker from "react-native-image-picker";
-import { CheckBox } from "react-native-elements";
-
-import { fetchCategories } from "../../../services/FetchCategories";
-import { fetchSubCategories } from "../../../services/FetchSubCategories";
-import { fetchSkills } from "../../../services/FetchSkills";
 import { TrainingCategoryServices } from '../../services'
 // import {Checkbox} from '../../common/Checkbox';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import NetInfo from "@react-native-community/netinfo";
 import * as coachRegister from "../../../services/registerCoach";
-import { debug } from "react-native-reanimated";
 import moment from 'moment';
 import Input from "../../common/Input";
 import PhoneInput from 'react-native-phone-input';
@@ -47,7 +34,7 @@ import Calendar from 'react-native-vector-icons/Feather';
 const height = Dimensions.get("window").height;
 const width = Dimensions.get("window").width;
 function CompleteProfile({ navigation, route }) {
-  const data = route.params;
+  // const data = route.params;
   // console.log("data is", data);
 
   // const [checked, setChecked] = useState("baseBall");
@@ -85,6 +72,7 @@ function CompleteProfile({ navigation, route }) {
   const phoneRef = createRef(null);
   const [address, setAddress] = useState("");
   const [submit, setSubmit] = useState(false)
+  const [image, setImage] = useState('')
   const [arr, setArr] = useState([
     {
       flag: false,
@@ -287,6 +275,22 @@ function CompleteProfile({ navigation, route }) {
     )
   }
 
+  const launchGallery = () => {
+    launchImageLibrary(
+        {
+            title: "Pick photo from storage",
+            storageOptions: {
+                skipBackup: true,
+                path: 'images',
+            },
+        },
+        async (response) => {
+            if (response.error) { }
+            else if (response.uri != undefined) {
+                setImage(response.uri);
+            }
+        })
+}
 
   return (
     <View style={styles.container}>
@@ -528,64 +532,6 @@ function CompleteProfile({ navigation, route }) {
             Please select atleast one skill level
           </Text>
         ) : null}
-        {/* <View style={styles.outerView}>
-          <View style={[styles.innerView1]}>
-            <RadioButton
-              size={20}
-              color={Colors.blackColor}
-              uncheckedColor={Colors.blackColor}
-              value={coachSkills}
-              status={coachSkills.skill === "Expert" ? "checked" : "unchecked"}
-              // onPress={() => setCoachSkills("Expert")}
-              onPress={() => setRadioButtonValue()}
-            />
-            <Text style={styles.innertext}>Expert</Text>
-          </View>
-          <View style={[styles.innerView1]}>
-            <RadioButton
-              color={Colors.blackColor}
-              uncheckedColor={Colors.blackColor}
-              value={coachSkills}
-              status={coachSkills.skill === "Mediaker" ? "checked" : "unchecked"}
-              onPress={() => setCoachSkills("Mediaker")}
-            />
-            <Text style={styles.innertext}>Mediaker</Text>
-          </View>
-          <View style={[styles.innerView1]}>
-            <RadioButton
-              color={Colors.blackColor}
-              uncheckedColor={"#000"}
-              value="collegiate"
-              status={coachSkills === "collegiate" ? "checked" : "unchecked"}
-              onPress={() => setCoachSkills("collegiate")}
-            />
-            <Text style={styles.innertext}>Collegiate</Text>
-          </View>
-        </View> */}
-        {/* <View style={[styles.outerView1]}>
-          <View style={[styles.innerView1]}>
-            <RadioButton
-              size={20}
-              color={Colors.blackColor}
-              uncheckedColor={Colors.blackColor}
-              value="division"
-              status={coachSkills === "division" ? "checked" : "unchecked"}
-              onPress={() => setCoachSkills("division")}
-            />
-            <Text style={styles.innertext}>Division-1</Text>
-          </View>
-          <View style={styles.innerView1}>
-            <RadioButton
-              size={20}
-              color={Colors.blackColor}
-              uncheckedColor={Colors.blackColor}
-              value="professional"
-              status={coachSkills === "professional" ? "checked" : "unchecked"}
-              onPress={() => setCoachSkills("professional")}
-            />
-            <Text style={styles.innertext}>Professional</Text>
-          </View>
-        </View> */}
 
         <Text style={styles.text}>Age Group Qualified to Coach</Text>
         <FlatList
@@ -624,22 +570,6 @@ function CompleteProfile({ navigation, route }) {
             );
           }}
         />
-        {/* <View style={styles.outerView}>
-          <TouchableOpacity
-            style={styles.dropDown}
-            onPress={() => setAgeModalVisible(true)}
-          >
-            {age == "" ? (
-              <Text style={styles.innertext}>Select</Text>
-            ) : (
-              <Text style={styles.innertext}>{age}</Text>
-            )}
-            <Image
-              source={require("../../assets/drop-down.png")}
-              style={styles.dropImage}
-            />
-          </TouchableOpacity>
-        </View> */}
         {checkAgeGroup == true && (
           <Text style={styles.errorStyle}>  Please select atleast one age group qualified coach</Text>
         )}
@@ -729,7 +659,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.whiteColor,
     borderTopRightRadius: 35,
     borderTopLeftRadius: 35,
-    // marginTop: '30%',
     paddingHorizontal: 20,
   },
   profile: {
