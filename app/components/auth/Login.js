@@ -347,7 +347,7 @@ const SplashScreen = (props) => {
                     setCheckFirstname(false);
                   }}
                 />
-                {checkFirst_name == true && (
+                {checkLast_name == true && (
                   <Text style={styles.errorStyle}>
                     Last Name cannot be empty
                   </Text>

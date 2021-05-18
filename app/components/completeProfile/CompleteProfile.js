@@ -41,6 +41,9 @@ import moment from 'moment';
 import Input from "../../common/Input";
 import PhoneInput from 'react-native-phone-input';
 import CountryPicker, { FlagButton } from 'react-native-country-picker-modal';
+import { launchImageLibrary } from 'react-native-image-picker';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import Calendar from 'react-native-vector-icons/Feather';
 const height = Dimensions.get("window").height;
 const width = Dimensions.get("window").width;
 function CompleteProfile({ navigation, route }) {
@@ -311,18 +314,20 @@ function CompleteProfile({ navigation, route }) {
         style={styles.bottom}
       >
         <View style={styles.profile}>
-          <Image
-            source={require("../../assets/avatar.png")}
-            style={styles.avatar}
-          />
-          <View style={styles.icon}>
-            <Ionicons
-              name="add-outline"
-              size={22}
-              color="#fff"
-              style={{ textAlign: "center", marginLeft: height > 667 ? 2 : 1 }}
-            />
-          </View>
+          {
+            image ?
+              <Image source={{ uri: image }} style={styles.avatarStyle} />
+              :
+              <Image source={require('../../assets/avatar.png')} style={styles.avatar} />
+          }
+          <TouchableOpacity onPress={() => launchGallery()} style={styles.icon}>
+            {
+              image ?
+                <Icon name="edit" color="white" size={15} />
+                :
+                <Image source={require('../../assets/plus.png')} style={styles.avatar1} />
+            }
+          </TouchableOpacity>
         </View>
         <Text style={styles.text}>Instructor Type</Text>
         <View style={styles.outerView}>
@@ -367,9 +372,9 @@ function CompleteProfile({ navigation, route }) {
             ) : (
               <Text style={styles.innertext}>- / -- / ----</Text>
             )}
-            <Image
-              source={require("../../assets/drop-down.png")}
-              style={styles.dropImage}
+            <Calendar
+              name="calendar"
+              color="grey" size={15}
             />
           </TouchableOpacity>
           <DateTimePickerModal
