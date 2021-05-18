@@ -681,6 +681,11 @@ const styles = StyleSheet.create({
     height: 12,
     width: 12,
   },
+  avatarStyle: {
+    height: 120,
+    width: 120,
+    borderRadius: 120,
+  },
   icon: {
     height: height > 667 ? 25 : 20,
     width: height > 667 ? 25 : 20,
