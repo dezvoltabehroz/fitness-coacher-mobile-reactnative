@@ -161,6 +161,7 @@ function CompleteProfile({ navigation, route }) {
       setCheckAgeGroup(true);
     } else if (!submit) {
       setSubmit(true);
+      console.log(submit)
     }
     else {
       getCoachDetails();
@@ -277,20 +278,20 @@ function CompleteProfile({ navigation, route }) {
 
   const launchGallery = () => {
     launchImageLibrary(
-        {
-            title: "Pick photo from storage",
-            storageOptions: {
-                skipBackup: true,
-                path: 'images',
-            },
+      {
+        title: "Pick photo from storage",
+        storageOptions: {
+          skipBackup: true,
+          path: 'images',
         },
-        async (response) => {
-            if (response.error) { }
-            else if (response.uri != undefined) {
-                setImage(response.uri);
-            }
-        })
-}
+      },
+      async (response) => {
+        if (response.error) { }
+        else if (response.uri != undefined) {
+          setImage(response.uri);
+        }
+      })
+  }
 
   return (
     <View style={styles.container}>
