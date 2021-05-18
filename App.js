@@ -16,6 +16,7 @@ import {
   Text,
   useColorScheme,
   View,
+  LogBox
 } from 'react-native';
 
 import {
@@ -32,6 +33,7 @@ const store = createStore();
 
 
 const App: () => Node = () => {
+  LogBox.ignoreAllLogs(true)
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {

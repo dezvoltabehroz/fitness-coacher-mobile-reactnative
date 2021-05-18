@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, createRef } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -38,10 +38,11 @@ import NetInfo from "@react-native-community/netinfo";
 import * as coachRegister from "../../../services/registerCoach";
 import { debug } from "react-native-reanimated";
 import moment from 'moment';
+import Input from "../../common/Input";
 import PhoneInput from 'react-native-phone-input';
 import CountryPicker, { FlagButton } from 'react-native-country-picker-modal';
 const height = Dimensions.get("window").height;
-
+const width = Dimensions.get("window").width;
 function CompleteProfile({ navigation, route }) {
   const data = route.params;
   // console.log("data is", data);
@@ -52,7 +53,7 @@ function CompleteProfile({ navigation, route }) {
 
   const [ageModalVisible, setAgeModalVisible] = useState(false);
 
-  const [age, setAge] = useState("");
+  const [age, setAge] = useState([]);
 
   const [instructorModalVisible, setInstructorModalVisible] = useState(false);
   const [instructionModalVisible, setInstructionModalVisible] = useState(false);
@@ -78,11 +79,35 @@ function CompleteProfile({ navigation, route }) {
   const [showDatePicker, setShowDatePicker] = useState(false);
   // const [subCategoriesLoading, setSubCategoriesLoading] = useState(true);
   const [skillsLoading, setSkillsLoading] = useState(true);
-  const phoneRef = useRef(null);
-
+  const phoneRef = createRef(null);
+  const [address, setAddress] = useState("");
+  const [submit, setSubmit] = useState(false)
+  const [arr, setArr] = useState([
+    {
+      flag: false,
+      age: "Under-9",
+    },
+    {
+      flag: false,
+      age: "10-11",
+    },
+    {
+      flag: false,
+      age: "12-14",
+    },
+    {
+      flag: false,
+      age: "15-16",
+    },
+    {
+      flag: false,
+      age: "18+",
+    },
+  ]);
+  const [prev, setPrev] = useState(0);
   useEffect(() => {
     // getCategories();
-    // getSkills();
+    getSkills();
   }, []);
 
   const getCategories = () => {
@@ -104,9 +129,8 @@ function CompleteProfile({ navigation, route }) {
       .catch((err) => console.log(err))
   };
 
-  const getSkills = async (item) => {
-    console.log(item)
-    TrainingCategoryServices.getSkillsBy(item.TrainingTypeId)
+  const getSkills = async () => {
+    TrainingCategoryServices.getSkillsBy()
       .then((response) => {
         var skill = response.data.skills;
         console.log("skill level", skill);
@@ -126,7 +150,7 @@ function CompleteProfile({ navigation, route }) {
       let state = await NetInfo.fetch();
       if (state.isConnected == true) {
         // call your function here
-        // checkValidations();
+        checkValidations();
         getCoachDetails();
       } else {
         alert("Please check your internet connection and try again");
@@ -144,7 +168,10 @@ function CompleteProfile({ navigation, route }) {
       setCheckInstructionTypes(true);
     } else if (age == "") {
       setCheckAgeGroup(true);
-    } else {
+    } else if (!submit) {
+      setSubmit(true);
+    }
+    else {
       getCoachDetails();
     }
   };
@@ -156,41 +183,33 @@ function CompleteProfile({ navigation, route }) {
         selectedSkill.push(coachSkills[index]);
       }
     }
-    // alert("bye");
-
+    console.log(selectedSkill)
     var trainingType = {
-      TrainingTypeId: selectInstruction.id,
-
+      TrainingTypeId: selectInstructor.id,
+      SkillId: selectedSkill[0].id,
       SubCategoryIds: [
         {
           TrainingSubCategoryId: selectInstruction.id,
-          SkillId: selectedSkill[0].id,
         },
       ],
     };
 
-    let ageObject = [
-      {
-        ageGroup: age,
-        skillLevel: selectedSkill[0].skill,
-      },
-    ];
-
+    let ageObject = age;
     let userData = JSON.stringify({
       firstName: route.params.firstName,
       lastName: route.params.lastName,
       email: route.params.email,
       password: route.params.password,
-      phone: route.params.phone,
-      address: route.params.address,
-      dob: route.params.dob,
-      role: route.params.role,
-      country: route.params.country,
+      phone: phoneNumber,
+      address: address,
+      dob: moment(date).format('YYYY-MM-DD'),
+      role: 'coach',
+      country: country,
       ageGroupCoach: ageObject,
       trainingType: trainingType,
     });
     console.log("userdata is", userData);
-
+    // navigation.navigate("EmailSent");
     try {
       let response = await coachRegister.coachRegisterService(userData);
       if (response.data.success != undefined && response.data.success == true) {
@@ -237,15 +256,16 @@ function CompleteProfile({ navigation, route }) {
 
   const onSelect = async (country) => {
     console.log(country)
-    console.log(phoneRef?.current)
+    console.log(phoneRef?.current?.selectCountry(country.cca2))
     await setCountry(country.name);
     await setPhoneNumber(`+${country.callingCode[0]}`);
     await phoneRef?.current?.selectCountry(country.cca2);
-    await phoneRef?.current?.setState({ iputValue: `+${country.callingCode[0]}` });
+    // await phoneRef?.current?.setState({ iputValue: `+${country.callingCode[0]}` });
 
     await setCountryModal(false)
 
   };
+
   const _flagButton = () => {
     return (
       <TouchableOpacity activeOpacity={0.9} onPress={() => setCountryModal(!countryModal)} >
@@ -312,6 +332,7 @@ function CompleteProfile({ navigation, route }) {
               setInstructorModalVisible(true);
               setCategoriesLoading(true);
               getCategories();
+              setCheckInstructorTypes(false)
             }}
           >
             {selectInstructor != undefined &&
@@ -341,7 +362,7 @@ function CompleteProfile({ navigation, route }) {
             }}
           >
             {date != undefined && date != '' ? (
-              // setCheckInstructorTypes(false)
+
               <Text style={styles.innertext}>{moment(date).format('M / DD / YYYY')}</Text>
             ) : (
               <Text style={styles.innertext}>- / -- / ----</Text>
@@ -357,7 +378,7 @@ function CompleteProfile({ navigation, route }) {
             onCancel={() => hideDatePicker}
           />
         </View>
-        {checkInstructorTypes == true && (
+        {submit == true && date == "" && (
           <Text style={styles.errorStyle}>Please select your date of birth</Text>
         )}
 
@@ -382,8 +403,21 @@ function CompleteProfile({ navigation, route }) {
             />
           </TouchableOpacity>
         </View>
-        {checkInstructorTypes == true && (
+        {submit == true && country == '' && (
           <Text style={styles.errorStyle}>Please select a Country</Text>
+        )}
+        <Input
+          full={true}
+          text={"Address"}
+          value={address}
+          onChangeText={(value) => {
+            setAddress(value);
+          }}
+        />
+        {submit == true && address == "" && (
+          <Text style={styles.errorStyle}>
+            Address cannot be empty
+          </Text>
         )}
         <Text style={styles.text}>Phone</Text>
 
@@ -406,15 +440,17 @@ function CompleteProfile({ navigation, route }) {
               onChangePhoneNumber={(phonenumber) => { console.log(phonenumber); setPhoneNumber(phonenumber) }}
               value={phoneNumber}
               textProps={{
-                placeholder: 'Phone Number *',
+                placeholder: 'Phone Number',
                 placeholderTextColor: "grey",
               }}
             />
-            <View >
-
-            </View>
           </View>
         </View>
+        {submit == true && phoneNumber == "" && (
+          <Text style={styles.errorStyle}>
+            Address cannot be empty
+          </Text>
+        )}
         <Text style={styles.text}>Instruction Types</Text>
 
         <View style={styles.outerView}>
@@ -452,32 +488,17 @@ function CompleteProfile({ navigation, route }) {
         <FlatList
           data={coachSkills}
           // showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            marginBottom: "5%",
+            width: width,
+          }}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item, index }) => {
             return (
               <View style={styles.outerView}>
                 <View style={[styles.innerView1]}>
-                  {/* <RadioButton
-                    size={20}
-                    color={Colors.blackColor}
-                    uncheckedColor={Colors.blackColor}
-                    value={item.selected}
-                    // status={item.selected == true ? "checked" : "unchecked"}
-                    onPress={() => {
-                      // item.skill ? "checked" : "unchecked";
-                      selectingSkills(index);
-                    }}
-                  /> */}
-
-                  {/* <CheckBox
-                    // center
-                    // title="Click Here"
-                    checkedIcon="dot-circle-o"
-                    uncheckedIcon="circle-o"
-                    checked={item.selected}
-                    onPress={() => selectingSkills(index)}
-                  /> */}
-
                   <TouchableOpacity
                     style={{
                       height: 20,
@@ -497,7 +518,11 @@ function CompleteProfile({ navigation, route }) {
             );
           }}
         />
-
+        {submit == true && dummy == false ? (
+          <Text style={styles.errorStyle}>
+            Please select atleast one skill level
+          </Text>
+        ) : null}
         {/* <View style={styles.outerView}>
           <View style={[styles.innerView1]}>
             <RadioButton
@@ -558,7 +583,43 @@ function CompleteProfile({ navigation, route }) {
         </View> */}
 
         <Text style={styles.text}>Age Group Qualified to Coach</Text>
-        <View style={styles.outerView}>
+        <FlatList
+          data={arr}
+          // showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            marginBottom: "5%",
+            width: width,
+          }}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item, index }) => {
+            return (
+              <View style={styles.outerView}>
+                <View style={[styles.innerView1]}>
+                  <RadioButton
+                    color={Colors.blackColor}
+                    size={10}
+                    uncheckedColor={Colors.blackColor}
+                    status={item.flag ? "checked" : "unchecked"}
+                    onPress={() => {
+                      let ageArr = [...age];
+                      let array = arr;
+                      // array[prev].flag = false;
+                      array[index].flag = true;
+                      setArr(arr);
+                      ageArr.push({ ageGroup: item.age })
+                      setAge(ageArr);
+                      // setPrev(index);
+                    }}
+                  />
+                  <Text style={styles.innertext}>{item.age}</Text>
+                </View>
+              </View>
+            );
+          }}
+        />
+        {/* <View style={styles.outerView}>
           <TouchableOpacity
             style={styles.dropDown}
             onPress={() => setAgeModalVisible(true)}
@@ -573,14 +634,16 @@ function CompleteProfile({ navigation, route }) {
               style={styles.dropImage}
             />
           </TouchableOpacity>
-        </View>
+        </View> */}
         {checkAgeGroup == true && (
-          <Text style={styles.errorStyle}>Age group cannot be empty</Text>
+          <Text style={styles.errorStyle}>  Please select atleast one age group qualified coach</Text>
         )}
         <Button
           text={"Register"}
           onPress={() => {
             // setModalVisible(!modalVisible);
+            setSubmit(true);
+            console.log(submit)
             checkNetwork();
           }}
         />
@@ -764,6 +827,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "red",
     paddingLeft: 0,
+    paddingBottom: 5
   },
 });
 

@@ -12,13 +12,13 @@ let configToken = (token) => {
 }
 const Api = {
     allTrainingTypes: function () {
-        return axiosInstance.get('admin/allTrainingTypes', config)
+        return axiosInstance.get('coach/allTrainingTypes', config)
     },
     subCategories: function (id) {
-        return axiosInstance.get(`admin/subCategories/${id}`, config)
+        return axiosInstance.get(`coach/subCategories/${id}`, config)
     },
     getSkillsBy: function (id) {
-        return axiosInstance.get(`admin/getSkillsBY/${id}`, config)
+        return axiosInstance.get(`coach/getAllSkills`, config)
     }
 
 };
