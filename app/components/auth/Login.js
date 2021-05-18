@@ -389,7 +389,7 @@ const SplashScreen = (props) => {
                 />
                 {checkPassword == true && (
                   <Text style={styles.errorStyle}>
-                    Password cannot be empty
+                   Confirm password cannot be empty
                   </Text>
                 )}
                 {/* <Input
