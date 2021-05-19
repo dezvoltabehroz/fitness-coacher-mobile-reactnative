@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -6,7 +6,7 @@ import {
   View,
   Text,
   StatusBar,
-  ImageBackground,
+  FlatList,
   Image,
   AsyncStorage,
   NativeModules,
@@ -16,10 +16,10 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 import AccountInput from '../../common/AccountInput';
-import {Colors} from '../../style/colors';
-import {FontFamily} from '../../style/typograpy';
+import { Colors } from '../../style/colors';
+import { FontFamily } from '../../style/typograpy';
 import Button from '../../common/Button';
-import {RadioButton} from 'react-native-paper';
+import { RadioButton } from 'react-native-paper';
 import AccountModal from '../../common/AccountModal';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AgeGroupModal from '../../common/ageGroupModal';
@@ -27,27 +27,113 @@ import InstructorTypeModal from '../../common/instructorTypeModal';
 import InstructionTypeModal from '../../common/instructionTypeModal';
 import * as ImagePicker from 'react-native-image-picker';
 import ImagePickerModal from '../../common/ImagePickerModal';
-
+import moment from 'moment';
+import Input from "../../common/Input";
+import PhoneInput from 'react-native-phone-input';
+import CountryPicker, { FlagButton } from 'react-native-country-picker-modal';
+import { launchImageLibrary } from 'react-native-image-picker';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import Calendar from 'react-native-vector-icons/Feather';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import RegisterationModal from "../../common/RegisterationModal";
+import { AuthServices, TrainingCategoryServices } from '../../services'
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 const height = Dimensions.get('window').height;
-
+const width = Dimensions.get("window").width;
 const AccountSettingsScreen = props => {
-  const [checked, setChecked] = useState('baseBall');
-  const [skillLevel, setSkillLevel] = useState('recreational');
-  const [ageGroup, setAgeGroup] = useState('9');
-  const [modalVisible, setModalVisible] = useState(false);
   const [instructorModalVisible, setInstructorModalVisible] = useState(false);
-  const [ageModalVisible, setAgeModalVisible] = useState(false);
   const [instructionModalVisible, setInstructionModalVisible] = useState(false);
-  const [age, setAge] = useState('');
-  const [instructor, setInstructor] = useState('');
-  const [instruction, setInstruction] = useState('');
-  // const [pickImage, setPickImage] = useState('');
-  const [state, setState] = useState({
-    resourcePath: {},
-  });
+  const [instructor, setInstructor] = useState("");
+  const [instruction, setInstruction] = useState("");
 
+  const [checkInstructorTypes, setCheckInstructorTypes] = useState(false);
+  const [checkInstructionTypes, setCheckInstructionTypes] = useState(false);
+  const [checkAgeGroup, setCheckAgeGroup] = useState(false);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [selectInstruction, setSelectInstruction] = useState({});
+  const [selectInstructor, setSelectInstructor] = useState({});
+  const [dob, setDob] = useState("")
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+  const [coachSkills, setCoachSkills] = useState([]);
+  const [country, setCountry] = useState("")
+  const [dummy, setDummy] = useState(false);
+  const [countryModal, setCountryModal] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState(``);
+  const [date, setDate] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [age, setAge] = useState([]);
+  const [address, setAddress] = useState("");
+  const [submit, setSubmit] = useState(false)
+  const [subCatVal, setSubCat] = useState(false)
+  const [arr, setArr] = useState([
+    {
+      flag: false,
+      age: "Under-9",
+    },
+    {
+      flag: false,
+      age: "10-11",
+    },
+    {
+      flag: false,
+      age: "12-14",
+    },
+    {
+      flag: false,
+      age: "15-16",
+    },
+    {
+      flag: false,
+      age: "18+",
+    },
+  ]);
+  const [prev, setPrev] = useState(0);
+  const [modalVisible, setModalVisible] = useState(false);
   const [filePath, setFilePath] = useState();
+  useEffect(() => {
+    // getCategories();
+    getSkills();
+  }, []);
 
+  const getCategories = () => {
+    TrainingCategoryServices.allTrainingTypes()
+      .then((response) => {
+        setCategoriesLoading(false)
+        console.log(response)
+        setCategories(response.data.trainingTypes);
+      })
+      .catch((err) => console.log(err))
+  };
+
+  const getSubCategories = (item) => {
+    TrainingCategoryServices.subCategories(item.id)
+      .then((response) => {
+        setCategoriesLoading(false)
+        var skill = response.data.subCategories;
+        console.log("skill level", skill);
+        for (let index = 0; index < response.data.subCategories.length; index++) {
+          skill[index].selected = false;
+        }
+        setSubCategories(skill);
+      })
+      .catch((err) => console.log(err))
+  };
+
+  const getSkills = async () => {
+    TrainingCategoryServices.getSkillsBy()
+      .then((response) => {
+        var skill = response.data.skills;
+        console.log("skill level", skill);
+        for (let index = 0; index < response.data.skills.length; index++) {
+          skill[index].selected = false;
+        }
+        setCoachSkills(skill);
+      })
+      .catch((err) => {
+        console.log("error =", err);
+      });
+  };
   const chooseFile = () => {
     let options = {
       title: 'Select Image',
@@ -137,6 +223,25 @@ const AccountSettingsScreen = props => {
   //   });
   // };
 
+  const settingInstructor = (item) => {
+    setSelectInstructor(item);
+    getSubCategories(item);
+  };
+  const selectingSkills = (iteration) => {
+    var skill = coachSkills;
+    // if (skill[iteration].selected) {
+    //   skill[iteration].selected = false;
+    // } else {
+    //   skill[iteration].selected = true;
+    // }
+    for (let index = 0; index < skill.length; index++) {
+      skill[index].selected = false;
+    }
+    skill[iteration].selected = true;
+    console.log("skill level is ", skill);
+    setCoachSkills(skill);
+    setDummy(!dummy);
+  };
   const renderFileData = () => {
     if (filePath) {
       return <Image source={filePath} style={styles.image} />;
@@ -147,6 +252,73 @@ const AccountSettingsScreen = props => {
           style={styles.image}
         />
       );
+    }
+  };
+
+
+  const onSelect = async (country) => {
+    console.log(country)
+    console.log(phoneRef?.current?.selectCountry(country.cca2))
+    await setCountry(country.name);
+    await setPhoneNumber(`+${country.callingCode[0]}`);
+    await phoneRef?.current?.selectCountry(country.cca2);
+    // await phoneRef?.current?.setState({ iputValue: `+${country.callingCode[0]}` });
+
+    await setCountryModal(false)
+
+  };
+
+  const _flagButton = () => {
+    return (
+      <TouchableOpacity activeOpacity={0.9} onPress={() => setCountryModal(!countryModal)} >
+        <View style={{}}>
+          <FlagButton
+            onOpen={() => setCountryModal(!countryModal)}
+            onClose={() => setCountryModal(!countryModal)}
+            placeholder={""}
+            withEmoji={false}
+            withFlagButton={false}
+            // countryCode={countryCode != "" ? countryCode : ""}
+            containerButtonStyle={{ height: 0 }}
+          />
+        </View>
+      </TouchableOpacity>
+    )
+  }
+
+  const launchGallery = () => {
+    launchImageLibrary(
+      {
+        title: "Pick photo from storage",
+        storageOptions: {
+          skipBackup: true,
+          path: 'images',
+        },
+      },
+      async (response) => {
+        if (response.error) { }
+        else if (response.uri != undefined) {
+          setImage(response.uri);
+        }
+      })
+  }
+
+  const checkBoxFunc = (iteration) => {
+    var instruction = [...subCategories];
+
+    // instruction[iteration].selected = true;
+    if (instruction[iteration].selected) {
+      instruction[iteration].selected = false;
+      setSubCat(false);
+    } else {
+      instruction[iteration].selected = true;
+    }
+    console.log("skill level is ", instruction);
+    setSubCategories(instruction);
+    for (let index = 0; index < instruction.length; index++) {
+      if (instruction[index].selected) {
+        setSubCat(true);
+      }
     }
   };
 
@@ -163,12 +335,12 @@ const AccountSettingsScreen = props => {
             <Ionicons
               name="arrow-back"
               size={height > 667 ? 20 : 16}
-              style={{paddingLeft: 20}}
+              style={{ paddingLeft: 20 }}
             />
           </TouchableOpacity>
         </View>
         <View style={styles.titleView}>
-          <Text style={[styles.innertext, {fontSize: height > 667 ? 16 : 13}]}>
+          <Text style={[styles.innertext, { fontSize: height > 667 ? 16 : 13 }]}>
             ACCOUNT SETTINGS
           </Text>
         </View>
@@ -184,33 +356,272 @@ const AccountSettingsScreen = props => {
               name="pencil-outline"
               color={'white'}
               size={height > 667 ? 14 : 12}
-              style={{textAlign: 'center'}}
+              style={{ textAlign: 'center' }}
             />
           </TouchableOpacity>
         </View>
         <AccountInput text={'Name'} placeholder="John Doe" />
-        <AccountInput text={'Email-Address'} placeholder="john@example.com" />
-        <AccountInput text={'Password'} placeholder="*******" secureTextEntry />
-        <Text style={[styles.text, {marginTop: 20}]}>Instructor Type</Text>
+        <AccountInput ed text={'Email-Address'} placeholder="john@example.com" />
+        <Text style={styles.inputText}>Password</Text>
+        <View style={styles.input}>
+          <Text style={styles.passwordText}>*********</Text>
+          <TouchableOpacity>
+            <Text style={styles.changeTextStyle} >Change</Text>
+          </TouchableOpacity>
+        </View>
 
-        <View style={styles.dropDownOuterView}>
+        <Text style={styles.text}>Date Of Birth</Text>
+        <View style={styles.outerView}>
           <TouchableOpacity
             style={styles.dropDown}
-            onPress={() => setInstructorModalVisible(true)}>
-            {instructor == '' ? (
-              <Text style={styles.innertext}>Select</Text>
+            onPress={() => {
+              setShowDatePicker(!showDatePicker)
+              console.log("showDatePicker: ", showDatePicker)
+            }}
+          >
+            {date != undefined && date != '' ? (
+
+              <Text style={styles.innertext}>{moment(date).format('M / DD / YYYY')}</Text>
             ) : (
-              <Text style={styles.innertext}>{instructor}</Text>
+              <Text style={styles.innertext}>- / -- / ----</Text>
+            )}
+            <Calendar
+              name="calendar"
+              color="grey" size={15}
+            />
+          </TouchableOpacity>
+          <DateTimePickerModal
+            isVisible={showDatePicker}
+            onConfirm={(date) => handleConfirm(date)}
+            onCancel={() => hideDatePicker}
+          />
+        </View>
+        {submit == true && date == "" && (
+          <Text style={styles.errorStyle}>Please select your date of birth</Text>
+        )}
+
+        <Text style={styles.text}>Country</Text>
+        <View style={styles.outerView}>
+          <TouchableOpacity
+            style={styles.dropDown}
+            onPress={() => {
+              setCountryModal(!countryModal)
+              console.log("countryModal : ", countryModal)
+            }}
+          >
+            {country != undefined && country != '' ? (
+              // setCheckInstructorTypes(false)
+              <Text style={styles.innertext}>{country}</Text>
+            ) : (
+              <Text style={styles.innertext}>Select</Text>
             )}
             <Image
-              source={require('../../assets/drop-down.png')}
+              source={require("../../assets/drop-down.png")}
               style={styles.dropImage}
             />
           </TouchableOpacity>
         </View>
-        <Text style={[styles.text, {marginTop: 15}]}>Skill Level</Text>
+        {submit == true && country == '' && (
+          <Text style={styles.errorStyle}>Please select a Country</Text>
+        )}
+        <Input
+          full={true}
+          text={"Address"}
+          value={address}
+          onChangeText={(value) => {
+            setAddress(value);
+          }}
+        />
+        {submit == true && address == "" && (
+          <Text style={styles.errorStyle}>
+            Address cannot be empty
+          </Text>
+        )}
+        <Input
+          full={true}
+          text={"Phone"}
+          keyboardType={'number-pad'}
+          value={phoneNumber}
+          onChangeText={(value) => {
+            setPhoneNumber(value)
+          }}
+        />
+        {
+          submit && phoneNumber == "" ? <Text style={styles.errorStyle}> Phonenumber cannot be empty </Text> : null
+        }
+        {
+          submit && phoneNumber.length && !isPhoneValid(phoneNumber) ? <Text style={[styles.errorStyle]}>Phone number is incomplete </Text> : null
+        }
+        <Text style={styles.text}>Instructor Type</Text>
         <View style={styles.outerView}>
-          <View style={[styles.innerView1, {width: '35%'}]}>
+          <TouchableOpacity
+            style={styles.dropDown}
+            onPress={() => {
+              setInstructorModalVisible(true);
+              setCategoriesLoading(true);
+              getCategories();
+              setCheckInstructorTypes(false)
+            }}
+          >
+            {selectInstructor != undefined &&
+              Object.keys(selectInstructor).length > 0 ? (
+              // setCheckInstructorTypes(false)
+              <Text style={styles.innertext}>{selectInstructor.title}</Text>
+            ) : (
+              <Text style={styles.innertext}>Select</Text>
+            )}
+            <Image
+              source={require("../../assets/drop-down.png")}
+              style={styles.dropImage}
+            />
+          </TouchableOpacity>
+        </View>
+        {submit && selectInstructor.title == undefined && (
+          <Text style={styles.errorStyle}>Instructor Type cannot be empty</Text>
+        )}
+
+
+
+        <Text style={styles.text}>Instruction Types</Text>
+        <View style={styles.outerView}>
+          {subCategories.length == 0 ?
+            <TouchableOpacity
+              style={styles.dropDown}
+              onPress={() => {
+                if (categories.length != 0) {
+                  setInstructionModalVisible(true);
+
+                } else {
+                  alert("Please select instructor first")
+                }
+                // setSubCategoriesLoading(true);
+              }}
+            >
+              {selectInstruction.title != undefined &&
+                Object.keys(selectInstruction).length > 0 ? (
+                <Text style={styles.innertext}>{selectInstruction.title}</Text>
+              ) : (
+                <Text style={styles.innertext}>Select</Text>
+              )}
+              <Image
+                source={require("../../assets/drop-down.png")}
+                style={styles.dropImage}
+              />
+            </TouchableOpacity>
+            :
+            <FlatList
+              data={subCategories}
+              contentContainerStyle={styles.contentContainerStyle}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item, index }) => {
+                return (
+                  <View style={styles.outerView}>
+                    <View style={[styles.innerView1]}>
+                      <MaterialIcons onPress={() => checkBoxFunc(index)}
+                        size={20}
+                        name={item.selected ? "check-box" : "check-box-outline-blank"} />
+                      <Text style={styles.innertext}>{item.title}</Text>
+                    </View>
+                  </View>
+                );
+              }}
+            />}
+        </View>
+        {submit && subCatVal != true && (
+          <Text style={styles.errorStyle}>
+            Instruction Type cannot be empty
+          </Text>
+        )}
+        <Text style={[styles.text, { marginTop: 5 }]}>Skill Level</Text>
+
+        <FlatList
+          data={coachSkills}
+          // showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.contentContainerStyle}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item, index }) => {
+            return (
+              <View style={styles.outerView}>
+                <View style={[styles.innerView1]}>
+                  <MaterialIcons onPress={() => selectingSkills(index)}
+                    size={20}
+                    name={item.selected ? "check-box" : "check-box-outline-blank"} />
+                  {/* <TouchableOpacity
+                    style={{
+                      height: 20,
+                      width: 20,
+                      borderRadius: 20,
+                      borderWidth: 1,
+                      borderColor: "grey",
+                      marginHorizontal: 10,
+                      backgroundColor: item.selected == true ? "red" : "white",
+                    }}
+                    onPress={() => selectingSkills(index)}
+                  ></TouchableOpacity> */}
+
+                  <Text style={styles.innertext}>{item.skill}</Text>
+                </View>
+              </View>
+            );
+          }}
+        />
+        {submit == true && dummy == false ? (
+          <Text style={styles.errorStyle}>
+            Please select atleast one skill level
+          </Text>
+        ) : null}
+
+        <Text style={styles.text}>Age Group</Text>
+        <FlatList
+          data={arr}
+          // showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.contentContainerStyle}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item, index }) => {
+            return (
+              <View style={styles.outerView}>
+                <View style={[styles.innerView1]}>
+                  <MaterialIcons onPress={() => {
+                    let ageArr = [...age];
+                    let array = arr;
+                    // array[prev].flag = false;
+                    array[index].flag = true;
+                    setArr(arr);
+                    ageArr.push({ ageGroup: item.age })
+                    setAge(ageArr);
+                    // setPrev(index);
+                  }}
+                    size={20}
+                    name={item.flag ? "check-box" : "check-box-outline-blank"} />
+                  {/* <RadioButton
+                    color={Colors.blackColor}
+                    size={10}
+                    uncheckedColor={Colors.blackColor}
+                    status={item.flag ? "checked" : "unchecked"}
+                    onPress={() => {
+                      let ageArr = [...age];
+                      let array = arr;
+                      // array[prev].flag = false;
+                      array[index].flag = true;
+                      setArr(arr);
+                      ageArr.push({ ageGroup: item.age })
+                      setAge(ageArr);
+                      // setPrev(index);
+                    }}
+                  /> */}
+                  <Text style={styles.innertext}>{item.age}</Text>
+                </View>
+              </View>
+            );
+          }}
+        />
+        {submit && age.length == 0 && (
+          <Text style={styles.errorStyle}>  Please select atleast one age group qualified coach</Text>
+        )}
+        {/*         
+        <Text style={[styles.text, { marginTop: 15 }]}>Skill Level</Text>
+        <View style={styles.outerView}>
+          <View style={[styles.innerView1, { width: '35%' }]}>
             <RadioButton
               size={20}
               color={Colors.blackColor}
@@ -221,7 +632,7 @@ const AccountSettingsScreen = props => {
             />
             <Text style={styles.innertext}>Recreational</Text>
           </View>
-          <View style={[styles.innerView1, {width: '28%'}]}>
+          <View style={[styles.innerView1, { width: '28%' }]}>
             <RadioButton
               color={Colors.blackColor}
               uncheckedColor={Colors.blackColor}
@@ -254,7 +665,7 @@ const AccountSettingsScreen = props => {
             />
             <Text style={styles.innertext}>Division-1</Text>
           </View>
-          <View style={[styles.innerView1, {marginLeft: 10}]}>
+          <View style={[styles.innerView1, { marginLeft: 10 }]}>
             <RadioButton
               color={Colors.blackColor}
               uncheckedColor={Colors.blackColor}
@@ -265,7 +676,7 @@ const AccountSettingsScreen = props => {
             <Text style={styles.innertext}>Professional</Text>
           </View>
         </View>
-        <Text style={[styles.text, {marginTop: 15}]}>Instruction Types</Text>
+        <Text style={[styles.text, { marginTop: 15 }]}>Instruction Types</Text>
         <View style={styles.dropDownOuterView}>
           <TouchableOpacity
             style={styles.dropDown}
@@ -281,7 +692,7 @@ const AccountSettingsScreen = props => {
             />
           </TouchableOpacity>
         </View>
-        <Text style={[styles.text, {marginTop: 15}]}>
+        <Text style={[styles.text, { marginTop: 15 }]}>
           Age Group Qualified to Coach
         </Text>
         <View style={styles.dropDownOuterView}>
@@ -298,31 +709,33 @@ const AccountSettingsScreen = props => {
               style={styles.dropImage}
             />
           </TouchableOpacity>
-        </View>
+        </View> */}
         <Button
-          text={'Save Details'}
+          text={'Update'}
           onPress={() => {
             // setModalVisible(!modalVisible);
             props.navigation.navigate('Booking');
           }}
         />
-        <View style={{marginTop: 20}}></View>
+        <View style={{ marginTop: 20 }}></View>
       </ScrollView>
       <InstructorTypeModal
         modalVisible={instructorModalVisible}
         setModalVisible={setInstructorModalVisible}
-        setInstructorType={setInstructor}
+        setInstructorType={categories}
+        selectedItem={settingInstructor}
+        isLoaderActive={categoriesLoading}
       />
       <InstructionTypeModal
         modalVisible={instructionModalVisible}
         setModalVisible={setInstructionModalVisible}
         setInstructionType={setInstruction}
       />
-      <AgeGroupModal
+      {/* <AgeGroupModal
         modalVisible={ageModalVisible}
         setModalVisible={setAgeModalVisible}
         setAge={setAge}
-      />
+      /> */}
       {/* <AccountModal
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
@@ -424,6 +837,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 8,
   },
+  contentContainerStyle: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: "5%",
+    width: width,
+  },
   dropDown: {
     height: 40,
     width: '100%',
@@ -436,6 +855,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 10,
+  },
+  changeTextStyle: {
+    color: "#60A7EE",
+    fontFamily: FontFamily.helveticaBold,
+    fontSize: 12
   },
   dropImage: {
     height: 14,
@@ -450,30 +874,57 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.textColor,
   },
 
-  image: {
-    height: height > 667 ? 100 : 70,
-    width: height > 667 ? 100 : 70,
-    borderRadius: height > 667 ? 50 : 35,
+  // image: {
+  //   height: height > 667 ? 100 : 70,
+  //   width: height > 667 ? 100 : 70,
+  //   borderRadius: height > 667 ? 50 : 35,
+  //   alignSelf: 'center',
+  //   marginTop: 20,
+  //   backgroundColor: Colors.textColor,
+  // },
+  // imageView: {
+  //   height: height > 667 ? 25 : 20,
+  //   width: height > 667 ? 25 : 20,
+  //   borderRadius: height > 667 ? 12.5 : 10,
+  //   borderWidth: 2,
+  //   borderColor: Colors.whiteColor,
+  //   backgroundColor: Colors.buttonColor,
+  //   position: 'absolute',
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  //   left: height > 667 ? 200 : 155,
+  //   top: height > 667 ? 90 : 65,
+  // },
+  // pen: {
+  //   height: 10,
+  //   width: 10,
+  // },
+  image:
+  {
+    height: 100,
+    width: 100,
+    borderRadius: 150,
     alignSelf: 'center',
-    marginTop: 20,
-    backgroundColor: Colors.textColor,
+    marginTop: 20
   },
-  imageView: {
-    height: height > 667 ? 25 : 20,
-    width: height > 667 ? 25 : 20,
-    borderRadius: height > 667 ? 12.5 : 10,
+  imageView:
+  {
+    height: 25,
+    width: 25,
+    borderRadius: 25,
     borderWidth: 2,
     borderColor: Colors.whiteColor,
     backgroundColor: Colors.buttonColor,
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
-    left: height > 667 ? 200 : 155,
-    top: height > 667 ? 90 : 65,
+    left: 180,
+    top: 90
   },
-  pen: {
+  pen:
+  {
     height: 10,
-    width: 10,
+    width: 10
   },
   text: {
     fontSize: 12,
@@ -504,7 +955,7 @@ const styles = StyleSheet.create({
   },
   innertext: {
     fontFamily: FontFamily.helveticaBold,
-    fontSize: height > 667 ? 12 : 9,
+    fontSize: height > 667 ? 14 : 12,
     // paddingRight: 25,
   },
 
@@ -516,6 +967,7 @@ const styles = StyleSheet.create({
     marginRight: '3%',
     borderColor: Colors.textColor,
     // borderColor: 'red',
+    paddingHorizontal: 5,
     paddingRight: 10,
     alignItems: 'center',
     flexDirection: 'row',
