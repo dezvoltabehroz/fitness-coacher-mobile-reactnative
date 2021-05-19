@@ -176,7 +176,7 @@ function CompleteProfile({ navigation, route }) {
     //   console.log(submit)
     // }
     // else {
-    if (selectInstructor != undefined && selectedSkill.length != 0 && subCatVal && age.length != 0 && submit && country && address && phoneNumber && isPhoneValid(phoneNumber)) {
+    if (selectInstructor != undefined && selectedSkill.length != 0 && subCatVal && age.length != 0 && date && submit && country && address && phoneNumber && isPhoneValid(phoneNumber)) {
       getCoachDetails();
     } else {
       setSubmit(true);
@@ -212,7 +212,7 @@ function CompleteProfile({ navigation, route }) {
     };
 
     let ageObject = age;
-    let userData = JSON.stringify({
+    let userData = {
       firstName: route.params.firstName,
       lastName: route.params.lastName,
       email: route.params.email,
@@ -224,7 +224,7 @@ function CompleteProfile({ navigation, route }) {
       country: country,
       ageGroupCoach: ageObject,
       trainingType: trainingType,
-    });
+    };
     console.log("userdata is", userData);
     AuthServices.userRegister(userData)
       .then((response) => {
