@@ -95,7 +95,12 @@ const SplashScreen = (props) => {
     };
     AuthServices.userLogin(loginDetails)
       .then((res) => {
-        console.log("res :", res)
+        if (res.status == 200) {
+          AsyncStorage.setItem('Token', JSON.stringify(res.data.userData.tokenInfo))
+          props.navigation.replace("TabContainer");
+          console.log("res :", res.data.userData.tokenInfo);
+        }
+
       })
       .catch((err) => { setLoading(false); console.log(err) })
   };
@@ -389,7 +394,7 @@ const SplashScreen = (props) => {
                 />
                 {checkPassword == true && (
                   <Text style={styles.errorStyle}>
-                   Confirm password cannot be empty
+                    Confirm password cannot be empty
                   </Text>
                 )}
                 {/* <Input

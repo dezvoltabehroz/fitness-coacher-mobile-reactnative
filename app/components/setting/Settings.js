@@ -8,7 +8,6 @@ import {
   StatusBar,
   ImageBackground,
   Image,
-  AsyncStorage,
   NativeModules,
   Platform,
   Dimensions,
@@ -18,6 +17,7 @@ import {Colors} from '../../style/colors';
 import {FontFamily} from '../../style/typograpy';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import BottomTabBar from '../../common/BottomTabBar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const height = Dimensions.get('window').height;
 const SettingsScreen = props => {
@@ -104,7 +104,10 @@ const SettingsScreen = props => {
           </View>
           <Text style={styles.text1}>Privacy Policy</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.outerView, {marginTop: 40}]}>
+        <TouchableOpacity onPress={async()=>{
+          await AsyncStorage.removeItem('Token');
+          props.navigation.replace('Login')
+        }} style={[styles.outerView, {marginTop: 40}]}>
           <View style={styles.left}>
             <Image
               source={require('../../assets/logout.png')}

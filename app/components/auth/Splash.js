@@ -1,4 +1,5 @@
-import React, {useEffect, useState} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -8,17 +9,24 @@ import {
   StatusBar,
   ImageBackground,
   Image,
-  AsyncStorage,
   NativeModules,
   Platform,
   Dimensions,
 } from 'react-native';
-import {Colors} from '../../style/colors';
+import { Colors } from '../../style/colors';
 const height = Dimensions.get('window').height;
 const SplashScreen = props => {
   useEffect(() => {
-    setTimeout(() => {
-      props.navigation.navigate('Login');
+    setTimeout(async () => {
+      let token = await AsyncStorage.getItem('Token');
+      let userToken = JSON.parse(token)
+      console.log(userToken)
+      if (userToken) {
+        props.navigation.replace('TabContainer');
+      } else {
+        props.navigation.replace('Login');
+      }
+
     }, 2000);
   });
   return (
@@ -32,14 +40,14 @@ const SplashScreen = props => {
         source={require('../../assets/splash.jpg')}
         style={styles.image}>
         <View
-          style={{flex: 0.5, alignItems: 'center', justifyContent: 'center'}}>
+          style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }}>
           {/* <Image
             source={require('../../assets/logo.png')}
             style={styles.logo}
           /> */}
         </View>
         <View
-          style={{flex: 0.5, alignItems: 'center', justifyContent: 'center'}}>
+          style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }}>
           {/* <Text style={styles.text}>Athlete</Text> */}
         </View>
       </ImageBackground>
