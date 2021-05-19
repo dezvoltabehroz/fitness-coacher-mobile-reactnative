@@ -404,11 +404,11 @@ const AccountSettingsScreen = (props) => {
         </View>
         <AccountInput text={'First Name'} placeholder=" " value={first_name} onChangeText={(val) => setFirstname(val)} />
         {submit == true && first_name == "" && (
-          <Text style={styles.errorStyle}>First Nane canot be empty</Text>
+          <Text style={styles.errorStyle}>First Name canot be empty</Text>
         )}
         <AccountInput text={'Last Name'} placeholder=" " value={last_name} onChangeText={(val) => setLastname(val)} />
         {submit == true && last_name == "" && (
-          <Text style={styles.errorStyle}>Last Nane canot be empty</Text>
+          <Text style={styles.errorStyle}>Last Name canot be empty</Text>
         )}
         <AccountInput editable={false} text={'Email Address'} value={email} placeholder="john@example.com" />
         <Text style={styles.inputText}>Password</Text>

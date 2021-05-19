@@ -84,9 +84,9 @@ const SplashScreen = (props) => {
       password: loginPassword,
     };
     AuthServices.userLogin(loginDetails)
-      .then((res) => {
+      .then(async (res) => {
         if (res.status == 200) {
-          AsyncStorage.setItem('Token', JSON.stringify(res.data.userData.tokenInfo))
+          await AsyncStorage.setItem('Token', JSON.stringify(res.data.userData.tokenInfo))
           props.authActions.getUserProfile(res.data.userData.tokenInfo, props.navigation.replace);
           // props.navigation.replace("TabContainer");
           console.log("res :", res.data.userData.tokenInfo);
@@ -501,13 +501,13 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
-  user: state.user,
+  user: state.authReducer,
 
 });
 
 const mapDispatchToProps = dispatch => {
   return {
-      authActions: bindActionCreators(authActions, dispatch)
+    authActions: bindActionCreators(authActions, dispatch)
   };
 };
 
