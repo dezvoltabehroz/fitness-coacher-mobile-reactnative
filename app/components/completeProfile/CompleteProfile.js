@@ -257,6 +257,7 @@ function CompleteProfile({ navigation, route }) {
     setSelectInstruction(item);
     getSkills(item);
   };
+  
   const settingInstructor = (item) => {
     setSelectInstructor(item);
     getSubCategories(item);

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -14,9 +14,9 @@ import {
   Dimensions,
   TextInput,
 } from 'react-native';
-import {Colors} from '../style/colors';
+import { Colors } from '../style/colors';
 const height = Dimensions.get('window').height;
-import {FontFamily} from '../style/typograpy';
+import { FontFamily } from '../style/typograpy';
 
 const Input = ({
   text,
@@ -25,17 +25,25 @@ const Input = ({
   secureTextEntry,
   isActive,
   multiline,
+  value,
+  onChangeText,
+  keyboardType,
+  editable
 }) => {
-  useEffect(() => {});
+  useEffect(() => { });
   return (
     <View style={styles.container}>
-      <Text style={isActive ? [styles.text, {paddingLeft: 10}] : styles.text}>
+      <Text style={isActive ? [styles.text, { paddingLeft: 10 }] : styles.text}>
         {text}
       </Text>
       <TextInput
         secureTextEntry={secureTextEntry}
         style={isActive ? styles.reviewInput : styles.input}
         placeholder={placeholder}
+        value={value}
+        editable={editable}
+        onChangeText={onChangeText}
+        keyboardType={keyboardType}
         placeholderTextColor={placeholderTextColor}
         multiline={multiline}
       />

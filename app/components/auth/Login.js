@@ -1,36 +1,26 @@
 import React, { useEffect, useState } from "react";
 import {
-  SafeAreaView,
   StyleSheet,
   ScrollView,
   View,
   Text,
   StatusBar,
-  ImageBackground,
   Image,
-  NativeModules,
   Platform,
-  Dimensions,
-  KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-  Keyboard,
+  Dimensions
 } from "react-native";
 import { Colors } from "../../style/colors";
-import { Container, Header, Content, Tab, Tabs } from "native-base";
+import { Tab, Tabs } from "native-base";
 import Input from "../../common/Input";
 import { FontFamily } from "../../style/typograpy";
 import Button from "../../common/Button";
 import { useKeyboard } from "./../index";
 import { Link } from "@react-navigation/native";
-
-import { TextInputMask } from "react-native-masked-text";
-
+import { authActions } from '../../redux/actions/auth';
+import { connect } from 'react-redux';
 import NetInfo from "@react-native-community/netinfo";
-import { coachRegister } from "../../../services/registerCoach";
-
+import { bindActionCreators } from "redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { logindatakey } from "../../helper/globalKey";
-import GlobalVariables from "../../helper/GlobalVariables";
 import { AuthServices } from "../../services";
 
 const screenWidth = Dimensions.get("window").width;
@@ -97,7 +87,8 @@ const SplashScreen = (props) => {
       .then((res) => {
         if (res.status == 200) {
           AsyncStorage.setItem('Token', JSON.stringify(res.data.userData.tokenInfo))
-          props.navigation.replace("TabContainer");
+          props.authActions.getUserProfile(res.data.userData.tokenInfo, props.navigation.replace);
+          // props.navigation.replace("TabContainer");
           console.log("res :", res.data.userData.tokenInfo);
         }
 
@@ -397,80 +388,10 @@ const SplashScreen = (props) => {
                     Confirm password cannot be empty
                   </Text>
                 )}
-                {/* <Input
-                  text={"Phone No."}
-                  keyboardType="phone-pad"
-                  value={phone}
-                  onChangeText={(value) => {
-                    _onHandleChange("phone", value);
-                    setCheckPhone(false);
-                  }}
-                />
-                {checkPhone == true && (
-                  <Text style={styles.errorStyle}>
-                    Phone no. cannot be empty
-                  </Text>
-                )}
-                <Input
-                  text={"Address"}
-                  value={address}
-                  onChangeText={(value) => {
-                    _onHandleChange("address", value);
-                    setCheckAddress(false);
-                  }}
-                />
-                {checkAddress == true && (
-                  <Text style={styles.errorStyle}>Address cannot be empty</Text>
-                )}
-
-                <Input
-                  text={"Country"}
-                  value={country}
-                  onChangeText={(value) => {
-                    _onHandleChange("country", value);
-                    setCheckCountry(false);
-                  }}
-                />
-                {checkCountry == true && (
-                  <Text style={styles.errorStyle}>Country cannot be empty</Text>
-                )}
-                <View style={styles.dateTimeContainer}>
-                  <Text style={styles.dateTimeText}>Date of Birth</Text>
-                  <TextInputMask
-                    placeholder="YYYY-MM-DD"
-                    type={"datetime"}
-                    style={styles.dateTimeStyle}
-                    options={{
-                      format: "YYYY-MM-DD",
-                    }}
-                    value={dob}
-                    onChangeText={(value) => {
-                      _onHandleChange("dob", value);
-                    }}
-                  />
-                </View>
-                {checkDob == true && (
-                  <Text style={styles.errorStyle}>
-                    Date of birth cannot be empty
-                  </Text>
-                )}
-                <Input
-                  text={"Role"}
-                  value={role}
-                  onChangeText={(value) => {
-                    _onHandleChange("role", value);
-                    setCheckRole(false);
-                  }}
-                />
-                {checkRole == true && (
-                  <Text style={styles.errorStyle}>Role cannot be empty</Text>
-                )} */}
-
                 <View style={{ paddingHorizontal: 20 }}>
                   <Button
                     text={"Next"}
                     loading={loading}
-                    // onPress={() => props.navigation.navigate("CompleteProfile")}
                     onPress={() => checkNetwork()}
                   />
                 </View>
@@ -489,6 +410,8 @@ const SplashScreen = (props) => {
     // </KeyboardAvoidingView>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -577,4 +500,19 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SplashScreen;
+const mapStateToProps = (state) => ({
+  user: state.user,
+
+});
+
+const mapDispatchToProps = dispatch => {
+  return {
+      authActions: bindActionCreators(authActions, dispatch)
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SplashScreen);
+

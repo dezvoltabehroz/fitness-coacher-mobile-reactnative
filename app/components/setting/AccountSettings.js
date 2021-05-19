@@ -19,33 +19,34 @@ import AccountInput from '../../common/AccountInput';
 import { Colors } from '../../style/colors';
 import { FontFamily } from '../../style/typograpy';
 import Button from '../../common/Button';
-import { RadioButton } from 'react-native-paper';
-import AccountModal from '../../common/AccountModal';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import AgeGroupModal from '../../common/ageGroupModal';
 import InstructorTypeModal from '../../common/instructorTypeModal';
 import InstructionTypeModal from '../../common/instructionTypeModal';
 import * as ImagePicker from 'react-native-image-picker';
 import ImagePickerModal from '../../common/ImagePickerModal';
 import moment from 'moment';
+import NetInfo from "@react-native-community/netinfo";
 import Input from "../../common/Input";
-import PhoneInput from 'react-native-phone-input';
 import CountryPicker, { FlagButton } from 'react-native-country-picker-modal';
 import { launchImageLibrary } from 'react-native-image-picker';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import Calendar from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import RegisterationModal from "../../common/RegisterationModal";
-import { AuthServices, TrainingCategoryServices } from '../../services'
+import { AuthServices, TrainingCategoryServices } from '../../services';
+import { connect } from 'react-redux';
+import { authActions } from '../../redux/actions/auth';
+import { bindActionCreators } from "redux";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 const height = Dimensions.get('window').height;
 const width = Dimensions.get("window").width;
-const AccountSettingsScreen = props => {
+const AccountSettingsScreen = (props) => {
+  console.log(props?.user)
   const [instructorModalVisible, setInstructorModalVisible] = useState(false);
   const [instructionModalVisible, setInstructionModalVisible] = useState(false);
   const [instructor, setInstructor] = useState("");
   const [instruction, setInstruction] = useState("");
-
+  const [first_name, setFirstname] = useState(props?.user?.firstName);
+  const [last_name, setLastname] = useState(props?.user?.lastName);
+  const [email, setEmail] = useState(props?.user?.email)
   const [checkInstructorTypes, setCheckInstructorTypes] = useState(false);
   const [checkInstructionTypes, setCheckInstructionTypes] = useState(false);
   const [checkAgeGroup, setCheckAgeGroup] = useState(false);
@@ -56,14 +57,14 @@ const AccountSettingsScreen = props => {
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [coachSkills, setCoachSkills] = useState([]);
-  const [country, setCountry] = useState("")
+  const [country, setCountry] = useState(props?.user?.country)
   const [dummy, setDummy] = useState(false);
   const [countryModal, setCountryModal] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState(``);
-  const [date, setDate] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(props?.user?.phone);
+  const [date, setDate] = useState(props?.user?.dob);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [age, setAge] = useState([]);
-  const [address, setAddress] = useState("");
+  const [address, setAddress] = useState(props?.user?.address);
   const [submit, setSubmit] = useState(false)
   const [subCatVal, setSubCat] = useState(false)
   const [arr, setArr] = useState([
@@ -90,9 +91,9 @@ const AccountSettingsScreen = props => {
   ]);
   const [prev, setPrev] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
-  const [filePath, setFilePath] = useState();
+  const [filePath, setFilePath] = useState(props?.user?.imagUrl);
   useEffect(() => {
-    // getCategories();
+
     getSkills();
   }, []);
 
@@ -134,6 +135,7 @@ const AccountSettingsScreen = props => {
         console.log("error =", err);
       });
   };
+
   const chooseFile = () => {
     let options = {
       title: 'Select Image',
@@ -165,68 +167,21 @@ const AccountSettingsScreen = props => {
     });
   };
 
-  // launchCamera = () => {
-  //   let options = {
-  //     storageOptions: {
-  //       skipBackup: true,
-  //       path: 'images',
-  //     },
-  //   };
-  //   ImagePicker.launchCamera(options, response => {
-  //     console.log('Response = ', response);
+  const hideDatePicker = () => {
+    setShowDatePicker(!showDatePicker);
+  };
 
-  //     if (response.didCancel) {
-  //       console.log('User cancelled image picker');
-  //     } else if (response.error) {
-  //       console.log('ImagePicker Error: ', response.error);
-  //     } else if (response.customButton) {
-  //       console.log('User tapped custom button: ', response.customButton);
-  //       alert(response.customButton);
-  //     } else {
-  //       const source = {uri: response.uri};
-  //       console.log('response', JSON.stringify(response));
-  //       this.setState({
-  //         filePath: response,
-  //         fileData: response.data,
-  //         fileUri: response.uri,
-  //       });
-  //     }
-  //   });
-  // };
-
-  // launchImageLibrary = () => {
-  //   let options = {
-  //     storageOptions: {
-  //       skipBackup: true,
-  //       path: 'images',
-  //     },
-  //   };
-  //   ImagePicker.launchImageLibrary(options, response => {
-  //     console.log('Response = ', response);
-
-  //     if (response.didCancel) {
-  //       console.log('User cancelled image picker');
-  //     } else if (response.error) {
-  //       console.log('ImagePicker Error: ', response.error);
-  //     } else if (response.customButton) {
-  //       console.log('User tapped custom button: ', response.customButton);
-  //       alert(response.customButton);
-  //     } else {
-  //       const source = {uri: response.uri};
-  //       console.log('response', JSON.stringify(response));
-  //       this.setState({
-  //         filePath: response,
-  //         fileData: response.data,
-  //         fileUri: response.uri,
-  //       });
-  //     }
-  //   });
-  // };
+  const handleConfirm = (selectedDate) => {
+    var date = moment(selectedDate).format('YYYY-MM-DD')
+    setDate(date);
+    hideDatePicker();
+  };
 
   const settingInstructor = (item) => {
     setSelectInstructor(item);
     getSubCategories(item);
   };
+
   const selectingSkills = (iteration) => {
     var skill = coachSkills;
     // if (skill[iteration].selected) {
@@ -242,6 +197,7 @@ const AccountSettingsScreen = props => {
     setCoachSkills(skill);
     setDummy(!dummy);
   };
+
   const renderFileData = () => {
     if (filePath) {
       return <Image source={filePath} style={styles.image} />;
@@ -255,15 +211,10 @@ const AccountSettingsScreen = props => {
     }
   };
 
-
   const onSelect = async (country) => {
     console.log(country)
-    console.log(phoneRef?.current?.selectCountry(country.cca2))
     await setCountry(country.name);
     await setPhoneNumber(`+${country.callingCode[0]}`);
-    await phoneRef?.current?.selectCountry(country.cca2);
-    // await phoneRef?.current?.setState({ iputValue: `+${country.callingCode[0]}` });
-
     await setCountryModal(false)
 
   };
@@ -322,6 +273,104 @@ const AccountSettingsScreen = props => {
     }
   };
 
+  const checkNetwork = async () => {
+    console.log("internet called");
+    setSubmit(true);
+    console.log(submit)
+    try {
+      let state = await NetInfo.fetch();
+      if (state.isConnected == true) {
+        checkValidations();
+      } else {
+        alert("Please check your internet connection and try again");
+      }
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  };
+
+  const checkValidations = () => {
+    var selectedSkill = [];
+    for (let index = 0; index < coachSkills.length; index++) {
+      if (coachSkills[index].selected == true) {
+        selectedSkill.push(coachSkills[index]);
+      }
+    }
+    if (first_name && last_name && selectInstructor != undefined && selectedSkill.length != 0 && subCatVal && age.length != 0 && date && submit && country && address && phoneNumber && isPhoneValid(phoneNumber)) {
+      getCoachDetails();
+    } else {
+      setSubmit(true);
+      console.log(submit)
+    }
+  };
+  const getCoachDetails = async () => {
+    var selectedSkill = [];
+    var selectedSubCategories = [];
+    for (let index = 0; index < coachSkills.length; index++) {
+      if (coachSkills[index].selected == true) {
+        selectedSkill.push(coachSkills[index]);
+      }
+    }
+    for (let index = 0; index < subCategories.length; index++) {
+      if (subCategories[index].selected == true) {
+        let obj = {
+          id: subCategories[index].id,
+          TrainingSubCategoryId: subCategories[index].id
+        }
+        selectedSubCategories.push(obj);
+      }
+    }
+    console.log(selectedSkill)
+    console.log(selectedSubCategories)
+    var trainingType = {
+      TrainingTypeId: selectInstructor.id,
+      SkillId: selectedSkill[0].id,
+      subCategory: selectedSubCategories,
+    };
+
+    let ageObject = age;
+    let userData = {
+      firstName: first_name,
+      lastName: last_name,
+      email: email,
+      age: props?.user?.age,
+      phone: phoneNumber,
+      address: address,
+      dob: moment(date).format('YYYY-MM-DD'),
+      role: 'coach',
+      deleteTrainingType: [],
+      deleteTrainingSubCategory: [],
+      country: country,
+      // ageGroupCoach: ageObject,
+      trainingType: {
+        TrainingTypeId: selectInstructor.id,
+        SkillId: selectedSkill[0].id,
+        subCategory: JSON.stringify(selectedSubCategories),
+      }
+    };
+    console.log("userdata is", userData);
+    console.log("userdata is", props?.token);
+    AuthServices.updateProfile(props?.user?.id, userData, props?.user?.token)
+      .then(async (response) => {
+        if (response.data.success != undefined && response.data.success == true) {
+          console.log("response", response);
+          await props.authActions.getUserProfile(props?.token)
+          navigation.navigate("Booking");
+        } else {
+          console.log("error in service");
+        }
+      })
+      .catch((error) => {
+        alert(error);
+        console.log(error);
+      })
+  };
+
+  const isPhoneValid = (phone) => {
+    return /^\+[0-9]{10,13}$/.test(phone)
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -349,19 +398,19 @@ const AccountSettingsScreen = props => {
       <ScrollView style={styles.bottom}>
         <View>
           {renderFileData()}
-          <TouchableOpacity
-            style={styles.imageView}
-            onPress={() => setModalVisible(!modalVisible)}>
-            <Ionicons
-              name="pencil-outline"
-              color={'white'}
-              size={height > 667 ? 14 : 12}
-              style={{ textAlign: 'center' }}
-            />
+          <TouchableOpacity onPress={() => launchGallery()} style={styles.imageView}>
+            <Image source={require('../../assets/pen.png')} style={styles.pen} />
           </TouchableOpacity>
         </View>
-        <AccountInput text={'Name'} placeholder="John Doe" />
-        <AccountInput ed text={'Email-Address'} placeholder="john@example.com" />
+        <AccountInput text={'First Name'} placeholder=" " value={first_name} onChangeText={(val) => setFirstname(val)} />
+        {submit == true && first_name == "" && (
+          <Text style={styles.errorStyle}>First Nane canot be empty</Text>
+        )}
+        <AccountInput text={'Last Name'} placeholder=" " value={last_name} onChangeText={(val) => setLastname(val)} />
+        {submit == true && last_name == "" && (
+          <Text style={styles.errorStyle}>Last Nane canot be empty</Text>
+        )}
+        <AccountInput editable={false} text={'Email Address'} value={email} placeholder="john@example.com" />
         <Text style={styles.inputText}>Password</Text>
         <View style={styles.input}>
           <Text style={styles.passwordText}>*********</Text>
@@ -546,19 +595,6 @@ const AccountSettingsScreen = props => {
                   <MaterialIcons onPress={() => selectingSkills(index)}
                     size={20}
                     name={item.selected ? "check-box" : "check-box-outline-blank"} />
-                  {/* <TouchableOpacity
-                    style={{
-                      height: 20,
-                      width: 20,
-                      borderRadius: 20,
-                      borderWidth: 1,
-                      borderColor: "grey",
-                      marginHorizontal: 10,
-                      backgroundColor: item.selected == true ? "red" : "white",
-                    }}
-                    onPress={() => selectingSkills(index)}
-                  ></TouchableOpacity> */}
-
                   <Text style={styles.innertext}>{item.skill}</Text>
                 </View>
               </View>
@@ -618,103 +654,11 @@ const AccountSettingsScreen = props => {
         {submit && age.length == 0 && (
           <Text style={styles.errorStyle}>  Please select atleast one age group qualified coach</Text>
         )}
-        {/*         
-        <Text style={[styles.text, { marginTop: 15 }]}>Skill Level</Text>
-        <View style={styles.outerView}>
-          <View style={[styles.innerView1, { width: '35%' }]}>
-            <RadioButton
-              size={20}
-              color={Colors.blackColor}
-              uncheckedColor={Colors.blackColor}
-              value="recreational"
-              status={skillLevel === 'recreational' ? 'checked' : 'unchecked'}
-              onPress={() => setSkillLevel('recreational')}
-            />
-            <Text style={styles.innertext}>Recreational</Text>
-          </View>
-          <View style={[styles.innerView1, { width: '28%' }]}>
-            <RadioButton
-              color={Colors.blackColor}
-              uncheckedColor={Colors.blackColor}
-              value="travel"
-              status={skillLevel === 'travel' ? 'checked' : 'unchecked'}
-              onPress={() => setSkillLevel('travel')}
-            />
-            <Text style={styles.innertext}>Travel</Text>
-          </View>
-          <View style={[styles.innerView1]}>
-            <RadioButton
-              color={Colors.blackColor}
-              uncheckedColor={Colors.blackColor}
-              value="collegiate"
-              status={skillLevel === 'collegiate' ? 'checked' : 'unchecked'}
-              onPress={() => setSkillLevel('collegiate')}
-            />
-            <Text style={styles.innertext}>Collegiate</Text>
-          </View>
-        </View>
-        <View style={[styles.outerView1]}>
-          <View style={[styles.innerView1]}>
-            <RadioButton
-              size={20}
-              color={Colors.blackColor}
-              uncheckedColor={Colors.blackColor}
-              value="division"
-              status={skillLevel === 'division' ? 'checked' : 'unchecked'}
-              onPress={() => setSkillLevel('division')}
-            />
-            <Text style={styles.innertext}>Division-1</Text>
-          </View>
-          <View style={[styles.innerView1, { marginLeft: 10 }]}>
-            <RadioButton
-              color={Colors.blackColor}
-              uncheckedColor={Colors.blackColor}
-              value="professional"
-              status={skillLevel === 'professional' ? 'checked' : 'unchecked'}
-              onPress={() => setSkillLevel('professional')}
-            />
-            <Text style={styles.innertext}>Professional</Text>
-          </View>
-        </View>
-        <Text style={[styles.text, { marginTop: 15 }]}>Instruction Types</Text>
-        <View style={styles.dropDownOuterView}>
-          <TouchableOpacity
-            style={styles.dropDown}
-            onPress={() => setInstructionModalVisible(true)}>
-            {instruction == '' ? (
-              <Text style={styles.innertext}>Select</Text>
-            ) : (
-              <Text style={styles.innertext}>{instruction}</Text>
-            )}
-            <Image
-              source={require('../../assets/drop-down.png')}
-              style={styles.dropImage}
-            />
-          </TouchableOpacity>
-        </View>
-        <Text style={[styles.text, { marginTop: 15 }]}>
-          Age Group Qualified to Coach
-        </Text>
-        <View style={styles.dropDownOuterView}>
-          <TouchableOpacity
-            style={styles.dropDown}
-            onPress={() => setAgeModalVisible(true)}>
-            {age == '' ? (
-              <Text style={styles.innertext}>Select</Text>
-            ) : (
-              <Text style={styles.innertext}>{age}</Text>
-            )}
-            <Image
-              source={require('../../assets/drop-down.png')}
-              style={styles.dropImage}
-            />
-          </TouchableOpacity>
-        </View> */}
         <Button
           text={'Update'}
           onPress={() => {
-            // setModalVisible(!modalVisible);
-            props.navigation.navigate('Booking');
+            checkNetwork()
+            // props.navigation.navigate('Booking');
           }}
         />
         <View style={{ marginTop: 20 }}></View>
@@ -793,6 +737,17 @@ const AccountSettingsScreen = props => {
           </TouchableOpacity>
         </View>
       </Modal>
+      <CountryPicker
+        theme={styles.themeText}
+        withFilter={true}
+        visible={countryModal}
+        onSelect={(country) => onSelect(country)}
+        withAlphaFilter={true}
+        withCountryNameButton={true}
+        renderFlagButton={_flagButton}
+      >
+        <View />
+      </CountryPicker>
     </View>
   );
 };
@@ -822,7 +777,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.whiteColor,
     borderTopRightRadius: 35,
     borderTopLeftRadius: 35,
-    // marginTop: '22%',
     paddingHorizontal: 20,
   },
   outerView: {
@@ -849,7 +803,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.textColor,
     borderRadius: 10,
-    // marginTop: 10,\
     marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
@@ -857,6 +810,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   changeTextStyle: {
+    marginRight: 10,
     color: "#60A7EE",
     fontFamily: FontFamily.helveticaBold,
     fontSize: 12
@@ -873,32 +827,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: Colors.textColor,
   },
-
-  // image: {
-  //   height: height > 667 ? 100 : 70,
-  //   width: height > 667 ? 100 : 70,
-  //   borderRadius: height > 667 ? 50 : 35,
-  //   alignSelf: 'center',
-  //   marginTop: 20,
-  //   backgroundColor: Colors.textColor,
-  // },
-  // imageView: {
-  //   height: height > 667 ? 25 : 20,
-  //   width: height > 667 ? 25 : 20,
-  //   borderRadius: height > 667 ? 12.5 : 10,
-  //   borderWidth: 2,
-  //   borderColor: Colors.whiteColor,
-  //   backgroundColor: Colors.buttonColor,
-  //   position: 'absolute',
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   left: height > 667 ? 200 : 155,
-  //   top: height > 667 ? 90 : 65,
-  // },
-  // pen: {
-  //   height: 10,
-  //   width: 10,
-  // },
   image:
   {
     height: 100,
@@ -918,7 +846,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
-    left: 180,
+    left: '56%',
     top: 90
   },
   pen:
@@ -1008,7 +936,11 @@ const styles = StyleSheet.create({
     height: 20,
     width: 20,
   },
-
+  errorStyle: {
+    fontSize: 12,
+    color: "red",
+    paddingLeft: 0,
+  },
   modal: {
     top: height > 667 ? (height * 75) / 100 : (height * 65) / 100,
     alignSelf: 'center',
@@ -1053,4 +985,17 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AccountSettingsScreen;
+const mapStateToProps = (state) => {
+  return {
+    user: state.authReducer.userData || {},
+    token: state.authReducer.userToken
+  };
+};
+const mapDispatchToProps = dispatch => {
+  return {
+    authActions: bindActionCreators(authActions, dispatch)
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(AccountSettingsScreen);
+

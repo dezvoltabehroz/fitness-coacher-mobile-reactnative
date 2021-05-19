@@ -14,6 +14,9 @@ import {
   Dimensions,
 } from 'react-native';
 import { Colors } from '../../style/colors';
+import { authActions } from '../../redux/actions/auth';
+import { connect } from 'react-redux';
+import { bindActionCreators } from "redux";
 const height = Dimensions.get('window').height;
 const SplashScreen = props => {
   useEffect(() => {
@@ -22,11 +25,11 @@ const SplashScreen = props => {
       let userToken = JSON.parse(token)
       console.log(userToken)
       if (userToken) {
-        props.navigation.replace('TabContainer');
+        await props.authActions.getUserProfile(userToken, props.navigation.replace);
+        // props.navigation.replace('TabContainer');
       } else {
         props.navigation.replace('Login');
       }
-
     }, 2000);
   });
   return (
@@ -78,4 +81,18 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SplashScreen;
+const mapStateToProps = (state) => ({
+  user: state.user,
+
+});
+
+const mapDispatchToProps = dispatch => {
+  return {
+    authActions: bindActionCreators(authActions, dispatch)
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SplashScreen);

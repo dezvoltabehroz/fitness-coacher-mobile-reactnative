@@ -9,12 +9,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const setUserProfile = (userData, navigate) => {
     return async (dispatch) => {
-        let token = await AsyncStorage.getItem('TOKEN')
+        let token = await AsyncStorage.getItem('Token')
         let data = JSON.parse(token)
         if (userData) {
             await dispatch({ type: USER_LOGIN_SUCCESS, userData: userData, userToken: data, loading: false });
             if (navigate != null)
-                navigate('Main');
+                navigate('TabContainer');
         }
     }
 };
@@ -28,8 +28,9 @@ const getUserProfile = (userData, navigate) => {
         AuthServices.getUserProfile(userData)
             .then(async (responseData) => {
                 if (responseData.data.success) {
-                    await AsyncStorage.setItem('USER', JSON.stringify(responseData.data.data))
-                    await dispatch(setUserProfile(responseData.data.data, navigate))
+                    console.log(responseData.data.user)
+                    await AsyncStorage.setItem('USER', JSON.stringify(responseData.data.user))
+                    await dispatch(setUserProfile(responseData.data.user, navigate))
                 }
                 else {
                     dispatch(removeUser(navigate));
@@ -44,8 +45,10 @@ const getUserProfile = (userData, navigate) => {
 const removeUser = (navigate) => {
     return async (dispatch) => {
         dispatch({ type: USER_LOGOUT_SUCCESS })
-        await navigate('Auth')
+        await navigate('Login')
+        await AsyncStorage.removeItem('Token');
         await AsyncStorage.removeItem('USER');
+        
     }
 };
 
