@@ -19,7 +19,7 @@ import RegisterationModal from "../../common/RegisterationModal";
 import AgeGroupModal from "../../common/ageGroupModal";
 import InstructorTypeModal from "../../common/instructorTypeModal";
 import InstructionTypeModal from "../../common/instructionTypeModal";
-import { TrainingCategoryServices } from '../../services'
+import { AuthServices, TrainingCategoryServices } from '../../services'
 // import {Checkbox} from '../../common/Checkbox';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import NetInfo from "@react-native-community/netinfo";
@@ -31,6 +31,7 @@ import CountryPicker, { FlagButton } from 'react-native-country-picker-modal';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Calendar from 'react-native-vector-icons/Feather';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 const height = Dimensions.get("window").height;
 const width = Dimensions.get("window").width;
 function CompleteProfile({ navigation, route }) {
@@ -64,7 +65,7 @@ function CompleteProfile({ navigation, route }) {
   const [dummy, setDummy] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [countryModal, setCountryModal] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState(`+1535483498`);
+  const [phoneNumber, setPhoneNumber] = useState(``);
   const [date, setDate] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   // const [subCategoriesLoading, setSubCategoriesLoading] = useState(true);
@@ -72,7 +73,8 @@ function CompleteProfile({ navigation, route }) {
   const phoneRef = createRef(null);
   const [address, setAddress] = useState("");
   const [submit, setSubmit] = useState(false)
-  const [image, setImage] = useState('')
+  const [image, setImage] = useState('');
+  const [subCatVal, setSubCat] = useState(false)
   const [arr, setArr] = useState([
     {
       flag: false,
@@ -115,7 +117,12 @@ function CompleteProfile({ navigation, route }) {
     TrainingCategoryServices.subCategories(item.id)
       .then((response) => {
         setCategoriesLoading(false)
-        setSubCategories(response.data.subCategories);
+        var skill = response.data.subCategories;
+        console.log("skill level", skill);
+        for (let index = 0; index < response.data.subCategories.length; index++) {
+          skill[index].selected = false;
+        }
+        setSubCategories(skill);
       })
       .catch((err) => console.log(err))
   };
@@ -142,7 +149,7 @@ function CompleteProfile({ navigation, route }) {
       if (state.isConnected == true) {
         // call your function here
         checkValidations();
-        getCoachDetails();
+        // getCoachDetails();
       } else {
         alert("Please check your internet connection and try again");
       }
@@ -153,37 +160,55 @@ function CompleteProfile({ navigation, route }) {
   };
 
   const checkValidations = () => {
-    if (instructor == "") {
-      setCheckInstructorTypes(true);
-    } else if (instruction == "") {
-      setCheckInstructionTypes(true);
-    } else if (age == "") {
-      setCheckAgeGroup(true);
-    } else if (!submit) {
-      setSubmit(true);
-      console.log(submit)
-    }
-    else {
-      getCoachDetails();
-    }
-  };
-
-  const getCoachDetails = async () => {
     var selectedSkill = [];
     for (let index = 0; index < coachSkills.length; index++) {
       if (coachSkills[index].selected == true) {
         selectedSkill.push(coachSkills[index]);
       }
     }
+
+    //  if (instruction == "") {
+    //   setCheckInstructionTypes(true);
+    // } else if (age == "") {
+    //   setCheckAgeGroup(true);
+    // } else if (!submit) {
+    //   setSubmit(true);
+    //   console.log(submit)
+    // }
+    // else {
+    if (selectInstructor != undefined && selectedSkill.length != 0 && subCatVal && age.length != 0 && submit && country && address && phoneNumber && isPhoneValid(phoneNumber)) {
+      getCoachDetails();
+    } else {
+      setSubmit(true);
+      console.log(submit)
+    }
+
+    // }
+  };
+
+  const isPhoneValid = (phone) => {
+    return /^\+[0-9]{10,13}$/.test(phone)
+  }
+
+  const getCoachDetails = async () => {
+    var selectedSkill = [];
+    var selectedSubCategories = [];
+    for (let index = 0; index < coachSkills.length; index++) {
+      if (coachSkills[index].selected == true) {
+        selectedSkill.push(coachSkills[index]);
+      }
+    }
+    for (let index = 0; index < subCategories.length; index++) {
+      if (subCategories[index].selected == true) {
+        selectedSubCategories.push({ TrainingSubCategoryId: subCategories[index].id });
+      }
+    }
     console.log(selectedSkill)
+    console.log(selectedSubCategories)
     var trainingType = {
       TrainingTypeId: selectInstructor.id,
       SkillId: selectedSkill[0].id,
-      SubCategoryIds: [
-        {
-          TrainingSubCategoryId: selectInstruction.id,
-        },
-      ],
+      SubCategoryIds: selectedSubCategories,
     };
 
     let ageObject = age;
@@ -201,19 +226,31 @@ function CompleteProfile({ navigation, route }) {
       trainingType: trainingType,
     });
     console.log("userdata is", userData);
+    AuthServices.userRegister(userData)
+      .then((response) => {
+        if (response.data.success != undefined && response.data.success == true) {
+          console.log("response", response);
+          navigation.navigate("EmailSent");
+        } else {
+          console.log("error in service");
+        }
+      })
+      .catch((error) => {
+        alert(error);
+        console.log(error);
+      })
     // navigation.navigate("EmailSent");
-    try {
-      let response = await coachRegister.coachRegisterService(userData);
-      if (response.data.success != undefined && response.data.success == true) {
-        console.log("response", response);
-        navigation.navigate("EmailSent");
-      } else {
-        console.log("error in service");
-      }
-    } catch (error) {
-      alert(error);
-      console.log(error);
-    }
+    // try {
+    //   let response = await coachRegister.coachRegisterService(userData);
+    //   if (response.data.success != undefined && response.data.success == true) {
+    //     console.log("response", response);
+    //     navigation.navigate("EmailSent");
+    //   } else {
+    //     console.log("error in service");
+    //   }
+    // } catch (error) {
+
+    // }
   };
 
   const settingValue = (item) => {
@@ -227,6 +264,11 @@ function CompleteProfile({ navigation, route }) {
 
   const selectingSkills = (iteration) => {
     var skill = coachSkills;
+    // if (skill[iteration].selected) {
+    //   skill[iteration].selected = false;
+    // } else {
+    //   skill[iteration].selected = true;
+    // }
     for (let index = 0; index < skill.length; index++) {
       skill[index].selected = false;
     }
@@ -293,6 +335,25 @@ function CompleteProfile({ navigation, route }) {
       })
   }
 
+  const checkBoxFunc = (iteration) => {
+    var instruction = [...subCategories];
+
+    // instruction[iteration].selected = true;
+    if (instruction[iteration].selected) {
+      instruction[iteration].selected = false;
+      setSubCat(false);
+    } else {
+      instruction[iteration].selected = true;
+    }
+    console.log("skill level is ", instruction);
+    setSubCategories(instruction);
+    for (let index = 0; index < instruction.length; index++) {
+      if (instruction[index].selected) {
+        setSubCat(true);
+      }
+    }
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -358,7 +419,7 @@ function CompleteProfile({ navigation, route }) {
             />
           </TouchableOpacity>
         </View>
-        {checkInstructorTypes == true && (
+        {submit && selectInstructor.title == undefined && (
           <Text style={styles.errorStyle}>Instructor Type cannot be empty</Text>
         )}
 
@@ -429,7 +490,7 @@ function CompleteProfile({ navigation, route }) {
             Address cannot be empty
           </Text>
         )}
-        <Text style={styles.text}>Phone</Text>
+        {/* <Text style={styles.text}>Phone</Text>
 
         <View style={styles.outerView}>
           <View style={styles.dropDown}>
@@ -438,13 +499,7 @@ function CompleteProfile({ navigation, route }) {
               onPressFlag={() => setCountryModal(!countryModal)}
               autoFormat={true}
               allowZeroAfterCountryCode={false}
-              textStyle={{
-                marginTop: 2,
-                lineHeight: 25,
-                // fontFamily: 'Nunito-Regular',
-                fontSize: 14,
-                color: 'black',
-              }}
+              textStyle={styles.phoneTextStyle}
               returnKeyType="next"
               // blur={() => this.disabled()}
               onChangePhoneNumber={(phonenumber) => { console.log(phonenumber); setPhoneNumber(phonenumber) }}
@@ -454,41 +509,71 @@ function CompleteProfile({ navigation, route }) {
                 placeholderTextColor: "grey",
               }}
             />
+
           </View>
-        </View>
-        {submit == true && phoneNumber == "" && (
-          <Text style={styles.errorStyle}>
-            Address cannot be empty
-          </Text>
-        )}
+        </View> */}
+        <Input
+          full={true}
+          text={"Phone"}
+          keyboardType={'number-pad'}
+          value={phoneNumber}
+          onChangeText={(value) => {
+            setPhoneNumber(value)
+          }}
+        />
+        {
+          submit && phoneNumber == "" ? <Text style={styles.errorStyle}> Phonenumber cannot be empty </Text> : null
+        }
+        {
+          submit && phoneNumber.length && !isPhoneValid(phoneNumber) ? <Text style={[styles.errorStyle]}>Phone number is incomplete </Text> : null
+        }
+
         <Text style={styles.text}>Instruction Types</Text>
-
         <View style={styles.outerView}>
-          <TouchableOpacity
-            style={styles.dropDown}
-            onPress={() => {
-              if (categories.length != 0) {
-                setInstructionModalVisible(true);
+          {subCategories.length == 0 ?
+            <TouchableOpacity
+              style={styles.dropDown}
+              onPress={() => {
+                if (categories.length != 0) {
+                  setInstructionModalVisible(true);
 
-              } else {
-                alert("Please select instructor first")
-              }
-              // setSubCategoriesLoading(true);
-            }}
-          >
-            {selectInstruction.title != undefined &&
-              Object.keys(selectInstruction).length > 0 ? (
-              <Text style={styles.innertext}>{selectInstruction.title}</Text>
-            ) : (
-              <Text style={styles.innertext}>Select</Text>
-            )}
-            <Image
-              source={require("../../assets/drop-down.png")}
-              style={styles.dropImage}
-            />
-          </TouchableOpacity>
+                } else {
+                  alert("Please select instructor first")
+                }
+                // setSubCategoriesLoading(true);
+              }}
+            >
+              {selectInstruction.title != undefined &&
+                Object.keys(selectInstruction).length > 0 ? (
+                <Text style={styles.innertext}>{selectInstruction.title}</Text>
+              ) : (
+                <Text style={styles.innertext}>Select</Text>
+              )}
+              <Image
+                source={require("../../assets/drop-down.png")}
+                style={styles.dropImage}
+              />
+            </TouchableOpacity>
+            :
+            <FlatList
+              data={subCategories}
+              contentContainerStyle={styles.contentContainerStyle}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item, index }) => {
+                return (
+                  <View style={styles.outerView}>
+                    <View style={[styles.innerView1]}>
+                      <MaterialIcons onPress={() => checkBoxFunc(index)}
+                        size={20}
+                        name={item.selected ? "check-box" : "check-box-outline-blank"} />
+                      <Text style={styles.innertext}>{item.title}</Text>
+                    </View>
+                  </View>
+                );
+              }}
+            />}
         </View>
-        {checkInstructionTypes == true && (
+        {submit && subCatVal != true && (
           <Text style={styles.errorStyle}>
             Instruction Type cannot be empty
           </Text>
@@ -498,18 +583,16 @@ function CompleteProfile({ navigation, route }) {
         <FlatList
           data={coachSkills}
           // showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            marginBottom: "5%",
-            width: width,
-          }}
+          contentContainerStyle={styles.contentContainerStyle}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item, index }) => {
             return (
               <View style={styles.outerView}>
                 <View style={[styles.innerView1]}>
-                  <TouchableOpacity
+                  <MaterialIcons onPress={() => selectingSkills(index)}
+                    size={20}
+                    name={item.selected ? "check-box" : "check-box-outline-blank"} />
+                  {/* <TouchableOpacity
                     style={{
                       height: 20,
                       width: 20,
@@ -520,7 +603,7 @@ function CompleteProfile({ navigation, route }) {
                       backgroundColor: item.selected == true ? "red" : "white",
                     }}
                     onPress={() => selectingSkills(index)}
-                  ></TouchableOpacity>
+                  ></TouchableOpacity> */}
 
                   <Text style={styles.innertext}>{item.skill}</Text>
                 </View>
@@ -538,18 +621,25 @@ function CompleteProfile({ navigation, route }) {
         <FlatList
           data={arr}
           // showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            marginBottom: "5%",
-            width: width,
-          }}
+          contentContainerStyle={styles.contentContainerStyle}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item, index }) => {
             return (
               <View style={styles.outerView}>
                 <View style={[styles.innerView1]}>
-                  <RadioButton
+                  <MaterialIcons onPress={() => {
+                    let ageArr = [...age];
+                    let array = arr;
+                    // array[prev].flag = false;
+                    array[index].flag = true;
+                    setArr(arr);
+                    ageArr.push({ ageGroup: item.age })
+                    setAge(ageArr);
+                    // setPrev(index);
+                  }}
+                    size={20}
+                    name={item.flag ? "check-box" : "check-box-outline-blank"} />
+                  {/* <RadioButton
                     color={Colors.blackColor}
                     size={10}
                     uncheckedColor={Colors.blackColor}
@@ -564,14 +654,14 @@ function CompleteProfile({ navigation, route }) {
                       setAge(ageArr);
                       // setPrev(index);
                     }}
-                  />
+                  /> */}
                   <Text style={styles.innertext}>{item.age}</Text>
                 </View>
               </View>
             );
           }}
         />
-        {checkAgeGroup == true && (
+        {submit && age.length == 0 && (
           <Text style={styles.errorStyle}>  Please select atleast one age group qualified coach</Text>
         )}
         <Button
@@ -662,6 +752,12 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 35,
     paddingHorizontal: 20,
   },
+  contentContainerStyle: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: "5%",
+    width: width,
+  },
   profile: {
     height: height > 667 ? 120 : 100,
     width: height > 667 ? 120 : 100,
@@ -704,6 +800,12 @@ const styles = StyleSheet.create({
     color: Colors.textColor,
     fontFamily: FontFamily.helveticaLight,
   },
+  phoneTextStyle: {
+    marginTop: 2,
+    lineHeight: 25,
+    fontSize: 14,
+    color: 'black',
+  },
   outerView: {
     width: "100%",
     flexDirection: "row",
@@ -742,6 +844,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.textColor,
     // borderColor: 'red',
     paddingRight: 10,
+    paddingHorizontal: 5,
     alignItems: "center",
     flexDirection: "row",
     // backgroundColor: 'red',
