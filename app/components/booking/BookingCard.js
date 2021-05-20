@@ -50,18 +50,24 @@ const BookingCard = props => {
       <View style={styles.bar}></View>
       <View style={styles.bottom}>
         <Text style={styles.text2}>Softball Coaching</Text>
-        <TouchableOpacity
-          style={{ flexDirection: 'row', alignItems: 'center', }}
-          onPress={() => {
-            props.navigation.navigate('Bookingdetails');
-          }}>
-          <Text style={[styles.text2, { color: '#030E2D' }]}>View Details</Text>
-          <MaterialIcons
-            name="arrow-right-alt"
-            size={height > 667 ? 20 : 16}
-            color={'#030E2D'}
-          />
-        </TouchableOpacity>
+        {
+          // !props.active ?
+          //   null
+          //   :
+            <TouchableOpacity
+              style={{ flexDirection: 'row', alignItems: 'center', }}
+              onPress={() => {
+                props.navigation.navigate('Bookingdetails');
+              }}>
+              <Text style={[styles.text2, { color: '#030E2D' }]}>View Details</Text>
+              <MaterialIcons
+                name="arrow-right-alt"
+                size={height > 667 ? 20 : 16}
+                color={'#030E2D'}
+              />
+            </TouchableOpacity>
+        }
+
       </View>
     </View>
   );

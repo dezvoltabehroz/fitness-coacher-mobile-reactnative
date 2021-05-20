@@ -20,11 +20,14 @@ const Api = {
     getBookingDetails: function (id, token) {
         return axiosInstance.get(`coach/getBookingDetails/${id}`, configToken(token))
     },
-    addRatingtoAthele:function(userData){
-        return axiosInstance.get(`coach/athleteRating`,userData, configToken(token))
+    addRatingtoAthele: function (userData,token) {
+        return axiosInstance.get(`coach/athleteRating`, userData, configToken(token))
     },
-    acceptRequest:function(userData){
-        return axiosInstance.get(` coach/acceptRequest`,userData, configToken(token))
+    acceptRequest: function (userData, token) {
+        return axiosInstance.get(`coach/acceptRequest`, userData, configToken(token))
+    },
+    getRequestDetails: function (id, token) {
+        return axiosInstance.get(`coach/requestDetails/${id}`, configToken(token))
     },
 
 };

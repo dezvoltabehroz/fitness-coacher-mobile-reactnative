@@ -27,14 +27,31 @@ import { connect } from 'react-redux';
 const height = Dimensions.get('window').height;
 const AcceptBooking = props => {
   const [modalVisible, setModalVisible] = useState(false);
-  //   useEffect(() => {
-  //     if (props.route.params != undefined) {
-  //       const {flag} = props?.route?.params;
-  //       if (flag) {
-  //         setModalVisible(true);
-  //       }
-  //     }
-  //   }, []);
+  useEffect(() => {
+    // if (props.route.params != undefined) {
+    //   const { flag } = props?.route?.params;
+    //   if (flag) {
+    //     setModalVisible(true);
+    //   }
+    // }
+    getRequestDetails()
+  }, []);
+
+  const getRequestDetails = () => {
+    BookingServices.getRequestDetails()
+      .then((response) => {
+        if (response.data.success) {
+          console.log(response.data)
+          props.navigation.replace('TabContainer')
+        }
+        else { alert(response.data.msg) }
+
+      })
+      .catch((err) => {
+        alert(err);
+        console.log(err)
+      })
+  }
 
   const handleAccept = () => {
     let userData = {
