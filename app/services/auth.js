@@ -49,12 +49,8 @@ const Api = {
             "otp": userData.otp
         }, config)
     },
-    changePassword: function (userData) {
-        return axiosInstance.post('change-password', {
-            // "id": userData.id,
-            "oldPassword": userData.current_password,
-            "newPassword": userData.new_password
-        }, configToken(userData.token))
+    changePassword: function (id, userData, token) {
+        return axiosInstance.put(`user/change-password/${id}`, userData, configToken(token))
     },
 
 

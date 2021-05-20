@@ -30,6 +30,7 @@ import CreateScreen from "../components/create/Create";
 import ProfileScreen from "../components/profile/Profile";
 import SettingsScreen from "../components/setting/Settings";
 import AccountSettings from "../components/setting/AccountSettings";
+import ChangePassword from "../components/setting/ChangePassword";
 import NottificatiosSettings from "../components/setting/NotificationsSettings";
 import Preview from "../components/create/Preview";
 import BookingDetails from "../components/create/BookingDetails";
@@ -65,9 +66,23 @@ function SettingsStack() {
           },
         }}
       />
-      <Stack.Screen
+      {/* <Stack.Screen
         name="AccountSettings"
         component={AccountSettings}
+        options={{
+          // headerTitle: 'ACCOUNT SETTINGS',
+          // headerTitleAllowFontScaling: true,
+          // headerTransparent: true,
+          headerShown: false,
+          headerTitleStyle: {
+            fontFamily: FontFamily.helveticaBold,
+            fontSize: 16,
+          },
+        }}
+      /> */}
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePassword}
         options={{
           // headerTitle: 'ACCOUNT SETTINGS',
           // headerTitleAllowFontScaling: true,
@@ -420,15 +435,27 @@ function TabContainer() {
       <Tab.Screen
         name="SettingsStack"
         component={SettingsStack}
-        options={{
-          tabBarLabel: "Settings",
-          tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name="settings-sharp"
-              size={height > 667 ? 22 : 20}
-              color={focused ? Colors.buttonColor : "grey"}
-            />
-          ),
+        options={({ navigation }) => {
+          const { routes, index } = navigation.dangerouslyGetState();
+          const { state: exploreState } = routes[index];
+          let tabBarVisible = true;
+          if (exploreState) {
+            const { routes: exploreRoutes, index: exploreIndex } = exploreState;
+            const exploreActiveRoute = exploreRoutes[exploreIndex];
+            if (exploreActiveRoute.name === "ChangePassword") { tabBarVisible = false };
+          }
+          return {
+            headerShown: false,
+            tabBarVisible,
+            tabBarLabel: "Settings",
+            tabBarIcon: ({ focused }) => (
+              <Ionicons
+                name="settings-sharp"
+                size={height > 667 ? 22 : 20}
+                color={focused ? Colors.buttonColor : "grey"}
+              />
+            ),
+          };
         }}
       />
     </Tab.Navigator>
