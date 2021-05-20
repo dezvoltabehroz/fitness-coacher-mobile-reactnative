@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  ToastAndroid,
 } from "react-native";
 import { Colors } from "../../style/colors";
 import { FontFamily } from "../../style/typograpy";
@@ -65,12 +66,13 @@ const BookingScreen = (props) => {
           console.log("booking details are", bookings);
         }
         else {
+          ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
           setLoading(false)
         }
 
       })
       .catch((error) => {
-        alert(error);
+        ToastAndroid.show(`${error}`, ToastAndroid.LONG)
         setLoading(false)
         console.log("error =", error);
       });

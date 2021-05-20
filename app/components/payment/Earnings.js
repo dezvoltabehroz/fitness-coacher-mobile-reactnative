@@ -13,6 +13,7 @@ import {
   Platform,
   Dimensions,
   ActivityIndicator,
+  ToastAndroid,
 } from 'react-native';
 import { Colors } from '../../style/colors';
 import { RadioButton, Checkbox } from 'react-native-paper';
@@ -61,9 +62,9 @@ const Earnings = props => {
             })
             .catch((err) => console.log(err))
         }
-        else { alert(response.data.msg) }
+        else {  ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG) }
       })
-      .catch((error) => { alert(error); console.log(error) })
+      .catch((error) => { ToastAndroid.show(`${error}`, ToastAndroid.LONG); console.log(error) })
   }
 
   return (

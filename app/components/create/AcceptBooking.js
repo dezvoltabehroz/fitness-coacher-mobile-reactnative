@@ -13,6 +13,7 @@ import {
   Platform,
   Dimensions,
   TextInput,
+  ToastAndroid,
 } from 'react-native';
 import { Colors } from '../../style/colors';
 import { RadioButton, Checkbox } from 'react-native-paper';
@@ -44,11 +45,11 @@ const AcceptBooking = props => {
           console.log(response.data)
           props.navigation.replace('TabContainer')
         }
-        else { alert(response.data.msg) }
+        else { ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG) }
 
       })
       .catch((err) => {
-        alert(err);
+        ToastAndroid.show(`${err}`, ToastAndroid.LONG); 
         console.log(err)
       })
   }
@@ -65,15 +66,9 @@ const AcceptBooking = props => {
           props.navigation.navigate('TabContainer')
 
         }
-        else {
-          alert(res.data.msg)
-        }
-
+        else {ToastAndroid.show(`${res.data.msg}`, ToastAndroid.LONG)  }
       })
-      .catch((err) => {
-        alert(err)
-        console.log(err)
-      })
+      .catch((err) => {ToastAndroid.show(`${err}`, ToastAndroid.LONG) ;console.log(err)})
   }
 
   return (

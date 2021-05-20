@@ -7,6 +7,7 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
+  ToastAndroid,
 } from "react-native";
 import Input from "../../common/Input";
 import { FontFamily } from "../../style/typograpy";
@@ -54,6 +55,7 @@ const ForgotPassword = (props) => {
       setCheckEmail(true);
     } else if (!validateEmail()) {
       alert("Please enter a proper email");
+      ToastAndroid.show(`${error}`, ToastAndroid.LONG)
     } else {
       setLoading(true);
       resetPassword();
@@ -78,12 +80,15 @@ const ForgotPassword = (props) => {
           props.navigation.navigate("ResetPassword", { email: newOtp.email });
           setLoading(false)
         } else {
+          ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
           console.log("error in service");
+          setLoading(false)
         }
       })
       .catch((err) => {
-        alert(err);
+        ToastAndroid.show(`${err}`, ToastAndroid.LONG)
         console.log(err);
+        setLoading(false)
       })
     // try {
     //   let response = await resendOtpService.resendOtpFunc(newOtp);

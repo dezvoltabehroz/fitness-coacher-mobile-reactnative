@@ -13,6 +13,7 @@ import {
   Platform,
   Dimensions,
   TouchableOpacity,
+  ToastAndroid,
 } from 'react-native';
 import Modal from 'react-native-modal';
 import AccountInput from '../../common/AccountInput';
@@ -159,7 +160,7 @@ const AccountSettingsScreen = (props) => {
         console.log('ImagePicker Error: ', response.error);
       } else if (response.customButton) {
         console.log('User tapped custom button: ', response.customButton);
-        alert(response.customButton);
+        ToastAndroid.show(`${response.customButton}`, ToastAndroid.LONG) 
       } else {
         let source = response;
         setFilePath(source);
@@ -282,7 +283,7 @@ const AccountSettingsScreen = (props) => {
       if (state.isConnected == true) {
         checkValidations();
       } else {
-        alert("Please check your internet connection and try again");
+        ToastAndroid.show(`Please check your internet connection and try again`, ToastAndroid.LONG) 
       }
     } catch (error) {
       console.log(error);
@@ -362,7 +363,7 @@ const AccountSettingsScreen = (props) => {
         }
       })
       .catch((error) => {
-        alert(error);
+        ToastAndroid.show(`${error}`, ToastAndroid.LONG) 
         console.log(error);
       })
   };
@@ -541,7 +542,7 @@ const AccountSettingsScreen = (props) => {
                   setInstructionModalVisible(true);
 
                 } else {
-                  alert("Please select instructor first")
+                  ToastAndroid.show(`Please select instructor first`, ToastAndroid.LONG) 
                 }
                 // setSubCategoriesLoading(true);
               }}

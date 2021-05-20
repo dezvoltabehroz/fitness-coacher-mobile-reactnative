@@ -7,6 +7,7 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
+  ToastAndroid,
 } from "react-native";
 import Input from "../../common/Input";
 import { FontFamily } from "../../style/typograpy";
@@ -43,7 +44,7 @@ const EmailSent = (props) => {
       if (state.isConnected == true) {
         checkValidations();
       } else {
-        alert("Please check your internet connection and try again");
+        ToastAndroid.show(`Please check your internet connection and try again`, ToastAndroid.LONG)
       }
     } catch (error) {
       console.log(error);
@@ -57,9 +58,9 @@ const EmailSent = (props) => {
     } else if (code == "") {
       setCheckCode(true);
     } else if (!validateEmail()) {
-      alert("Please enter a proper email");
+      ToastAndroid.show(`Please enter a proper email`, ToastAndroid.LONG)
     } else if (String(code).length <= 3) {
-      alert("Code must be 4 characters");
+      ToastAndroid.show(`Please enter a proper email`, ToastAndroid.LONG)
     } else {
       // resendCode();
       enterCode();
@@ -87,10 +88,11 @@ const EmailSent = (props) => {
         console.log("response", response);
         props.navigation.navigate("Login");
       } else {
+        ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
         console.log("error in service");
       }
     } catch (error) {
-      alert(error);
+      ToastAndroid.show(`${error}`, ToastAndroid.LONG)
       console.log(error);
     }
   };
@@ -106,10 +108,11 @@ const EmailSent = (props) => {
         console.log("response", response);
         props.navigation.navigate("Login");
       } else {
+        ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
         console.log("error in service");
       }
     } catch (error) {
-      alert(error);
+      ToastAndroid.show(`${error}`, ToastAndroid.LONG)
       console.log(error);
     }
   };

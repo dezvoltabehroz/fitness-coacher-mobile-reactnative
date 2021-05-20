@@ -9,6 +9,7 @@ import {
   Dimensions,
   TouchableOpacity,
   FlatList,
+  ToastAndroid,
 } from "react-native";
 import { Colors } from "../../style/colors";
 import { FontFamily } from "../../style/typograpy";
@@ -151,7 +152,7 @@ function CompleteProfile({ navigation, route }) {
         checkValidations();
         // getCoachDetails();
       } else {
-        alert("Please check your internet connection and try again");
+        ToastAndroid.show(`Please check your internet connection and try again`, ToastAndroid.LONG)
       }
     } catch (error) {
       console.log(error);
@@ -236,7 +237,7 @@ function CompleteProfile({ navigation, route }) {
         }
       })
       .catch((error) => {
-        alert(error);
+        ToastAndroid.show(`${error}`, ToastAndroid.LONG) 
         console.log(error);
       })
     // navigation.navigate("EmailSent");
@@ -539,7 +540,7 @@ function CompleteProfile({ navigation, route }) {
                   setInstructionModalVisible(true);
 
                 } else {
-                  alert("Please select instructor first")
+                  ToastAndroid.show(`Please select instructor first`, ToastAndroid.LONG)
                 }
                 // setSubCategoriesLoading(true);
               }}

@@ -7,6 +7,7 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
+  ToastAndroid,
 } from "react-native";
 import Input from "../../common/Input";
 import { FontFamily } from "../../style/typograpy";
@@ -114,12 +115,13 @@ const ResetPassword = ({ navigation, route }) => {
           navigation.navigate("Login");
         } else {
           setLoading(false);
-          alert(response.data.msg);
+          ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
+          
           console.log("error in service");
         }
       })
       .catch((error) => {
-        alert(error);
+        ToastAndroid.show(`${error}`, ToastAndroid.LONG)
         setLoading(false)
         console.log(error);
       })
