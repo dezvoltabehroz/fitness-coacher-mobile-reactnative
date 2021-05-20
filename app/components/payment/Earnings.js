@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -12,25 +12,59 @@ import {
   NativeModules,
   Platform,
   Dimensions,
-  TextInput,
+  ActivityIndicator,
 } from 'react-native';
-import {Colors} from '../../style/colors';
-import {RadioButton, Checkbox} from 'react-native-paper';
-import {FontFamily} from '../../style/typograpy';
+import { Colors } from '../../style/colors';
+import { RadioButton, Checkbox } from 'react-native-paper';
+import { FontFamily } from '../../style/typograpy';
 import Button from '../../common/Button';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import DetailsModal from '../../common/DetailsModal';
-import {Container, Header, Content, Tab, Tabs} from 'native-base';
+import { Container, Header, Content, Tab, Tabs } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {Divider} from 'react-native-elements';
-import {BarChart, Grid} from 'react-native-svg-charts';
+import { Divider } from 'react-native-elements';
+import { BarChart, Grid } from 'react-native-svg-charts';
 import * as shape from 'd3-shape';
+import { PaymentServices } from '../../services';
+import { connect } from 'react-redux';
 const height = Dimensions.get('window').height;
 const Earnings = props => {
-  const [modalVisible, setModalVisible] = useState(false);
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const fill = 'rgb(4, 11, 34)';
   const data = [50, 10, 40, 95, 4, 24];
+  const handleWithdraw = () => {
+    PaymentServices.coachPayout()
+      .then((response) => {
+        if (response.data.success) {
+          props.navigation.replace('TabContainer')
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
+  useEffect(() => {
+    getAmounts()
+  }, [])
+  const getAmounts = () => {
+    setLoading(true);
+    PaymentServices.getAmountOfCoaches(props?.user.id, props?.token)
+      .then((response) => {
+        if (response.data.success) {
+          console.log(response.data)
+          PaymentServices.coachGraphData(props?.user.id, props?.token)
+            .then((resData) => {
+              console.log(resData.data)
+              setLoading(false);
+            })
+            .catch((err) => console.log(err))
+        }
+        else { alert(response.data.msg) }
+      })
+      .catch((error) => { alert(error); console.log(error) })
+  }
 
   return (
     <View style={styles.container}>
@@ -40,7 +74,7 @@ const Earnings = props => {
         backgroundColor={'transparent'}
       />
       <View style={styles.header}>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <TouchableOpacity onPress={() => props.navigation.goBack()}>
             <Ionicons name="arrow-back" size={height > 667 ? 20 : 16} />
           </TouchableOpacity>
@@ -49,77 +83,84 @@ const Earnings = props => {
       </View>
 
       <View style={styles.bottom}>
-        <ScrollView
-          contentContainerStyle={{paddingBottom: '45%'}}
-          showsVerticalScrollIndicator={false}>
-          <View
-            style={{
-              marginTop: 10,
-              marginHorizontal: 20,
-              height: height > 667 ? 100 : 70,
-              backgroundColor: Colors.lightGreyColor,
-              padding: 10,
-              borderRadius: 10,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <Text style={{fontSize: height > 667 ? 14 : 12}}>
-              Personal Available Balance
+        {
+          loading ?
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+              <ActivityIndicator size={20} color={'#030E2D'} />
+            </View>
+            :
+            <ScrollView
+              contentContainerStyle={{ paddingBottom: '45%' }}
+              showsVerticalScrollIndicator={false}>
+              <View
+                style={{
+                  marginTop: 10,
+                  marginHorizontal: 20,
+                  height: height > 667 ? 100 : 70,
+                  backgroundColor: Colors.lightGreyColor,
+                  padding: 10,
+                  borderRadius: 10,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <Text style={{ fontSize: height > 667 ? 14 : 12 }}>
+                  Personal Available Balance
             </Text>
-            <Text
-              style={{
-                fontSize: height > 667 ? 18 : 14,
-                color: 'red',
-                marginTop: 10,
-                fontWeight: 'bold',
-              }}>
-              $728
+                <Text
+                  style={{
+                    fontSize: height > 667 ? 18 : 14,
+                    color: 'red',
+                    marginTop: 10,
+                    fontWeight: 'bold',
+                  }}>
+                  $728
             </Text>
-          </View>
-          <View style={styles.barChartContainer}>
-            <BarChart
-              style={{height: height > 667 ? 200 : 150}}
-              data={data}
-              barStyle={{borderRadius: 120}}
-              svg={{fill}}
-              spacingOuter={0.5}
-              curve={shape.curveNatural}
-              contentInset={{top: 30, bottom: 30}}>
-              <Grid />
-            </BarChart>
-          </View>
+              </View>
+              <View style={styles.barChartContainer}>
+                <BarChart
+                  style={{ height: height > 667 ? 200 : 150 }}
+                  data={data}
+                  barStyle={{ borderRadius: 120 }}
+                  svg={{ fill }}
+                  spacingOuter={0.5}
+                  curve={shape.curveNatural}
+                  contentInset={{ top: 30, bottom: 30 }}>
+                  <Grid />
+                </BarChart>
+              </View>
 
-          <View style={[styles.barChartContainer, {height: '40%'}]}>
-            <View style={styles.mainView}>
-              <Text style={{fontSize: 14, marginTop: 5}}>Sales Analytics</Text>
-            </View>
-            <View style={styles.mainView}>
-              <Text style={styles.text}>Earned this month</Text>
-              <Text style={styles.text1}>$300</Text>
-            </View>
-            <View style={styles.mainView}>
-              <Text style={styles.text}>Average selling price</Text>
-              <Text style={styles.text1}>$50</Text>
-            </View>
-            <View style={styles.mainView}>
-              <Text style={styles.text}>Active bookings</Text>
-              <Text style={styles.text1}>6</Text>
-            </View>
-            <View style={styles.mainView}>
-              <Text style={styles.text}>Completed this month</Text>
-              <Text style={styles.text1}>10</Text>
-            </View>
-            <View style={styles.mainView}>
-              <Text style={styles.text}>Available for withdrawal</Text>
-              <Text style={styles.text1}>$500</Text>
-            </View>
-          </View>
-          <TouchableOpacity
-            onPress={() => props.navigation.navigate('Booking')}
-            style={styles.btnStyle}>
-            <Text style={{color: 'white', fontWeight: '700'}}>Withdraw</Text>
-          </TouchableOpacity>
-        </ScrollView>
+              <View style={[styles.barChartContainer, { height: '40%' }]}>
+                <View style={styles.mainView}>
+                  <Text style={{ fontSize: 14, marginTop: 5 }}>Sales Analytics</Text>
+                </View>
+                <View style={styles.mainView}>
+                  <Text style={styles.text}>Earned this month</Text>
+                  <Text style={styles.text1}>$300</Text>
+                </View>
+                <View style={styles.mainView}>
+                  <Text style={styles.text}>Average selling price</Text>
+                  <Text style={styles.text1}>$50</Text>
+                </View>
+                <View style={styles.mainView}>
+                  <Text style={styles.text}>Active bookings</Text>
+                  <Text style={styles.text1}>6</Text>
+                </View>
+                <View style={styles.mainView}>
+                  <Text style={styles.text}>Completed this month</Text>
+                  <Text style={styles.text1}>10</Text>
+                </View>
+                <View style={styles.mainView}>
+                  <Text style={styles.text}>Available for withdrawal</Text>
+                  <Text style={styles.text1}>$500</Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                onPress={() => handleWithdraw()}
+                style={styles.btnStyle}>
+                <Text style={{ color: 'white', fontWeight: '700' }}>Withdraw</Text>
+              </TouchableOpacity>
+            </ScrollView>
+        }
       </View>
     </View>
   );
@@ -235,5 +276,14 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
   },
 });
+const mapStateToProps = (state) => ({
+  user: state.authReducer.userData || {},
+  token: state.authReducer.userToken || {}
+});
 
-export default Earnings;
+
+export default connect(
+  mapStateToProps,
+)(Earnings);
+
+

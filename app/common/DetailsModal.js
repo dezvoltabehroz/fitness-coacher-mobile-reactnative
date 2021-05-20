@@ -18,7 +18,7 @@ import Modal from 'react-native-modal';
 import {Col} from 'native-base';
 import Button from './Button';
 const height = Dimensions.get('window').height;
-const DetailsModal = ({modalVisible, setModalVisible, navigation}) => {
+const DetailsModal = ({modalVisible, setModalVisible, navigation,onYes}) => {
   return (
     <Modal
       style={styles.modal}
@@ -41,10 +41,7 @@ const DetailsModal = ({modalVisible, setModalVisible, navigation}) => {
         </Text>
         <View style={{flexDirection: 'row', marginTop: '5%'}}>
           <TouchableOpacity
-            onPress={() => {
-              setModalVisible(false);
-              navigation.navigate('Booking');
-            }}
+            onPress={() => {onYes()}}
             style={[
               styles.button,
               {backgroundColor: '#030E2D', borderWidth: 0},

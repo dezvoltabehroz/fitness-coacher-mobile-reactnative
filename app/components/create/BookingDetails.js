@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -14,15 +14,16 @@ import {
   Dimensions,
   TextInput,
 } from 'react-native';
-import {Colors} from '../../style/colors';
-import {RadioButton, Checkbox} from 'react-native-paper';
-import {FontFamily} from '../../style/typograpy';
+import { Colors } from '../../style/colors';
+import { RadioButton, Checkbox } from 'react-native-paper';
+import { FontFamily } from '../../style/typograpy';
 import Button from '../../common/Button';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import DetailsModal from '../../common/DetailsModal';
-import {Container, Header, Content, Tab, Tabs} from 'native-base';
+import { Container, Header, Content, Tab, Tabs } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import { BookingServices } from '../../services';
+import { connect } from 'react-redux';
 const height = Dimensions.get('window').height;
 const BookingDetails = props => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -34,6 +35,21 @@ const BookingDetails = props => {
   //     }
   //   }
   // }, []);
+
+  const handleYes = () => {
+    let userData = {
+      "CoachId": props?.user?.id,
+      "BookingId": 1
+    }
+    BookingServices.completeBooking(userData, props?.token)
+      .then((response) => {
+        console.log(response.data)
+        setModalVisible(false)
+        props.navigation.replace('TabContainer')
+      })
+      .catch((err) => { setModalVisible(false); console.log(err) })
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -48,7 +64,7 @@ const BookingDetails = props => {
             <Ionicons
               name="arrow-back"
               size={height > 667 ? 20 : 16}
-              style={{paddingLeft: 20}}
+              style={{ paddingLeft: 20 }}
             />
           </TouchableOpacity>
         </View>
@@ -60,7 +76,7 @@ const BookingDetails = props => {
             <Ionicons
               name="ellipsis-horizontal"
               size={height > 667 ? 20 : 16}
-              style={{paddingLeft: 20}}
+              style={{ paddingLeft: 20 }}
             />
           </TouchableOpacity>
         </View>
@@ -79,8 +95,8 @@ const BookingDetails = props => {
           }}>
           <Tab
             heading="Details"
-            tabStyle={[styles.tab, {borderTopLeftRadius: 30}]}
-            activeTabStyle={[styles.activeTab, {borderTopLeftRadius: 30}]}
+            tabStyle={[styles.tab, { borderTopLeftRadius: 30 }]}
+            activeTabStyle={[styles.activeTab, { borderTopLeftRadius: 30 }]}
             textStyle={styles.tabText}
             activeTextStyle={styles.activeTabText}>
             <ScrollView
@@ -102,7 +118,7 @@ const BookingDetails = props => {
                       style={styles.profile}
                     />
                   </TouchableOpacity>
-                  <Text style={{textAlign: 'left'}}>Porter Shue</Text>
+                  <Text style={{ textAlign: 'left' }}>Porter Shue</Text>
                   <Text
                     style={{
                       textAlign: 'right',
@@ -139,7 +155,7 @@ const BookingDetails = props => {
                   <Text style={styles.text}>Baseball Category</Text>
                   <Text style={styles.text1}>Hitting</Text>
                 </View>
-                <Text style={[styles.text, {marginLeft: 10}]}>Media</Text>
+                <Text style={[styles.text, { marginLeft: 10 }]}>Media</Text>
                 <Image
                   style={styles.video}
                   source={require('../../assets/splash.jpg')}
@@ -148,7 +164,7 @@ const BookingDetails = props => {
               <TouchableOpacity
                 onPress={() => setModalVisible(true)}
                 style={styles.btnStyle}>
-                <Text style={{color: 'white', fontWeight: '700'}}>
+                <Text style={{ color: 'white', fontWeight: '700' }}>
                   Mark as Delivered
                 </Text>
               </TouchableOpacity>
@@ -156,11 +172,11 @@ const BookingDetails = props => {
           </Tab>
           <Tab
             heading="Contact Information"
-            tabStyle={[styles.tab, {borderTopRightRadius: 30}]}
-            activeTabStyle={[styles.activeTab, {borderTopRightRadius: 30}]}
+            tabStyle={[styles.tab, { borderTopRightRadius: 30 }]}
+            activeTabStyle={[styles.activeTab, { borderTopRightRadius: 30 }]}
             textStyle={styles.tabText}
             activeTextStyle={styles.activeTabText}>
-            <View style={[styles.mainView, {marginTop: 10}]}>
+            <View style={[styles.mainView, { marginTop: 10 }]}>
               <Text style={styles.text}>Mobile Phone</Text>
               <Text style={styles.text1}>+92 3333 3333333</Text>
             </View>
@@ -176,6 +192,7 @@ const BookingDetails = props => {
         </Tabs>
       </View>
       <DetailsModal
+        onYes={() => handleYes()}
         setModalVisible={setModalVisible}
         modalVisible={modalVisible}
         navigation={props.navigation}
@@ -320,5 +337,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+const mapStateToProps = (state) => ({
+  user: state.authReducer.userData || {},
+  token: state.authReducer.userToken || {}
+});
 
-export default BookingDetails;
+
+export default connect(
+  mapStateToProps,
+)(BookingDetails);

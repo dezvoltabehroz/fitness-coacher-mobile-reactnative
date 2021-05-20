@@ -93,7 +93,9 @@ const SplashScreen = (props) => {
         }
 
       })
-      .catch((err) => { setLoading(false); console.log(err) })
+      .catch((err) => { setLoading(false);
+        alert(err)
+        console.log(err) })
   };
 
   const storeData = async (value) => {

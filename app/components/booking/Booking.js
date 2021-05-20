@@ -19,11 +19,12 @@ import { Colors } from "../../style/colors";
 import { FontFamily } from "../../style/typograpy";
 import BookingCard from "./BookingCard";
 import NotificationCard from "../notifications/NotificationsCard";
-
+import { connect } from 'react-redux';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { logindatakey } from "../../helper/globalKey";
 import GlobalVariables from "../../helper/GlobalVariables";
 import * as fetchBookingsService from "../../../services/FetchBookings";
+import { BookingServices } from "../../services";
 
 const height = Dimensions.get("window").height;
 const BookingScreen = (props) => {
@@ -31,6 +32,7 @@ const BookingScreen = (props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [active, setActive] = useState(true);
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     getBookings();
@@ -50,26 +52,26 @@ const BookingScreen = (props) => {
   // };
 
   const getBookings = async () => {
+    setLoading(true)
     // console.log("booking details are", state.bookingDetails);
-    console.log("token is", GlobalVariables.authenticationToken);
-    console.log("user details are", GlobalVariables.userDetails);
-
-    await fetchBookingsService
-      .fetchBookingsFunc(
-        `bearer ${GlobalVariables.authenticationToken}`,
-        GlobalVariables.userDetails.CoachId
-      )
+    BookingServices.getBookings(props?.user?.id, props?.token)
       .then((response) => {
-        alert("success");
-        setBookings(response.data.coursesDetail);
+        // alert("success");
+        if (response.data.success) {
+          let arr = Array(10);
+          setLoading(false)
+          // setBookings(response.data.coursesDetail.rows);
+          setBookings(arr);
+          console.log("booking details are", bookings);
+        }
+        else {
+          setLoading(false)
+        }
 
-        // setState({
-        //   bookingDetails: response.data.coursesDetail,
-        // });
-        console.log("booking details are", bookings);
       })
       .catch((error) => {
-        alert(err);
+        alert(error);
+        setLoading(false)
         console.log("error =", error);
       });
   };
@@ -102,7 +104,7 @@ const BookingScreen = (props) => {
           style={{
             flexDirection: "row",
             marginLeft: 5,
-            justifyContent: "space-between",
+            // justifyContent: "space-around",
             height: 50,
             width: "100%",
             alignItems: "center",
@@ -119,10 +121,11 @@ const BookingScreen = (props) => {
                 { color: !active ? Colors.textColor : Colors.blackColor },
               ]}
             >
-              Active Bookings
+              My Active Bookings
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
+            style={{ marginLeft: '5%' }}
             onPress={() => {
               setActive(false);
             }}
@@ -136,21 +139,29 @@ const BookingScreen = (props) => {
                 },
               ]}
             >
-              Previous Bookings
+              Completed Bookings
             </Text>
           </TouchableOpacity>
         </View>
-        <FlatList
-          contentContainerStyle={{ paddingBottom: "20%" }}
-          showsVerticalScrollIndicator={false}
-          data={bookings}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => {
-            return (
-              <BookingCard navigation={props.navigation} active={active} />
-            );
-          }}
-        />
+        {
+          loading ?
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+              <ActivityIndicator size={20} color={'#030E2D'} />
+            </View>
+            :
+            <FlatList
+              contentContainerStyle={{ paddingBottom: "20%" }}
+              showsVerticalScrollIndicator={false}
+              data={bookings}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item, index }) => {
+                return (
+                  <BookingCard navigation={props.navigation} active={active} />
+                );
+              }}
+            />
+        }
+
       </View>
     </View>
   );
@@ -202,5 +213,13 @@ const styles = StyleSheet.create({
     fontSize: height > 667 ? 14 : 12,
   },
 });
+const mapStateToProps = (state) => ({
+  user: state.authReducer.userData || {},
+  token: state.authReducer.userToken || {}
+});
 
-export default BookingScreen;
+
+export default connect(
+  mapStateToProps,
+)(BookingScreen);
+

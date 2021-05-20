@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -14,15 +14,16 @@ import {
   Dimensions,
   TextInput,
 } from 'react-native';
-import {Colors} from '../../style/colors';
-import {RadioButton, Checkbox} from 'react-native-paper';
-import {FontFamily} from '../../style/typograpy';
+import { Colors } from '../../style/colors';
+import { RadioButton, Checkbox } from 'react-native-paper';
+import { FontFamily } from '../../style/typograpy';
 import Button from '../../common/Button';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import DetailsModal from '../../common/DetailsModal';
-import {Container, Header, Content, Tab, Tabs} from 'native-base';
+import { Container, Header, Content, Tab, Tabs } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import { BookingServices } from '../../services';
+import { connect } from 'react-redux';
 const height = Dimensions.get('window').height;
 const AcceptBooking = props => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -34,6 +35,30 @@ const AcceptBooking = props => {
   //       }
   //     }
   //   }, []);
+
+  const handleAccept = () => {
+    let userData = {
+      "RequestId": 4,
+      "CoachId": props?.user?.id
+    }
+    BookingServices.acceptRequest(userData, props?.token)
+      .then((res) => {
+        if (res.data.success) {
+          console.log(res.data)
+          props.navigation.navigate('TabContainer')
+
+        }
+        else {
+          alert(res.data.msg)
+        }
+
+      })
+      .catch((err) => {
+        alert(err)
+        console.log(err)
+      })
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -42,7 +67,7 @@ const AcceptBooking = props => {
         backgroundColor={'transparent'}
       />
       <View style={styles.header}>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <TouchableOpacity onPress={() => props.navigation.goBack()}>
             <Ionicons name="arrow-back" size={height > 667 ? 20 : 16} />
           </TouchableOpacity>
@@ -58,7 +83,7 @@ const AcceptBooking = props => {
 
       <View style={styles.bottom}>
         <ScrollView
-          contentContainerStyle={{paddingBottom: '25%'}}
+          contentContainerStyle={{ paddingBottom: '25%' }}
           showsVerticalScrollIndicator={false}>
           <View style={styles.border}>
             <View
@@ -82,7 +107,7 @@ const AcceptBooking = props => {
                   justifyContent: 'space-between',
                   flexDirection: 'row',
                 }}>
-                <Text style={{fontSize: height > 667 ? 11 : 10}}>
+                <Text style={{ fontSize: height > 667 ? 11 : 10 }}>
                   You have a new booking opportunity
                 </Text>
                 <Text
@@ -123,23 +148,23 @@ const AcceptBooking = props => {
               <Text style={styles.text}>Baseball Category</Text>
               <Text style={styles.text1}>Hitting</Text>
             </View>
-            <Text style={[styles.text, {marginLeft: 10}]}>Media</Text>
+            <Text style={[styles.text, { marginLeft: 10 }]}>Media</Text>
             <Image
               style={styles.video}
               source={require('../../assets/splash.jpg')}
             />
           </View>
           <TouchableOpacity
-            onPress={() => props.navigation.navigate('Booking')}
+            onPress={() => handleAccept()}
             style={styles.btnStyle}>
-            <Text style={{color: 'white', fontWeight: '700'}}>Accept</Text>
+            <Text style={{ color: 'white', fontWeight: '700' }}>Accept</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[
               styles.btnStyle,
-              {backgroundColor: 'white', borderWidth: 0.4},
+              { backgroundColor: 'white', borderWidth: 0.4 },
             ]}>
-            <Text style={{color: Colors.textColor, fontWeight: '700'}}>
+            <Text style={{ color: Colors.textColor, fontWeight: '700' }}>
               Reject
             </Text>
           </TouchableOpacity>
@@ -271,5 +296,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+const mapStateToProps = (state) => ({
+  user: state.authReducer.userData || {},
+  token: state.authReducer.userToken || {}
+});
 
-export default AcceptBooking;
+
+export default connect(
+  mapStateToProps,
+)(AcceptBooking);
+

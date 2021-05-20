@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -14,9 +14,9 @@ import {
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
-import {Colors} from '../../style/colors';
-import {FontFamily} from '../../style/typograpy';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Colors } from '../../style/colors';
+import { FontFamily } from '../../style/typograpy';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const height = Dimensions.get('window').height;
 const BookingCard = props => {
@@ -51,15 +51,15 @@ const BookingCard = props => {
       <View style={styles.bottom}>
         <Text style={styles.text2}>Softball Coaching</Text>
         <TouchableOpacity
-          style={{alignItems: 'center', flexDirection: 'row'}}
+          style={{ flexDirection: 'row', alignItems: 'center', }}
           onPress={() => {
             props.navigation.navigate('Bookingdetails');
           }}>
-          <Text style={[styles.text2, {color: 'red'}]}>View</Text>
-          <Ionicons
-            name="arrow-forward"
+          <Text style={[styles.text2, { color: '#030E2D' }]}>View Details</Text>
+          <MaterialIcons
+            name="arrow-right-alt"
             size={height > 667 ? 20 : 16}
-            color={'red'}
+            color={'#030E2D'}
           />
         </TouchableOpacity>
       </View>
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     // marginTop: 5,
   },
   text2: {
-    fontFamily: FontFamily.helvetica,
+    fontFamily: FontFamily.helveticaLight,
     fontSize: height > 667 ? 14 : 12,
     color: Colors.textColor,
   },
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     height: height > 667 ? 23 : 20,
     borderRadius: 25,
     width: '18%',
-    backgroundColor: '#90ee90',
+    backgroundColor: '#c1ffd3',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: height > 667 ? -7 : -4,

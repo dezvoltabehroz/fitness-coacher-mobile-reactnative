@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -14,22 +14,26 @@ import {
   Dimensions,
   TextInput,
 } from 'react-native';
-import {Colors} from '../../style/colors';
-import {RadioButton, Checkbox} from 'react-native-paper';
-import {FontFamily} from '../../style/typograpy';
+import { Colors } from '../../style/colors';
+import { RadioButton, Checkbox } from 'react-native-paper';
+import { FontFamily } from '../../style/typograpy';
 import Button from '../../common/Button';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import DetailsModal from '../../common/DetailsModal';
-import {Container, Header, Content, Tab, Tabs} from 'native-base';
+import { Container, Header, Content, Tab, Tabs } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AccountInput from '../../common/AccountInput';
-
+import StarRating from 'react-native-star-rating';
+import { BookingServices } from '../../services';
+import { connect } from 'react-redux'
 const WATER_IMAGE = require('../../assets/star.png');
 
 const height = Dimensions.get('window').height;
 const AcceptBooking = props => {
   const [modalVisible, setModalVisible] = useState(false);
   const [isActive, setIsActive] = useState(true);
+  const [starCount, setStarCount] = useState(0);
+  const [review, setReview] = useState('');
   //   useEffect(() => {
   //     if (props.route.params != undefined) {
   //       const {flag} = props?.route?.params;
@@ -38,6 +42,25 @@ const AcceptBooking = props => {
   //       }
   //     }
   //   }, []);
+
+  const handleSubmit = () => {
+    let userData = {
+      "AthleteId": 5,
+      "stars": starCount,
+      "review": review,
+      "ratingBy": props?.user?.id
+    }
+    BookingServices.addRatingtoAthele(userData, props?.token)
+      .then((response) => {
+        if (response.data.success) {
+          console.log(response.data)
+          props.navigation.replace('TabContainer');
+        }
+        else { alert(response.data.msg) }
+      })
+      .catch((err) => { alert(err); console.log(err) })
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -46,12 +69,12 @@ const AcceptBooking = props => {
         backgroundColor={'transparent'}
       />
       <View style={styles.header}>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <TouchableOpacity onPress={() => props.navigation.goBack()}>
             <Ionicons
               name="arrow-back"
               size={height > 667 ? 20 : 16}
-              style={{marginTop: 3}}
+              style={{ marginTop: 3 }}
             />
           </TouchableOpacity>
           <Text style={styles.headertext}>PORTER SHUE - CCH643311</Text>
@@ -61,11 +84,11 @@ const AcceptBooking = props => {
       <View style={styles.bottom}>
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{paddingBottom: height > 667 ? '30%' : '90%'}}>
+          contentContainerStyle={{ paddingBottom: height > 667 ? '30%' : '90%' }}>
           <View style={styles.congratulationsContainer}>
             <View style={styles.congratulationView}>
               <Ionicons name="checkmark-circle" size={20} />
-              <Text style={[styles.text, {marginTop: 0, color: 'black'}]}>
+              <Text style={[styles.text, { marginTop: 0, color: 'black' }]}>
                 Congratulations, your booking has been approved
               </Text>
             </View>
@@ -82,39 +105,18 @@ const AcceptBooking = props => {
             <View
               style={{
                 height: '30%',
-                justifyContent: 'center',
+                justifyContent: 'space-evenly',
                 alignItems: 'center',
                 flexDirection: 'row',
               }}>
-              <Ionicons
-                name="star"
-                size={25}
-                color="yellow"
-                style={{marginHorizontal: 2}}
-              />
-              <Ionicons
-                name="star"
-                size={25}
-                color="yellow"
-                style={{marginHorizontal: 2}}
-              />
-              <Ionicons
-                name="star"
-                size={25}
-                color="yellow"
-                style={{marginHorizontal: 2}}
-              />
-              <Ionicons
-                name="star"
-                size={25}
-                color="yellow"
-                style={{marginHorizontal: 2}}
-              />
-              <Ionicons
-                name="star"
-                size={25}
-                color="yellow"
-                style={{marginHorizontal: 2}}
+              <StarRating
+                disabled={false}
+                maxStars={5}
+                starSize={25}
+                starStyle={{ paddingHorizontal: 5 }}
+                rating={starCount}
+                selectedStar={(rating) => setStarCount(rating)}
+                fullStarColor={'yellow'}
               />
             </View>
             {/* <Text
@@ -143,16 +145,18 @@ const AcceptBooking = props => {
               </Text> */}
             <AccountInput
               multiline={true}
+              value={review}
               text={'Add a booking review'}
               isActive={isActive}
+              onChangeText={(e) => setReview(e)}
             />
             {/* </View> */}
             {/* </View> */}
           </View>
           <TouchableOpacity
-            onPress={() => props.navigation.navigate('Bookingdetails')}
+            onPress={() => handleSubmit()}
             style={styles.btnStyle}>
-            <Text style={{color: 'white', fontWeight: '700'}}>Submit</Text>
+            <Text style={{ color: 'white', fontWeight: '700' }}>Submit</Text>
           </TouchableOpacity>
         </ScrollView>
       </View>
@@ -307,5 +311,13 @@ const styles = StyleSheet.create({
     height: '50%',
   },
 });
+const mapStateToProps = (state) => ({
+  user: state.authReducer.userData || {},
+  token: state.authReducer.userToken || {}
+});
 
-export default AcceptBooking;
+
+export default connect(
+  mapStateToProps,
+)(AcceptBooking);
+
