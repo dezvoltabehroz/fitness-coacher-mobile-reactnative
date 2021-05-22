@@ -16,7 +16,7 @@ import {
   ToastAndroid,
 } from 'react-native';
 import { Colors } from '../../style/colors';
-import { RadioButton, Checkbox } from 'react-native-paper';
+import { RadioButton, Checkbox, Snackbar } from 'react-native-paper';
 import { FontFamily } from '../../style/typograpy';
 import Button from '../../common/Button';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -35,6 +35,8 @@ const AcceptBooking = props => {
   const [isActive, setIsActive] = useState(true);
   const [starCount, setStarCount] = useState(0);
   const [review, setReview] = useState('');
+  const [visible, setVisible] = useState(false)
+  const [message, setMessage] = useState("")
   //   useEffect(() => {
   //     if (props.route.params != undefined) {
   //       const {flag} = props?.route?.params;
@@ -57,9 +59,15 @@ const AcceptBooking = props => {
           console.log(response.data)
           props.navigation.replace('TabContainer');
         }
-        else { ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)  }
+        else {
+          setMessage(`${response.data.msg}`)
+          setVisible(true);
+        }
       })
-      .catch((err) => { ToastAndroid.show(`${err}`, ToastAndroid.LONG) ; console.log(err) })
+      .catch((err) => {
+        setMessage(`${err}`)
+        setVisible(true);
+      })
   }
 
   return (
@@ -85,7 +93,10 @@ const AcceptBooking = props => {
       <View style={styles.bottom}>
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: height > 667 ? '30%' : '90%' }}>
+          contentContainerStyle={{
+            flex: 1,
+             paddingBottom: height > 667 ? '30%' : '90%'
+          }}>
           <View style={styles.congratulationsContainer}>
             <View style={styles.congratulationView}>
               <Ionicons name="checkmark-circle" size={20} />
@@ -159,7 +170,21 @@ const AcceptBooking = props => {
             style={styles.btnStyle}>
             <Text style={{ color: 'white', fontWeight: '700' }}>Submit</Text>
           </TouchableOpacity>
+          <View style={styles.snackbarContainerStyle}>
+            <Snackbar
+              visible={visible}
+              onDismiss={() => setVisible(!visible)}
+              action={{
+                label: 'OK',
+                onPress: () => {
+                  console.log("hello")
+                },
+              }}>
+              {message}
+            </Snackbar>
+          </View>
         </ScrollView>
+
       </View>
     </View>
   );
@@ -168,6 +193,11 @@ const AcceptBooking = props => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  snackbarContainerStyle: {
+    top: '30%',
+    justifyContent: "flex-end",
+    alignItems: "center"
   },
   bottom: {
     width: '100%',

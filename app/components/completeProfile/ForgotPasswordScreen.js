@@ -17,13 +17,15 @@ import * as resendOtpService from "../../../services/ForgotPassword";
 import NetInfo from "@react-native-community/netinfo";
 import { AuthServices } from "../../services";
 import { ActivityIndicator } from "react-native";
-
+import { Snackbar } from 'react-native-paper';
 const ForgotPassword = (props) => {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [state, setState] = useState({
     email: "",
   });
+  const [visible, setVisible] = useState(false)
+  const [message, setMessage] = useState("")
 
   const [checkEmail, setCheckEmail] = useState(false);
 
@@ -42,7 +44,9 @@ const ForgotPassword = (props) => {
       if (state.isConnected == true) {
         checkValidations();
       } else {
-        alert("Please check your internet connection and try again");
+        setMessage(`Please check your internet connection and try again`)
+        setVisible(true);
+        // alert("Please check your internet connection and try again");
       }
     } catch (error) {
       console.log(error);
@@ -54,8 +58,10 @@ const ForgotPassword = (props) => {
     if (state.email == "") {
       setCheckEmail(true);
     } else if (!validateEmail()) {
-      alert("Please enter a proper email");
-      ToastAndroid.show(`${error}`, ToastAndroid.LONG)
+      setMessage(`Please enter a proper email`)
+      setVisible(true);
+      // alert("Please enter a proper email");
+      // ToastAndroid.show(`${error}`, ToastAndroid.LONG)
     } else {
       setLoading(true);
       resetPassword();
@@ -80,13 +86,17 @@ const ForgotPassword = (props) => {
           props.navigation.navigate("ResetPassword", { email: newOtp.email });
           setLoading(false)
         } else {
-          ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
+          setMessage(`${response.data.msg}`)
+          setVisible(true);
+          // ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
           console.log("error in service");
           setLoading(false)
         }
       })
       .catch((err) => {
-        ToastAndroid.show(`${err}`, ToastAndroid.LONG)
+        setMessage(`${err}`)
+        setVisible(true);
+        // ToastAndroid.show(`${err}`, ToastAndroid.LONG)
         console.log(err);
         setLoading(false)
       })
@@ -139,7 +149,21 @@ const ForgotPassword = (props) => {
                 <Text style={styles.btnText}>Get new OTP</Text>}
           </TouchableOpacity>
         </View>
+
       </ScrollView>
+      <View style={styles.snackbarContainerStyle}>
+        <Snackbar
+          visible={visible}
+          onDismiss={() => setVisible(!visible)}
+          action={{
+            label: 'OK',
+            onPress: () => {
+              console.log("hello")
+            },
+          }}>
+          {message}
+        </Snackbar>
+      </View>
     </SafeAreaView>
   );
 };
@@ -148,6 +172,10 @@ const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: Colors.backgroundColor,
     height: "100%",
+  },
+  snackbarContainerStyle: {
+    justifyContent: "flex-end",
+    alignItems: "center"
   },
   logoContainer: {
     height: "60%",

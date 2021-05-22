@@ -29,7 +29,8 @@ const ResetPassword = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
   const [checkPassword, setCheckPassword] = useState(false);
   const [updateEmail, setUpdateEmail] = useState(false);
-
+  const [visible, setVisible] = useState(false)
+  const [message, setMessage] = useState("")
   const [state, setState] = useState({
     email: "",
   });
@@ -65,7 +66,9 @@ const ResetPassword = ({ navigation, route }) => {
       if (state.isConnected == true) {
         checkValidations();
       } else {
-        alert("Please check your internet connection and try again");
+        setMessage(`Please check your internet connection and try again`)
+        setVisible(true);
+        // alert("Please check your internet connection and try again");
       }
     } catch (error) {
       console.log(error);
@@ -86,9 +89,11 @@ const ResetPassword = ({ navigation, route }) => {
     //   alert("Please enter a proper email");
     // }
     else if (String(password).length <= 7) {
-      alert("Password must be between 8 to 16 characters");
+      setMessage(`Password must be between 8 to 16 characters`)
+      setVisible(true);
     } else if (String(code).length <= 3) {
-      alert("Code must be 4 characters");
+      setMessage(`Code must be 4 characters`)
+      setVisible(true);
     } else {
       setLoading(true);
       resetPasswordDetails();
@@ -115,17 +120,19 @@ const ResetPassword = ({ navigation, route }) => {
           navigation.navigate("Login");
         } else {
           setLoading(false);
-          ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
-          
+          setMessage(`${response.data.msg}`)
+          setVisible(true);
+
           console.log("error in service");
         }
       })
       .catch((error) => {
-        ToastAndroid.show(`${error}`, ToastAndroid.LONG)
+        setMessage(`${error}`)
+        setVisible(true);
         setLoading(false)
         console.log(error);
       })
-  
+
   };
 
   return (
@@ -189,6 +196,19 @@ const ResetPassword = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <View style={styles.snackbarContainerStyle}>
+        <Snackbar
+          visible={visible}
+          onDismiss={() => setVisible(!visible)}
+          action={{
+            label: 'OK',
+            onPress: () => {
+              console.log("hello")
+            },
+          }}>
+          {message}
+        </Snackbar>
+      </View>
     </SafeAreaView>
   );
 };
@@ -197,6 +217,10 @@ const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: Colors.backgroundColor,
     height: "100%",
+  },
+  snackbarContainerStyle: {
+    justifyContent: "flex-end",
+    alignItems: "center"
   },
   logoContainer: {
     height: "40%",

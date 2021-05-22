@@ -19,24 +19,23 @@ import {
 import { Colors } from "../../style/colors";
 import { FontFamily } from "../../style/typograpy";
 import BookingCard from "./BookingCard";
-import NotificationCard from "../notifications/NotificationsCard";
 import { connect } from 'react-redux';
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { logindatakey } from "../../helper/globalKey";
-import GlobalVariables from "../../helper/GlobalVariables";
-import * as fetchBookingsService from "../../../services/FetchBookings";
 import { BookingServices } from "../../services";
+import { Snackbar } from 'react-native-paper';
 
 const height = Dimensions.get("window").height;
 const BookingScreen = (props) => {
   const [bookings, setBookings] = useState([]);
+  const [completedBookings, setCompletedBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [active, setActive] = useState(true);
   const [loading, setLoading] = useState(false)
-
+  const [visible, setVisible] = useState(false)
+  const [message, setMessage] = useState("")
   useEffect(() => {
-    getBookings();
+    getActiveBookings();
+    getCompletedBookings()
   }, []);
   // const getBookings = async () => {
   //   let response = await fetchBookingsService.fetchBookingsFunc(
@@ -52,27 +51,59 @@ const BookingScreen = (props) => {
   //   console.log("booking details are", state.bookingDetails);
   // };
 
-  const getBookings = async () => {
+  const getActiveBookings = async () => {
     setLoading(true)
     // console.log("booking details are", state.bookingDetails);
-    BookingServices.getBookings(props?.user?.id, props?.token)
+    BookingServices.getActiveBookings(props?.user?.id, props?.token)
       .then((response) => {
         // alert("success");
         if (response.data.success) {
           let arr = Array(10);
+          setMessage(response.data.msg)
+          setVisible(true);
           setLoading(false)
           // setBookings(response.data.coursesDetail.rows);
           setBookings(arr);
           console.log("booking details are", bookings);
         }
         else {
-          ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
+          setMessage(response.data.msg)
+          setVisible(true);
           setLoading(false)
         }
 
       })
       .catch((error) => {
-        ToastAndroid.show(`${error}`, ToastAndroid.LONG)
+        setMessage(error)
+        setVisible(true);
+        setLoading(false)
+        console.log("error =", error);
+      });
+  };
+
+  const getCompletedBookings = async () => {
+    setLoading(true)
+    // console.log("booking details are", state.bookingDetails);
+    BookingServices.getCompletedBookings(props?.user?.id, props?.token)
+      .then((response) => {
+        // alert("success");
+        if (response.data.success) {
+          let arr = Array(10);
+          setLoading(false)
+          // setBookings(response.data.coursesDetail.rows);
+          setCompletedBookings(arr);
+          console.log("booking details are", bookings);
+        }
+        else {
+          setMessage(response.data.msg)
+          setVisible(true);
+          setLoading(false)
+        }
+
+      })
+      .catch((error) => {
+        setMessage(error)
+        setVisible(true);
         setLoading(false)
         console.log("error =", error);
       });
@@ -151,18 +182,44 @@ const BookingScreen = (props) => {
               <ActivityIndicator size={20} color={'#030E2D'} />
             </View>
             :
-            <FlatList
-              contentContainerStyle={{ paddingBottom: "20%" }}
-              showsVerticalScrollIndicator={false}
-              data={bookings}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item, index }) => {
-                return (
-                  <BookingCard navigation={props.navigation} active={active} />
-                );
-              }}
-            />
+            active ?
+              <FlatList
+                contentContainerStyle={{ paddingBottom: "20%" }}
+                showsVerticalScrollIndicator={false}
+                data={bookings}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item, index }) => {
+                  return (
+                    <BookingCard navigation={props.navigation} active={active} />
+                  );
+                }}
+              />
+              :
+              <FlatList
+                contentContainerStyle={{ paddingBottom: "20%" }}
+                showsVerticalScrollIndicator={false}
+                data={completedBookings}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item, index }) => {
+                  return (
+                    <BookingCard navigation={props.navigation} active={false} />
+                  );
+                }}
+              />
         }
+        <View style={styles.snackbarContainerStyle}>
+          <Snackbar
+            visible={visible}
+            onDismiss={() => setVisible(!visible)}
+            action={{
+              label: 'OK',
+              onPress: () => {
+                console.log("hello")
+              },
+            }}>
+            {message}
+          </Snackbar>
+        </View>
 
       </View>
     </View>
@@ -172,6 +229,10 @@ const BookingScreen = (props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  snackbarContainerStyle: {
+    bottom: 30,
+    alignItems: "center"
   },
   bottom: {
     height: "90%",

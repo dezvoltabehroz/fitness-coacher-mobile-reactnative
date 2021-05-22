@@ -15,7 +15,7 @@ import {
   TextInput,
 } from 'react-native';
 import { Colors } from '../../style/colors';
-import { RadioButton, Checkbox } from 'react-native-paper';
+import { RadioButton, Checkbox, Snackbar } from 'react-native-paper';
 import { FontFamily } from '../../style/typograpy';
 import Button from '../../common/Button';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -27,6 +27,8 @@ import { connect } from 'react-redux';
 const height = Dimensions.get('window').height;
 const BookingDetails = props => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [visible, setVisible] = useState(false)
+  const [message, setMessage] = useState("")
   // useEffect(() => {
   //   if (props.route.params != undefined) {
   //     const {flag} = props?.route?.params;
@@ -43,11 +45,21 @@ const BookingDetails = props => {
     }
     BookingServices.completeBooking(userData, props?.token)
       .then((response) => {
-        console.log(response.data)
-        setModalVisible(false)
+        if (response.data.success) {
+          console.log(response.data)
+          setModalVisible(false)
+        } else {
+          setMessage(`${response.data.msg}`)
+          setVisible(true);
+          console.log(response.data)
+          setModalVisible(false)
+        }
         props.navigation.replace('TabContainer')
       })
-      .catch((err) => { setModalVisible(false); console.log(err) })
+      .catch((err) => {
+        setMessage(`${err}`)
+        setVisible(true); setModalVisible(false); console.log(err)
+      })
   }
 
   return (
@@ -168,6 +180,19 @@ const BookingDetails = props => {
                   Mark as Delivered
                 </Text>
               </TouchableOpacity>
+              <View style={styles.snackbarContainerStyle}>
+                <Snackbar
+                  visible={visible}
+                  onDismiss={() => setVisible(!visible)}
+                  action={{
+                    label: 'OK',
+                    onPress: () => {
+                      console.log("hello")
+                    },
+                  }}>
+                  {message}
+                </Snackbar>
+              </View>
             </ScrollView>
           </Tab>
           <Tab
@@ -188,6 +213,19 @@ const BookingDetails = props => {
               <Text style={styles.text}>Whatsapp</Text>
               <Text style={styles.text1}>+92 3333 3333333</Text>
             </View>
+            <View style={styles.snackbarContainerStyle}>
+              <Snackbar
+                visible={visible}
+                onDismiss={() => setVisible(!visible)}
+                action={{
+                  label: 'OK',
+                  onPress: () => {
+                    console.log("hello")
+                  },
+                }}>
+                {message}
+              </Snackbar>
+            </View>
           </Tab>
         </Tabs>
       </View>
@@ -197,6 +235,7 @@ const BookingDetails = props => {
         modalVisible={modalVisible}
         navigation={props.navigation}
       />
+
     </View>
   );
 };
@@ -204,6 +243,11 @@ const BookingDetails = props => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  snackbarContainerStyle: {
+    // top: '30%',
+    // justifyContent: "flex-end",
+    alignItems: "center"
   },
   bottom: {
     width: '100%',

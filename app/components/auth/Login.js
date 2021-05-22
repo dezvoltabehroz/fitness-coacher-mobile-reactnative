@@ -23,6 +23,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { bindActionCreators } from "redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthServices } from "../../services";
+import { Snackbar } from 'react-native-paper';
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -44,7 +45,8 @@ const SplashScreen = (props) => {
   const [dob, setDob] = useState("");
   const [country, setCountry] = useState("");
   const [role, setRole] = useState("");
-
+  const [visible, setVisible] = useState(false)
+  const [message, setMessage] = useState("")
   const [checkFirst_name, setCheckFirstname] = useState(false);
   const [checkLast_name, setCheckLastname] = useState(false);
   const [checkEmail, setCheckEmail] = useState(false);
@@ -94,9 +96,13 @@ const SplashScreen = (props) => {
         }
 
       })
-      .catch((err) => { setLoading(false);
-        ToastAndroid.show(`${err}`, ToastAndroid.LONG)
-        console.log(err) })
+      .catch((err) => {
+        setLoading(false);
+        setMessage(`${err}`)
+        setVisible(true);
+        // ToastAndroid.show(`${err}`, ToastAndroid.LONG)
+        console.log(err)
+      })
   };
 
   const storeData = async (value) => {
@@ -140,7 +146,9 @@ const SplashScreen = (props) => {
       if (state.isConnected == true) {
         checkValidations();
       } else {
-        ToastAndroid.show("Please check your internet connection and try again", ToastAndroid.LONG)
+        setMessage(`Please check your internet connection and try again`)
+        setVisible(true);
+        // ToastAndroid.show("Please check your internet connection and try again", ToastAndroid.LONG)
       }
     } catch (error) {
       console.log(error);
@@ -160,15 +168,25 @@ const SplashScreen = (props) => {
     } else if (password == "") {
       setCheckConfirmPassword(true);
     } else if (String(first_name).length <= 2) {
-      ToastAndroid.show("Firstname must be atleast 3 characters", ToastAndroid.LONG)
+      setMessage(`Firstname must be atleast 3 characters`)
+      setVisible(true);
+      // ToastAndroid.show("Firstname must be atleast 3 characters", ToastAndroid.LONG)
     } else if (String(last_name).length <= 2) {
-     ToastAndroid.show("Lastname must be atleast 3 characters", ToastAndroid.LONG)
+      setMessage(`Lastname must be atleast 3 characters`)
+      setVisible(true);
+      //  ToastAndroid.show("Lastname must be atleast 3 characters", ToastAndroid.LONG)
     } else if (!validateEmail()) {
-      ToastAndroid.show("Please enter a proper email", ToastAndroid.LONG)
+      setMessage(`Please enter a proper email`)
+      setVisible(true);
+      // ToastAndroid.show("Please enter a proper email", ToastAndroid.LONG)
     } else if (String(password).length <= 7) {
-      ToastAndroid.show("Password must be between 8 to 16 characters", ToastAndroid.LONG)
+      setMessage(`Password must be between 8 to 16 characters`)
+      setVisible(true);
+      // ToastAndroid.show("Password must be between 8 to 16 characters", ToastAndroid.LONG)
     } else if (confirmPassword != password) {
-      ToastAndroid.show("Password Mismatch", ToastAndroid.LONG)
+      setMessage(`Password Mismatch`)
+      setVisible(true);
+      // ToastAndroid.show("Password Mismatch", ToastAndroid.LONG)
     } else {
       navigateToNextScreen();
     }
@@ -307,6 +325,19 @@ const SplashScreen = (props) => {
                 Forgot your password?
               </Link>
             </View>
+            <View style={styles.snackbarContainerStyle}>
+              <Snackbar
+                visible={visible}
+                onDismiss={() => setVisible(!visible)}
+                action={{
+                  label: 'OK',
+                  onPress: () => {
+                    console.log("hello")
+                  },
+                }}>
+                {message}
+              </Snackbar>
+            </View>
             {/* </ScrollView> */}
           </Tab>
           <Tab
@@ -391,6 +422,7 @@ const SplashScreen = (props) => {
                     Confirm password cannot be empty
                   </Text>
                 )}
+
                 <View style={{ paddingHorizontal: 20 }}>
                   <Button
                     text={"Next"}
@@ -402,9 +434,24 @@ const SplashScreen = (props) => {
                   By signing up, you agree to ECHO's Terms of Use & Privacy
                   Policy
                 </Text>
+                <View style={styles.snackbarContainerStyle}>
+                  <Snackbar
+                    visible={visible}
+                    onDismiss={() => setVisible(!visible)}
+                    action={{
+                      label: 'OK',
+                      onPress: () => {
+                        console.log("hello")
+                      },
+                    }}>
+                    {message}
+                  </Snackbar>
+                </View>
                 <View style={{ marginBottom: 150 }}></View>
               </View>
+
             </ScrollView>
+
           </Tab>
         </Tabs>
       </View>
@@ -420,6 +467,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundColor,
+  },
+  snackbarContainerStyle: {
+    bottom: 30,
+    alignItems: "center"
   },
   tab: {
     backgroundColor: Colors.whiteColor,

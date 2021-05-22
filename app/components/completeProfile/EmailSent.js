@@ -15,11 +15,12 @@ import { Colors } from "../../style/colors";
 import * as verifyEmailService from "../../../services/VerifyEmail";
 import * as resendOtpService from "../../../services/ResendCode";
 import NetInfo from "@react-native-community/netinfo";
-
+import { Snackbar } from 'react-native-paper';
 const EmailSent = (props) => {
   const [code, setCode] = useState("");
   const [checkCode, setCheckCode] = useState("");
-
+  const [visible, setVisible] = useState(false)
+  const [message, setMessage] = useState("")
   const [state, setState] = useState({
     email: "",
   });
@@ -44,7 +45,9 @@ const EmailSent = (props) => {
       if (state.isConnected == true) {
         checkValidations();
       } else {
-        ToastAndroid.show(`Please check your internet connection and try again`, ToastAndroid.LONG)
+        setMessage(`Please check your internet connection and try again`)
+        setVisible(true);
+        // ToastAndroid.show(`Please check your internet connection and try again`, ToastAndroid.LONG)
       }
     } catch (error) {
       console.log(error);
@@ -58,9 +61,13 @@ const EmailSent = (props) => {
     } else if (code == "") {
       setCheckCode(true);
     } else if (!validateEmail()) {
-      ToastAndroid.show(`Please enter a proper email`, ToastAndroid.LONG)
+      setMessage(`Please enter a proper email`)
+      setVisible(true);
+      // ToastAndroid.show(`Please enter a proper email`, ToastAndroid.LONG)
     } else if (String(code).length <= 3) {
-      ToastAndroid.show(`Please enter a proper email`, ToastAndroid.LONG)
+      setMessage(`Please enter a proper code`)
+      setVisible(true);
+      // ToastAndroid.show(`Please enter a proper code`, ToastAndroid.LONG)
     } else {
       // resendCode();
       enterCode();
@@ -88,11 +95,15 @@ const EmailSent = (props) => {
         console.log("response", response);
         props.navigation.navigate("Login");
       } else {
-        ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
+        setMessage(`${response.data.msg}`)
+        setVisible(true);
+        // ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
         console.log("error in service");
       }
     } catch (error) {
-      ToastAndroid.show(`${error}`, ToastAndroid.LONG)
+      setMessage(`${error}`)
+      setVisible(true);
+      // ToastAndroid.show(`${error}`, ToastAndroid.LONG)
       console.log(error);
     }
   };
@@ -108,11 +119,15 @@ const EmailSent = (props) => {
         console.log("response", response);
         props.navigation.navigate("Login");
       } else {
-        ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
+        setMessage(`${response.data.msg}`)
+        setVisible(true);
+        // ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
         console.log("error in service");
       }
     } catch (error) {
-      ToastAndroid.show(`${error}`, ToastAndroid.LONG)
+      setMessage(`${error}`)
+      setVisible(true);
+      // ToastAndroid.show(`${error}`, ToastAndroid.LONG)
       console.log(error);
     }
   };
@@ -168,6 +183,19 @@ const EmailSent = (props) => {
             <Text style={styles.btnText}>Resend Code</Text>
           </TouchableOpacity>
         </View>
+        <View style={styles.snackbarContainerStyle}>
+          <Snackbar
+            visible={visible}
+            onDismiss={() => setVisible(!visible)}
+            action={{
+              label: 'OK',
+              onPress: () => {
+                console.log("hello")
+              },
+            }}>
+            {message}
+          </Snackbar>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -177,6 +205,10 @@ const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: Colors.backgroundColor,
     height: "100%",
+  },
+  snackbarContainerStyle: {
+    // bottom: 30,
+    alignItems: "center"
   },
   logoContainer: {
     height: "40%",

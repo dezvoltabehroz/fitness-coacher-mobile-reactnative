@@ -32,6 +32,8 @@ const ChangePassword = props => {
     const [confirmNewPassword, setConfirmNewPassword] = React.useState("");
     const [submit, setSubmit] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
+    const [visible, setVisible] = useState(false)
+    const [message, setMessage] = useState("")
     const checkNetwork = async () => {
         setLoading(true)
         console.log("internet called");
@@ -42,7 +44,8 @@ const ChangePassword = props => {
             if (state.isConnected == true) {
                 checkValidations();
             } else {
-                ToastAndroid.show(`Please check your internet connection and try again`, ToastAndroid.LONG)
+                setMessage(`Please check your internet connection and try again`)
+                setVisible(true);
             }
         } catch (error) {
             console.log(error);
@@ -68,16 +71,21 @@ const ChangePassword = props => {
         AuthServices.changePassword(props?.user?.id, userData, props?.token)
             .then((respone) => {
                 if (respone.data.success) {
-                    ToastAndroid.show(`${respone.data.msg}`, ToastAndroid.LONG);
+                    setMessage(`${respone.data.msg}`)
+                    setVisible(true);
                     setLoading(false);
                     props.navigation.replace('TabContainer')
                 } else {
                     setLoading(false);
-                    ToastAndroid.show(`${respone.data.msg}`, ToastAndroid.LONG);
+                    setMessage(`${respone.data.msg}`)
+                    setVisible(true);;
                 }
 
             })
-            .catch((error) => { setLoading(false); ToastAndroid.show(`${error}`, ToastAndroid.LONG); console.log(error) })
+            .catch((error) => {
+                setMessage(`${error}`)
+                setVisible(true); setLoading(false);
+            })
     }
 
     return (
@@ -104,7 +112,7 @@ const ChangePassword = props => {
             </View>
 
             <View style={styles.bottom}>
-                <KeyboardAwareScrollView style={{  }} showsVerticalScrollIndicator={false}>
+                <KeyboardAwareScrollView style={{}} showsVerticalScrollIndicator={false}>
 
 
                     <View style={{ marginTop: '5%' }}>
@@ -160,6 +168,19 @@ const ChangePassword = props => {
                             // props.navigation.navigate('Booking');
                         }}
                     />
+                    <View style={styles.snackbarContainerStyle}>
+                        <Snackbar
+                            visible={visible}
+                            onDismiss={() => setVisible(!visible)}
+                            action={{
+                                label: 'OK',
+                                onPress: () => {
+                                    console.log("hello")
+                                },
+                            }}>
+                            {message}
+                        </Snackbar>
+                    </View>
                 </KeyboardAwareScrollView>
             </View>
         </View>

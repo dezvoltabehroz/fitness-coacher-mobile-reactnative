@@ -27,7 +27,7 @@ import NetInfo from "@react-native-community/netinfo";
 import * as coachRegister from "../../../services/registerCoach";
 import moment from 'moment';
 import Input from "../../common/Input";
-import PhoneInput from 'react-native-phone-input';
+import { Snackbar } from 'react-native-paper';
 import CountryPicker, { FlagButton } from 'react-native-country-picker-modal';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -72,6 +72,8 @@ function CompleteProfile({ navigation, route }) {
   // const [subCategoriesLoading, setSubCategoriesLoading] = useState(true);
   const [skillsLoading, setSkillsLoading] = useState(true);
   const phoneRef = createRef(null);
+  const [visible, setVisible] = useState(false)
+  const [message, setMessage] = useState("")
   const [address, setAddress] = useState("");
   const [submit, setSubmit] = useState(false)
   const [image, setImage] = useState('');
@@ -111,7 +113,7 @@ function CompleteProfile({ navigation, route }) {
         console.log(response)
         setCategories(response.data.trainingTypes);
       })
-      .catch((err) => console.log(err))
+      .catch((err) =>{ console.log(err)})
   };
 
   const getSubCategories = (item) => {
@@ -152,7 +154,9 @@ function CompleteProfile({ navigation, route }) {
         checkValidations();
         // getCoachDetails();
       } else {
-        ToastAndroid.show(`Please check your internet connection and try again`, ToastAndroid.LONG)
+        setMessage(`Please check your internet connection and try again`)
+        setVisible(true);
+        // ToastAndroid.show(`Please check your internet connection and try again`, ToastAndroid.LONG)
       }
     } catch (error) {
       console.log(error);
@@ -237,7 +241,9 @@ function CompleteProfile({ navigation, route }) {
         }
       })
       .catch((error) => {
-        ToastAndroid.show(`${error}`, ToastAndroid.LONG) 
+        setMessage(`${error}`)
+        setVisible(true);
+        // ToastAndroid.show(`${error}`, ToastAndroid.LONG) 
         console.log(error);
       })
     // navigation.navigate("EmailSent");
@@ -258,7 +264,7 @@ function CompleteProfile({ navigation, route }) {
     setSelectInstruction(item);
     getSkills(item);
   };
-  
+
   const settingInstructor = (item) => {
     setSelectInstructor(item);
     getSubCategories(item);
@@ -540,7 +546,9 @@ function CompleteProfile({ navigation, route }) {
                   setInstructionModalVisible(true);
 
                 } else {
-                  ToastAndroid.show(`Please select instructor first`, ToastAndroid.LONG)
+                  setMessage(`Please select instructor first`)
+                  setVisible(true);
+                  // ToastAndroid.show(`Please select instructor first`, ToastAndroid.LONG)
                 }
                 // setSubCategoriesLoading(true);
               }}
@@ -717,6 +725,19 @@ function CompleteProfile({ navigation, route }) {
       >
         <View />
       </CountryPicker>
+      <View style={styles.snackbarContainerStyle}>
+        <Snackbar
+          visible={visible}
+          onDismiss={() => setVisible(!visible)}
+          action={{
+            label: 'OK',
+            onPress: () => {
+              console.log("hello")
+            },
+          }}>
+          {message}
+        </Snackbar>
+      </View>
     </View >
   );
 }
@@ -725,6 +746,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundColor,
+  },
+  snackbarContainerStyle: {
+    bottom: 30,
+    alignItems: "center"
   },
   completeProfileContainer: {
     height: "7%",

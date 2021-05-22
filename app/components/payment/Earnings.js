@@ -16,7 +16,7 @@ import {
   ToastAndroid,
 } from 'react-native';
 import { Colors } from '../../style/colors';
-import { RadioButton, Checkbox } from 'react-native-paper';
+import { RadioButton, Checkbox, Snackbar } from 'react-native-paper';
 import { FontFamily } from '../../style/typograpy';
 import Button from '../../common/Button';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -30,7 +30,8 @@ import { PaymentServices } from '../../services';
 import { connect } from 'react-redux';
 const height = Dimensions.get('window').height;
 const Earnings = props => {
-
+  const [visible, setVisible] = useState(false)
+  const [message, setMessage] = useState("")
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const fill = 'rgb(4, 11, 34)';
@@ -43,6 +44,8 @@ const Earnings = props => {
         }
       })
       .catch((error) => {
+        setMessage(`${error}`)
+        setVisible(true);
         console.log(error)
       })
   }
@@ -60,11 +63,20 @@ const Earnings = props => {
               console.log(resData.data)
               setLoading(false);
             })
-            .catch((err) => console.log(err))
+            .catch((err) => {
+              setMessage(`${err}`)
+              setVisible(true); console.log(err)
+            })
         }
-        else {  ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG) }
+        else {
+          setMessage(`${response.data.msg}`)
+          setVisible(true);
+        }
       })
-      .catch((error) => { ToastAndroid.show(`${error}`, ToastAndroid.LONG); console.log(error) })
+      .catch((error) => {
+        setMessage(`${error}`)
+        setVisible(true);
+      })
   }
 
   return (
@@ -91,7 +103,7 @@ const Earnings = props => {
             </View>
             :
             <ScrollView
-              contentContainerStyle={{ paddingBottom: '45%' }}
+              contentContainerStyle={{ flex: 1, paddingBottom: '45%' }}
               showsVerticalScrollIndicator={false}>
               <View
                 style={{
@@ -160,6 +172,19 @@ const Earnings = props => {
                 style={styles.btnStyle}>
                 <Text style={{ color: 'white', fontWeight: '700' }}>Withdraw</Text>
               </TouchableOpacity>
+              <View style={styles.snackbarContainerStyle}>
+                <Snackbar
+                  visible={visible}
+                  onDismiss={() => setVisible(!visible)}
+                  action={{
+                    label: 'OK',
+                    onPress: () => {
+                      console.log("hello")
+                    },
+                  }}>
+                  {message}
+                </Snackbar>
+              </View>
             </ScrollView>
         }
       </View>
@@ -170,6 +195,11 @@ const Earnings = props => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  snackbarContainerStyle: {
+    // top: '30%',
+    justifyContent: "flex-end",
+    alignItems: "center"
   },
   profile: {
     height: 30,

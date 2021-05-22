@@ -52,7 +52,9 @@ const Api = {
     changePassword: function (id, userData, token) {
         return axiosInstance.put(`user/change-password/${id}`, userData, configToken(token))
     },
-
+    getUrl: function (userData, token) {
+        return axiosInstance.post(`getUrl`, userData, configToken(token))
+    }
 
 };
 

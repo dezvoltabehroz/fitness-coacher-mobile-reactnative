@@ -16,18 +16,20 @@ import {
   ToastAndroid,
 } from 'react-native';
 import { Colors } from '../../style/colors';
-import { RadioButton, Checkbox } from 'react-native-paper';
+import { RadioButton, Checkbox, Snackbar } from 'react-native-paper';
 import { FontFamily } from '../../style/typograpy';
 import Button from '../../common/Button';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import DetailsModal from '../../common/DetailsModal';
 import { Container, Header, Content, Tab, Tabs } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { BookingServices } from '../../services';
 import { connect } from 'react-redux';
+
 const height = Dimensions.get('window').height;
 const AcceptBooking = props => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [visible, setVisible] = useState(false)
+  const [message, setMessage] = useState("")
   useEffect(() => {
     // if (props.route.params != undefined) {
     //   const { flag } = props?.route?.params;
@@ -45,11 +47,15 @@ const AcceptBooking = props => {
           console.log(response.data)
           props.navigation.replace('TabContainer')
         }
-        else { ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG) }
+        else {
+          setMessage(`${response.data.msg}`)
+          setVisible(true);
+        }
 
       })
       .catch((err) => {
-        ToastAndroid.show(`${err}`, ToastAndroid.LONG); 
+        setMessage(`${err}`)
+        setVisible(true);
         console.log(err)
       })
   }
@@ -64,11 +70,16 @@ const AcceptBooking = props => {
         if (res.data.success) {
           console.log(res.data)
           props.navigation.navigate('TabContainer')
-
         }
-        else {ToastAndroid.show(`${res.data.msg}`, ToastAndroid.LONG)  }
+        else {
+          setMessage(`${res.data.msg}`)
+          setVisible(true);
+        }
       })
-      .catch((err) => {ToastAndroid.show(`${err}`, ToastAndroid.LONG) ;console.log(err)})
+      .catch((err) => {
+        setMessage(`${err}`)
+        setVisible(true);
+      })
   }
 
   return (
@@ -180,7 +191,21 @@ const AcceptBooking = props => {
               Reject
             </Text>
           </TouchableOpacity>
+          <View style={styles.snackbarContainerStyle}>
+            <Snackbar
+              visible={visible}
+              onDismiss={() => setVisible(!visible)}
+              action={{
+                label: 'OK',
+                onPress: () => {
+                  console.log("hello")
+                },
+              }}>
+              {message}
+            </Snackbar>
+          </View>
         </ScrollView>
+
       </View>
     </View>
   );
@@ -189,6 +214,10 @@ const AcceptBooking = props => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  snackbarContainerStyle: {
+    justifyContent: "flex-end",
+    alignItems: "center"
   },
   bottom: {
     width: '100%',

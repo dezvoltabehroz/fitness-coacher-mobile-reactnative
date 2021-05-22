@@ -36,6 +36,7 @@ import { AuthServices, TrainingCategoryServices } from '../../services';
 import { connect } from 'react-redux';
 import { authActions } from '../../redux/actions/auth';
 import { bindActionCreators } from "redux";
+import { Snackbar } from 'react-native-paper';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 const height = Dimensions.get('window').height;
 const width = Dimensions.get("window").width;
@@ -93,6 +94,8 @@ const AccountSettingsScreen = (props) => {
   const [prev, setPrev] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [filePath, setFilePath] = useState(props?.user?.imagUrl);
+  const [visible, setVisible] = useState(false)
+  const [message, setMessage] = useState("")
   useEffect(() => {
 
     getSkills();
@@ -160,7 +163,8 @@ const AccountSettingsScreen = (props) => {
         console.log('ImagePicker Error: ', response.error);
       } else if (response.customButton) {
         console.log('User tapped custom button: ', response.customButton);
-        ToastAndroid.show(`${response.customButton}`, ToastAndroid.LONG) 
+        setMessage(`${response.customButton}`)
+        setVisible(true);
       } else {
         let source = response;
         setFilePath(source);
@@ -283,7 +287,8 @@ const AccountSettingsScreen = (props) => {
       if (state.isConnected == true) {
         checkValidations();
       } else {
-        ToastAndroid.show(`Please check your internet connection and try again`, ToastAndroid.LONG) 
+        setMessage(`Please check your internet connection and try again`)
+        setVisible(true);
       }
     } catch (error) {
       console.log(error);
@@ -305,7 +310,7 @@ const AccountSettingsScreen = (props) => {
       console.log(submit)
     }
   };
-  
+
   const getCoachDetails = async () => {
     var selectedSkill = [];
     var selectedSubCategories = [];
@@ -360,11 +365,13 @@ const AccountSettingsScreen = (props) => {
           await props.authActions.getUserProfile(props?.token)
           navigation.navigate("Booking");
         } else {
-          console.log("error in service");
+          setMessage(`${response.data.msg}`)
+          setVisible(true);
         }
       })
       .catch((error) => {
-        ToastAndroid.show(`${error}`, ToastAndroid.LONG) 
+        setMessage(`${error}`)
+        setVisible(true);
         console.log(error);
       })
   };
@@ -416,7 +423,7 @@ const AccountSettingsScreen = (props) => {
         <Text style={styles.inputText}>Password</Text>
         <View style={styles.input}>
           <Text style={styles.passwordText}>*********</Text>
-          <TouchableOpacity onPress={()=>props.navigation.navigate('ChangePassword')}>
+          <TouchableOpacity onPress={() => props.navigation.navigate('ChangePassword')}>
             <Text style={styles.changeTextStyle} >Change</Text>
           </TouchableOpacity>
         </View>
@@ -543,7 +550,8 @@ const AccountSettingsScreen = (props) => {
                   setInstructionModalVisible(true);
 
                 } else {
-                  ToastAndroid.show(`Please select instructor first`, ToastAndroid.LONG) 
+                  setMessage(`Please select instructor first`)
+                  setVisible(true);
                 }
                 // setSubCategoriesLoading(true);
               }}
@@ -750,6 +758,19 @@ const AccountSettingsScreen = (props) => {
       >
         <View />
       </CountryPicker>
+      <View style={styles.snackbarContainerStyle}>
+        <Snackbar
+          visible={visible}
+          onDismiss={() => setVisible(!visible)}
+          action={{
+            label: 'OK',
+            onPress: () => {
+              console.log("hello")
+            },
+          }}>
+          {message}
+        </Snackbar>
+      </View>
     </View>
   );
 };
@@ -757,6 +778,10 @@ const AccountSettingsScreen = (props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  snackbarContainerStyle: {
+    bottom: 30,
+    alignItems: "center"
   },
   completeProfileContainer: {
     height: '7%',
