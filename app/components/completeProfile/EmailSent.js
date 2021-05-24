@@ -47,7 +47,6 @@ const EmailSent = (props) => {
       } else {
         setMessage(`Please check your internet connection and try again`)
         setVisible(true);
-        // ToastAndroid.show(`Please check your internet connection and try again`, ToastAndroid.LONG)
       }
     } catch (error) {
       console.log(error);
@@ -63,13 +62,10 @@ const EmailSent = (props) => {
     } else if (!validateEmail()) {
       setMessage(`Please enter a proper email`)
       setVisible(true);
-      // ToastAndroid.show(`Please enter a proper email`, ToastAndroid.LONG)
     } else if (String(code).length <= 3) {
       setMessage(`Please enter a proper code`)
       setVisible(true);
-      // ToastAndroid.show(`Please enter a proper code`, ToastAndroid.LONG)
     } else {
-      // resendCode();
       enterCode();
     }
   };
@@ -97,13 +93,11 @@ const EmailSent = (props) => {
       } else {
         setMessage(`${response.data.msg}`)
         setVisible(true);
-        // ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
         console.log("error in service");
       }
     } catch (error) {
       setMessage(`${error}`)
       setVisible(true);
-      // ToastAndroid.show(`${error}`, ToastAndroid.LONG)
       console.log(error);
     }
   };
@@ -121,13 +115,11 @@ const EmailSent = (props) => {
       } else {
         setMessage(`${response.data.msg}`)
         setVisible(true);
-        // ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
         console.log("error in service");
       }
     } catch (error) {
       setMessage(`${error}`)
       setVisible(true);
-      // ToastAndroid.show(`${error}`, ToastAndroid.LONG)
       console.log(error);
     }
   };
@@ -207,7 +199,6 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   snackbarContainerStyle: {
-    // bottom: 30,
     alignItems: "center"
   },
   logoContainer: {
@@ -225,7 +216,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     height: "100%",
     justifyContent: "space-evenly",
-    // backgroundColor: "pink",
   },
   btnStyle: {
     backgroundColor: Colors.buttonColor,

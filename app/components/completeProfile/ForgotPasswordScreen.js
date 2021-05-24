@@ -60,8 +60,6 @@ const ForgotPassword = (props) => {
     } else if (!validateEmail()) {
       setMessage(`Please enter a proper email`)
       setVisible(true);
-      // alert("Please enter a proper email");
-      // ToastAndroid.show(`${error}`, ToastAndroid.LONG)
     } else {
       setLoading(true);
       resetPassword();
@@ -82,36 +80,19 @@ const ForgotPassword = (props) => {
     AuthServices.forgotPassword(state.email)
       .then((response) => {
         if (response.data.success != undefined && response.data.success == true) {
-          console.log("response", response.data);
           props.navigation.navigate("ResetPassword", { email: newOtp.email });
           setLoading(false)
         } else {
           setMessage(`${response.data.msg}`)
           setVisible(true);
-          // ToastAndroid.show(`${response.data.msg}`, ToastAndroid.LONG)
-          console.log("error in service");
           setLoading(false)
         }
       })
       .catch((err) => {
         setMessage(`${err}`)
         setVisible(true);
-        // ToastAndroid.show(`${err}`, ToastAndroid.LONG)
-        console.log(err);
         setLoading(false)
       })
-    // try {
-    //   let response = await resendOtpService.resendOtpFunc(newOtp);
-    //   if (response.data.success != undefined && response.data.success == true) {
-    //     console.log("response", response);
-    //     props.navigation.navigate("ResetPassword");
-    //   } else {
-    //     console.log("error in service");
-    //   }
-    // } catch (error) {
-    //   alert(error);
-    //   console.log(error);
-    // }
   };
 
   return (

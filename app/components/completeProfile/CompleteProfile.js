@@ -33,6 +33,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Calendar from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import axios from "axios";
 const height = Dimensions.get("window").height;
 const width = Dimensions.get("window").width;
 function CompleteProfile({ navigation, route }) {
@@ -113,7 +114,7 @@ function CompleteProfile({ navigation, route }) {
         console.log(response)
         setCategories(response.data.trainingTypes);
       })
-      .catch((err) =>{ console.log(err)})
+      .catch((err) => { console.log(err) })
   };
 
   const getSubCategories = (item) => {
@@ -150,14 +151,11 @@ function CompleteProfile({ navigation, route }) {
     try {
       let state = await NetInfo.fetch();
       if (state.isConnected == true) {
-        // call your function here
-        checkValidations();
-        // getCoachDetails();
-      } else {
+         checkValidations();
+       } else {
         setMessage(`Please check your internet connection and try again`)
         setVisible(true);
-        // ToastAndroid.show(`Please check your internet connection and try again`, ToastAndroid.LONG)
-      }
+       }
     } catch (error) {
       console.log(error);
       return null;
@@ -243,21 +241,8 @@ function CompleteProfile({ navigation, route }) {
       .catch((error) => {
         setMessage(`${error}`)
         setVisible(true);
-        // ToastAndroid.show(`${error}`, ToastAndroid.LONG) 
         console.log(error);
       })
-    // navigation.navigate("EmailSent");
-    // try {
-    //   let response = await coachRegister.coachRegisterService(userData);
-    //   if (response.data.success != undefined && response.data.success == true) {
-    //     console.log("response", response);
-    //     navigation.navigate("EmailSent");
-    //   } else {
-    //     console.log("error in service");
-    //   }
-    // } catch (error) {
-
-    // }
   };
 
   const settingValue = (item) => {
@@ -338,6 +323,28 @@ function CompleteProfile({ navigation, route }) {
       async (response) => {
         if (response.error) { }
         else if (response.uri != undefined) {
+          let userData = {
+            fileName: new Date().getTime() + response.fileName,
+            fileType: response.type
+          }
+          console.log("response : ", response);
+          AuthServices.getUrl(userData)
+            .then((res) => {
+              console.log(res.data)
+              let formData = new FormData();
+              formData.append(`${userData.fileName}`, {
+                uri: response.uri,
+                name: `${new Date().getTime().toString()}.jpg`,
+                filename: new Date().getTime().toString() + '.jpg',
+                type: 'image/jpg'
+              })
+              axios.put(res.data.postUrl, formData)
+                .then((responseData) => {
+                  console.log(responseData)
+                  setImage(res.data.getUrl);
+                }).catch((err) => { console.log(err) })
+            })
+            .catch((err) => { console.log(err) })
           setImage(response.uri);
         }
       })
@@ -471,7 +478,6 @@ function CompleteProfile({ navigation, route }) {
             }}
           >
             {country != undefined && country != '' ? (
-              // setCheckInstructorTypes(false)
               <Text style={styles.innertext}>{country}</Text>
             ) : (
               <Text style={styles.innertext}>Select</Text>
@@ -498,28 +504,7 @@ function CompleteProfile({ navigation, route }) {
             Address cannot be empty
           </Text>
         )}
-        {/* <Text style={styles.text}>Phone</Text>
-
-        <View style={styles.outerView}>
-          <View style={styles.dropDown}>
-            <PhoneInput
-              ref={phoneRef}
-              onPressFlag={() => setCountryModal(!countryModal)}
-              autoFormat={true}
-              allowZeroAfterCountryCode={false}
-              textStyle={styles.phoneTextStyle}
-              returnKeyType="next"
-              // blur={() => this.disabled()}
-              onChangePhoneNumber={(phonenumber) => { console.log(phonenumber); setPhoneNumber(phonenumber) }}
-              value={phoneNumber}
-              textProps={{
-                placeholder: 'Phone Number',
-                placeholderTextColor: "grey",
-              }}
-            />
-
-          </View>
-        </View> */}
+       
         <Input
           full={true}
           text={"Phone"}
@@ -544,13 +529,10 @@ function CompleteProfile({ navigation, route }) {
               onPress={() => {
                 if (categories.length != 0) {
                   setInstructionModalVisible(true);
-
                 } else {
                   setMessage(`Please select instructor first`)
                   setVisible(true);
-                  // ToastAndroid.show(`Please select instructor first`, ToastAndroid.LONG)
                 }
-                // setSubCategoriesLoading(true);
               }}
             >
               {selectInstruction.title != undefined &&
@@ -602,19 +584,6 @@ function CompleteProfile({ navigation, route }) {
                   <MaterialIcons onPress={() => selectingSkills(index)}
                     size={20}
                     name={item.selected ? "check-box" : "check-box-outline-blank"} />
-                  {/* <TouchableOpacity
-                    style={{
-                      height: 20,
-                      width: 20,
-                      borderRadius: 20,
-                      borderWidth: 1,
-                      borderColor: "grey",
-                      marginHorizontal: 10,
-                      backgroundColor: item.selected == true ? "red" : "white",
-                    }}
-                    onPress={() => selectingSkills(index)}
-                  ></TouchableOpacity> */}
-
                   <Text style={styles.innertext}>{item.skill}</Text>
                 </View>
               </View>
@@ -630,7 +599,6 @@ function CompleteProfile({ navigation, route }) {
         <Text style={styles.text}>Age Group Qualified to Coach</Text>
         <FlatList
           data={arr}
-          // showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.contentContainerStyle}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item, index }) => {
@@ -640,31 +608,13 @@ function CompleteProfile({ navigation, route }) {
                   <MaterialIcons onPress={() => {
                     let ageArr = [...age];
                     let array = arr;
-                    // array[prev].flag = false;
                     array[index].flag = true;
                     setArr(arr);
                     ageArr.push({ ageGroup: item.age })
                     setAge(ageArr);
-                    // setPrev(index);
                   }}
                     size={20}
                     name={item.flag ? "check-box" : "check-box-outline-blank"} />
-                  {/* <RadioButton
-                    color={Colors.blackColor}
-                    size={10}
-                    uncheckedColor={Colors.blackColor}
-                    status={item.flag ? "checked" : "unchecked"}
-                    onPress={() => {
-                      let ageArr = [...age];
-                      let array = arr;
-                      // array[prev].flag = false;
-                      array[index].flag = true;
-                      setArr(arr);
-                      ageArr.push({ ageGroup: item.age })
-                      setAge(ageArr);
-                      // setPrev(index);
-                    }}
-                  /> */}
                   <Text style={styles.innertext}>{item.age}</Text>
                 </View>
               </View>
@@ -677,7 +627,6 @@ function CompleteProfile({ navigation, route }) {
         <Button
           text={"Register"}
           onPress={() => {
-            // setModalVisible(!modalVisible);
             setSubmit(true);
             console.log(submit)
             checkNetwork();
@@ -690,8 +639,6 @@ function CompleteProfile({ navigation, route }) {
         modalVisible={ageModalVisible}
         setModalVisible={setAgeModalVisible}
         setAge={setAge}
-      // setGroupAge={categories}
-      // selectInstruction={settingValue}
       />
       <RegisterationModal
         modalVisible={modalVisible}
@@ -761,11 +708,9 @@ const styles = StyleSheet.create({
 
   backIconView: {
     width: "15%",
-    // justifyContent: 'center',
   },
   titleView: {
     width: "85%",
-    // justifyContent: 'center',
   },
   titleText: {
     fontFamily: FontFamily.helveticaBold,
@@ -900,5 +845,6 @@ const styles = StyleSheet.create({
     paddingBottom: 5
   },
 });
+
 
 export default CompleteProfile;

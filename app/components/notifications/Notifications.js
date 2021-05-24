@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -14,11 +14,16 @@ import {
   Dimensions,
   FlatList,
 } from 'react-native';
-import {Colors} from '../../style/colors';
-import {FontFamily} from '../../style/typograpy';
+import { Colors } from '../../style/colors';
+import { FontFamily } from '../../style/typograpy';
 import NotificationCard from './NotificationsCard';
+import { NotificationServices } from '../../services';
+import { connect } from 'react-redux'
 const height = Dimensions.get('window').height;
 const NotificationsScreen = props => {
+  useEffect(() => {
+    getNotifications();
+  }, [])
   const [data, setdata] = useState([
     {
       type: 'completed_booking',
@@ -45,6 +50,18 @@ const NotificationsScreen = props => {
       message: 'Porter Shue left a 5 star review',
     },
   ]);
+
+
+  const getNotifications = () => {
+    NotificationServices.getNotifications(props?.token)
+      .then((res) => {
+        console.log(res.data)
+        setdata(res.data.notifications)
+      })
+      .catch((err) => console.log(err))
+  }
+
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -57,16 +74,21 @@ const NotificationsScreen = props => {
       </View>
 
       <ScrollView style={styles.bottom}>
-        <FlatList
-          data={data}
-          showsVerticalScrollIndicator={false}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({item, index}) => {
-            return (
-              <NotificationCard item={item} navigation={props.navigation} />
-            );
-          }}
-        />
+        {data.length == 0 ?
+          <View style={{ marginTop: 200, justifyContent: "center", alignItems: "center" }}>
+            <Text>No notification found!</Text>
+          </View>
+          :
+          <FlatList
+            data={data}
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item, index }) => {
+              return (
+                <NotificationCard item={item} navigation={props.navigation} />
+              );
+            }}
+          />}
       </ScrollView>
     </View>
   );
@@ -99,5 +121,8 @@ const styles = StyleSheet.create({
     // marginTop: '5%',
   },
 });
-
-export default NotificationsScreen;
+const mapStateToProps = (state) => ({
+  user: state.authReducer.userData || {},
+  token: state.authReducer.userToken || {}
+});
+export default connect(mapStateToProps)(NotificationsScreen);

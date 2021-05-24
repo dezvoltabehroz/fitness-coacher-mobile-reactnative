@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -14,11 +14,12 @@ import {
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
-import {Colors} from '../../style/colors';
-import {FontFamily} from '../../style/typograpy';
-import {Switch} from 'react-native-paper';
+import { Colors } from '../../style/colors';
+import { FontFamily } from '../../style/typograpy';
+import { Switch } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import { NotificationServices } from '../../services';
+import { connect } from 'react-redux'
 const height = Dimensions.get('window').height;
 const NotificatinsSettings = props => {
   const [isSwitchOn, setIsSwitchOn] = React.useState(false);
@@ -28,6 +29,23 @@ const NotificatinsSettings = props => {
   const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
   const onToggleSwitch1 = () => setIsSwitchOn1(!isSwitchOn1);
   const onToggleSwitch2 = () => setIsSwitchOn2(!isSwitchOn2);
+
+  const handleNotificationSetting = () => {
+    let userData = {
+      "UserId": props.user.id,
+      "notification": !isSwitchOn1
+    }
+    NotificationServices.notificationSetting(userData, props.token)
+      .then((res) => {
+        if (res.data.success) {
+          onToggleSwitch1()
+        }
+        else {
+          console.log(res.data)
+        }
+      })
+      .catch((err) => console.log(err))
+  }
 
   return (
     <View style={styles.container}>
@@ -43,7 +61,7 @@ const NotificatinsSettings = props => {
             <Ionicons
               name="arrow-back"
               size={height > 667 ? 20 : 16}
-              style={{paddingLeft: 20, marginTop: 3}}
+              style={{ paddingLeft: 20, marginTop: 3 }}
             />
           </TouchableOpacity>
         </View>
@@ -61,11 +79,11 @@ const NotificatinsSettings = props => {
           <Switch
             style={{
               transform: [
-                {scaleX: height > 667 ? 1 : 0.7},
-                {scaleY: height > 667 ? 1 : 0.7},
+                { scaleX: height > 667 ? 1 : 0.7 },
+                { scaleY: height > 667 ? 1 : 0.7 },
               ],
             }}
-            trackColor={{true: Colors.buttonColor, false: 'grey'}}
+            trackColor={{ true: Colors.buttonColor, false: 'grey' }}
             value={isSwitchOn}
             onValueChange={onToggleSwitch}
             color={Colors.buttonColor}
@@ -78,13 +96,13 @@ const NotificatinsSettings = props => {
           <Switch
             style={{
               transform: [
-                {scaleX: height > 667 ? 1 : 0.7},
-                {scaleY: height > 667 ? 1 : 0.7},
+                { scaleX: height > 667 ? 1 : 0.7 },
+                { scaleY: height > 667 ? 1 : 0.7 },
               ],
             }}
-            trackColor={{true: Colors.buttonColor, false: 'grey'}}
+            trackColor={{ true: Colors.buttonColor, false: 'grey' }}
             value={isSwitchOn1}
-            onValueChange={onToggleSwitch1}
+            onValueChange={() => handleNotificationSetting()}
             color={Colors.buttonColor}
           />
         </View>
@@ -96,11 +114,11 @@ const NotificatinsSettings = props => {
           <Switch
             style={{
               transform: [
-                {scaleX: height > 667 ? 1 : 0.7},
-                {scaleY: height > 667 ? 1 : 0.7},
+                { scaleX: height > 667 ? 1 : 0.7 },
+                { scaleY: height > 667 ? 1 : 0.7 },
               ],
             }}
-            trackColor={{true: Colors.buttonColor, false: 'grey'}}
+            trackColor={{ true: Colors.buttonColor, false: 'grey' }}
             value={isSwitchOn2}
             onValueChange={onToggleSwitch2}
             color={Colors.buttonColor}
@@ -165,4 +183,10 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NotificatinsSettings;
+const mapStateToProps = (state) => {
+  return {
+    user: state.authReducer.userData || {},
+    token: state.authReducer.userToken
+  };
+};
+export default connect(mapStateToProps)(NotificatinsSettings);

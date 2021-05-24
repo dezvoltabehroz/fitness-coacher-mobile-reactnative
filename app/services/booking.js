@@ -15,7 +15,7 @@ const Api = {
         return axiosInstance.get('coach/completeBooking', userData, configToken(token))
     },
     getActiveBookings: function (id, token) {
-        return axiosInstance.get(`coach/getBookings?CoachId=${id}&status=active`, configToken(token))
+        return axiosInstance.get(`coach/getBookings?CoachId=${id}`, configToken(token))
     },
     getCompletedBookings: function (id, token) {
         return axiosInstance.get(`coach/getBookings?CoachId=${id}&status=completed`, configToken(token))

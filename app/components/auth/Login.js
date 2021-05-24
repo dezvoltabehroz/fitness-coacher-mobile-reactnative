@@ -89,9 +89,12 @@ const SplashScreen = (props) => {
     AuthServices.userLogin(loginDetails)
       .then(async (res) => {
         if (res.status == 200) {
+          let userData={
+            id:res.data.userData.userInfo.id,
+            token:res.data.userData.tokenInfo
+          }
           await AsyncStorage.setItem('Token', JSON.stringify(res.data.userData.tokenInfo))
-          props.authActions.getUserProfile(res.data.userData.tokenInfo, props.navigation.replace);
-          // props.navigation.replace("TabContainer");
+          props.authActions.getUserProfile(userData, props.navigation.replace);
           console.log("res :", res.data.userData.tokenInfo);
         }
 
@@ -100,7 +103,6 @@ const SplashScreen = (props) => {
         setLoading(false);
         setMessage(`${err}`)
         setVisible(true);
-        // ToastAndroid.show(`${err}`, ToastAndroid.LONG)
         console.log(err)
       })
   };
@@ -148,7 +150,6 @@ const SplashScreen = (props) => {
       } else {
         setMessage(`Please check your internet connection and try again`)
         setVisible(true);
-        // ToastAndroid.show("Please check your internet connection and try again", ToastAndroid.LONG)
       }
     } catch (error) {
       console.log(error);
@@ -170,23 +171,18 @@ const SplashScreen = (props) => {
     } else if (String(first_name).length <= 2) {
       setMessage(`Firstname must be atleast 3 characters`)
       setVisible(true);
-      // ToastAndroid.show("Firstname must be atleast 3 characters", ToastAndroid.LONG)
     } else if (String(last_name).length <= 2) {
       setMessage(`Lastname must be atleast 3 characters`)
       setVisible(true);
-      //  ToastAndroid.show("Lastname must be atleast 3 characters", ToastAndroid.LONG)
     } else if (!validateEmail()) {
       setMessage(`Please enter a proper email`)
       setVisible(true);
-      // ToastAndroid.show("Please enter a proper email", ToastAndroid.LONG)
     } else if (String(password).length <= 7) {
       setMessage(`Password must be between 8 to 16 characters`)
       setVisible(true);
-      // ToastAndroid.show("Password must be between 8 to 16 characters", ToastAndroid.LONG)
     } else if (confirmPassword != password) {
       setMessage(`Password Mismatch`)
       setVisible(true);
-      // ToastAndroid.show("Password Mismatch", ToastAndroid.LONG)
     } else {
       navigateToNextScreen();
     }

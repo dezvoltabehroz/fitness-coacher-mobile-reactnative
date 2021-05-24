@@ -1,37 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import {
-  SafeAreaView,
   StyleSheet,
-  ScrollView,
   View,
   Text,
-  StatusBar,
-  ImageBackground,
   Image,
-  AsyncStorage,
-  NativeModules,
-  Platform,
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
 import { Colors } from '../../style/colors';
 import { FontFamily } from '../../style/typograpy';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-
+import moment from "moment"
 const height = Dimensions.get('window').height;
 const BookingCard = props => {
-  const [active, setActive] = useState(true);
+
   return (
     <View style={styles.container}>
       <View style={styles.outer}>
         <View style={styles.inner}>
           <Image
-            source={require('../../assets/splash.jpg')}
+            resizeMode="contain"
+            source={props.item.athlete.imageUrl != null ? { uri: props.item.athlete.imageUrl } : require('../../assets/splash.jpg')}
             style={styles.image}
           />
           <View>
-            <Text style={styles.text}>Porter Shue</Text>
-            <Text style={styles.text1}>Started March 7</Text>
+            <Text style={styles.text}>{props.item.athlete.firstName} {props.item.athlete.lastName}</Text>
+            <Text style={styles.text1}>Started {moment(props.item.athleteRequest.createdAt).format("MMM DD")}</Text>
           </View>
         </View>
         <View style={styles.act}>
@@ -40,7 +34,7 @@ const BookingCard = props => {
           ) : (
             <TouchableOpacity
               onPress={() => {
-                props.navigation.navigate('BookingApproved');
+                props.navigation.navigate('BookingApproved', { bookingData: props.item });
               }}>
               <Text style={styles.smallText}>Review</Text>
             </TouchableOpacity>
@@ -49,15 +43,15 @@ const BookingCard = props => {
       </View>
       <View style={styles.bar}></View>
       <View style={styles.bottom}>
-        <Text style={styles.text2}>Softball Coaching</Text>
+        <Text style={styles.text2}>{props.item.athleteRequest.trainingType.title} Coaching</Text>
         {
-          // !props.active ?
-          //   null
-          //   :
+          !props.active ?
+            null
+            :
             <TouchableOpacity
               style={{ flexDirection: 'row', alignItems: 'center', }}
               onPress={() => {
-                props.navigation.navigate('Bookingdetails');
+                props.navigation.navigate('Bookingdetails', { bookingId: props.item.id });
               }}>
               <Text style={[styles.text2, { color: '#030E2D' }]}>View Details</Text>
               <MaterialIcons

@@ -9,3 +9,6 @@ export const BookingServices = _booking;
 
 import _payments from './payments';
 export const PaymentServices = _payments;
+
+import _notifications from './notifications';
+export const NotificationServices = _notifications;

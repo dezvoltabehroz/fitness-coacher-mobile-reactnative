@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -14,10 +14,10 @@ import {
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
-import {Colors} from '../../style/colors';
-import {FontFamily} from '../../style/typograpy';
+import { Colors } from '../../style/colors';
+import { FontFamily } from '../../style/typograpy';
 const height = Dimensions.get('window').height;
-const NotificationsCard = ({item, navigation}) => {
+const NotificationsCard = ({ item, navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.outer}>
@@ -27,7 +27,7 @@ const NotificationsCard = ({item, navigation}) => {
             style={styles.image}
           />
           <View>
-            {item.type == 'completed_booking' ? (
+            {item.type == 'completed_booking' || item.type == 'request' ? (
               <View
                 style={{
                   // justifyContent:'',
@@ -35,7 +35,7 @@ const NotificationsCard = ({item, navigation}) => {
                   alignSelf: 'center',
                   // marginTop: 2,
                 }}>
-                <Text style={styles.text}>{item.message}</Text>
+                <Text style={styles.text}>{item.body}</Text>
                 <Text
                   style={[
                     styles.text,
@@ -52,7 +52,7 @@ const NotificationsCard = ({item, navigation}) => {
               <>
                 <TouchableOpacity
                   onPress={() => navigation.navigate('Bookingdetails')}>
-                  <Text style={styles.text}>{item.message}</Text>
+                  <Text style={styles.text}>{item.body}</Text>
                 </TouchableOpacity>
 
                 <Text
@@ -71,7 +71,7 @@ const NotificationsCard = ({item, navigation}) => {
           </View>
         </View>
 
-        {item.type == 'completed_booking' && (
+        {item.type == 'completed_booking' || item.type == 'request' ? (
           <>
             <View style={styles.detailsView}>
               <View>
@@ -82,15 +82,15 @@ const NotificationsCard = ({item, navigation}) => {
 
               <View>
                 <Text
-                  style={[styles.text1, {color: 'black', textAlign: 'right'}]}>
+                  style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
                   Baseball
                 </Text>
                 <Text
-                  style={[styles.text1, {color: 'black', textAlign: 'right'}]}>
+                  style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
                   Hitting
                 </Text>
                 <Text
-                  style={[styles.text1, {color: 'black', textAlign: 'right'}]}>
+                  style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
                   12u
                 </Text>
               </View>
@@ -106,24 +106,24 @@ const NotificationsCard = ({item, navigation}) => {
                 paddingHorizontal: 10,
               }}>
               <Text
-                style={{textAlign: 'center', fontSize: height > 667 ? 14 : 12}}>
+                style={{ textAlign: 'center', fontSize: height > 667 ? 14 : 12 }}>
                 You'll be earning an expected $200
               </Text>
             </View>
           </>
-        )}
+        ) : null}
       </View>
-      {item.type == 'completed_booking' ? (
+      {item.type == 'completed_booking' || item.type == 'request' ? (
         <View style={styles.buttonView}>
           <TouchableOpacity
-            style={[styles.button, {borderBottomLeftRadius: 10}]}
+            style={[styles.button, { borderBottomLeftRadius: 10 }]}
             onPress={() => {
-              navigation.navigate('AcceptBooking', {flag: true});
+              navigation.navigate('AcceptBooking', { flag: true });
             }}>
             <Text style={styles.text3}>Accept</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.button, {borderBottomRightRadius: 10}]}>
+            style={[styles.button, { borderBottomRightRadius: 10 }]}>
             <Text style={styles.text3}>Reject</Text>
           </TouchableOpacity>
         </View>

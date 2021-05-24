@@ -45,12 +45,7 @@ const ResetPassword = ({ navigation, route }) => {
   };
 
   const _onHandleChange = (name, value) => {
-    // if (name == "email") {
-    //   setCheckEmail(false);
-    //   setState({
-    //     email: value,
-    //   });
-    // }
+    
     if (name == "code") {
       setCheckCode(false);
       setCode(value);
@@ -68,7 +63,6 @@ const ResetPassword = ({ navigation, route }) => {
       } else {
         setMessage(`Please check your internet connection and try again`)
         setVisible(true);
-        // alert("Please check your internet connection and try again");
       }
     } catch (error) {
       console.log(error);
@@ -77,17 +71,13 @@ const ResetPassword = ({ navigation, route }) => {
   };
 
   const checkValidations = () => {
-    // if (state.email == "") {
-    //   setCheckEmail(true);
-    // }
+    
     if (password == "") {
       setCheckPassword(true);
     } else if (code == "") {
       setCheckCode(true);
     }
-    // else if (!validateEmail()) {
-    //   alert("Please enter a proper email");
-    // }
+   
     else if (String(password).length <= 7) {
       setMessage(`Password must be between 8 to 16 characters`)
       setVisible(true);
@@ -100,11 +90,6 @@ const ResetPassword = ({ navigation, route }) => {
     }
   };
 
-  // const validateEmail = () => {
-  //   let email = state.email;
-  //   let pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  //   return pattern.test(String(email).toLowerCase());
-  // };
 
   const resetPasswordDetails = async () => {
     let newCredentials = {

@@ -22,14 +22,17 @@ const SplashScreen = props => {
   useEffect(() => {
     setTimeout(async () => {
       let token = await AsyncStorage.getItem('Token');
+      let user = await AsyncStorage.getItem('USER');
+      let userdata = JSON.parse(user)
       let userToken = JSON.parse(token)
       console.log(userToken)
       if (userToken) {
-        await props.authActions.getUserProfile(userToken, props.navigation.replace);
-        // props.navigation.replace('TabContainer');
-      } else {
-        props.navigation.replace('Login');
-      }
+        let userData={
+          id:userdata.id,
+          token:userToken
+        }
+        await props.authActions.getUserProfile(userData, props.navigation.replace);
+      } else {props.navigation.replace('Login');}
     }, 2000);
   });
   return (
@@ -44,14 +47,9 @@ const SplashScreen = props => {
         style={styles.image}>
         <View
           style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }}>
-          {/* <Image
-            source={require('../../assets/logo.png')}
-            style={styles.logo}
-          /> */}
         </View>
         <View
           style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }}>
-          {/* <Text style={styles.text}>Athlete</Text> */}
         </View>
       </ImageBackground>
     </View>

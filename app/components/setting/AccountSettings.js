@@ -38,6 +38,7 @@ import { authActions } from '../../redux/actions/auth';
 import { bindActionCreators } from "redux";
 import { Snackbar } from 'react-native-paper';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import axios from 'axios';
 const height = Dimensions.get('window').height;
 const width = Dimensions.get("window").width;
 const AccountSettingsScreen = (props) => {
@@ -68,7 +69,9 @@ const AccountSettingsScreen = (props) => {
   const [age, setAge] = useState([]);
   const [address, setAddress] = useState(props?.user?.address);
   const [submit, setSubmit] = useState(false)
-  const [subCatVal, setSubCat] = useState(false)
+  const [subCatVal, setSubCat] = useState(false);
+  const [deletedSubCategories, setDeletedSubCategories] = useState([]);
+  const [deletedCategories, setDeletedCategories] = useState([])
   const [arr, setArr] = useState([
     {
       flag: false,
@@ -97,16 +100,25 @@ const AccountSettingsScreen = (props) => {
   const [visible, setVisible] = useState(false)
   const [message, setMessage] = useState("")
   useEffect(() => {
-
+    getCategories();
     getSkills();
   }, []);
 
   const getCategories = () => {
     TrainingCategoryServices.allTrainingTypes()
       .then((response) => {
-        setCategoriesLoading(false)
-        console.log(response)
-        setCategories(response.data.trainingTypes);
+        var trainingTypes = response.data.trainingTypes
+        for (let index = 0; index < response.data.trainingTypes.length; index++) {
+          if (props.user.coachTrainings[0].TrainingTypeId == trainingTypes[index].id) {
+            trainingTypes[index].selected = true;
+            setSelectInstructor(trainingTypes[index])
+            getSubCategories(trainingTypes[index]);
+          } else {
+            trainingTypes[index].selected = false;
+          }
+
+        }
+        setCategories(trainingTypes);
       })
       .catch((err) => console.log(err))
   };
@@ -118,7 +130,12 @@ const AccountSettingsScreen = (props) => {
         var skill = response.data.subCategories;
         console.log("skill level", skill);
         for (let index = 0; index < response.data.subCategories.length; index++) {
-          skill[index].selected = false;
+          if (props.user.coachTrainings[0].coachTrainingSubCategory[index].TrainingSubCategoryId == skill[index].id) {
+            skill[index].selected = true;
+          } else {
+            skill[index].selected = false;
+          }
+
         }
         setSubCategories(skill);
       })
@@ -131,7 +148,11 @@ const AccountSettingsScreen = (props) => {
         var skill = response.data.skills;
         console.log("skill level", skill);
         for (let index = 0; index < response.data.skills.length; index++) {
-          skill[index].selected = false;
+          if (props.user.coachTrainings[0].coachTrainingSubCategory[index].SkillId == skill[index].id) {
+            skill[index].selected = true;
+          } else {
+            skill[index].selected = false;
+          }
         }
         setCoachSkills(skill);
       })
@@ -167,7 +188,28 @@ const AccountSettingsScreen = (props) => {
         setVisible(true);
       } else {
         let source = response;
-        setFilePath(source);
+        let userData = {
+          fileName: new Date().getTime() + response.fileName,
+          fileType: response.type
+        }
+        AuthServices.getUrl(userData)
+          .then((res) => {
+            console.log(res.data)
+            let formData = new FormData();
+            formData.append(`${userData.fileName}`, {
+              uri: response.uri,
+              name: `${new Date().getTime().toString()}.jpg`,
+              filename: new Date().getTime().toString() + '.jpg',
+              type: 'image/jpg'
+            })
+            axios.put(res.data.postUrl, formData)
+              .then((responseData) => {
+                console.log(responseData)
+                setFilePath(res.data.getUrl);
+              }).catch((err) => { console.log(err) })
+          })
+          .catch((err) => { console.log(err) })
+        setFilePath(source.uri);
       }
     });
   };
@@ -204,8 +246,8 @@ const AccountSettingsScreen = (props) => {
   };
 
   const renderFileData = () => {
-    if (filePath) {
-      return <Image source={filePath} style={styles.image} />;
+    if (filePath != null) {
+      return <Image source={{ uri: filePath }} style={styles.image} />;
     } else {
       return (
         <Image
@@ -254,18 +296,48 @@ const AccountSettingsScreen = (props) => {
       async (response) => {
         if (response.error) { }
         else if (response.uri != undefined) {
-          setImage(response.uri);
+          let source = response;
+          let userData = {
+            fileName: new Date().getTime() + response.fileName,
+            fileType: response.type
+          }
+          AuthServices.getUrl(userData)
+            .then((res) => {
+              console.log(res.data)
+              let formData = new FormData();
+              formData.append(`${userData.fileName}`, {
+                uri: response.uri,
+                name: `${new Date().getTime().toString()}.jpg`,
+                filename: new Date().getTime().toString() + '.jpg',
+                type: 'image/jpg'
+              })
+              axios.put(res.data.postUrl, formData)
+                .then((responseData) => {
+                  console.log(responseData)
+                  setFilePath(res.data.getUrl);
+                }).catch((err) => { console.log(err) })
+            })
+            .catch((err) => { console.log(err) })
+          setFilePath(source.uri);
         }
       })
   }
 
   const checkBoxFunc = (iteration) => {
     var instruction = [...subCategories];
+    let deletedSubCategoris = []
 
     // instruction[iteration].selected = true;
     if (instruction[iteration].selected) {
-      instruction[iteration].selected = false;
+      for (let index = 0; index < instruction.length; index++) {
+        if (props.user.coachTrainings[0].coachTrainingSubCategory[index].TrainingSubCategoryId == instruction[iteration].id) {
+          deletedSubCategoris.push(props.user.coachTrainings[0].coachTrainingSubCategory[index].id);
+        }
+      }
+      console.log(deletedSubCategoris)
+      setDeletedSubCategories(deletedSubCategoris);
       setSubCat(false);
+      instruction[iteration].selected = false;
     } else {
       instruction[iteration].selected = true;
     }
@@ -341,13 +413,14 @@ const AccountSettingsScreen = (props) => {
       firstName: first_name,
       lastName: last_name,
       email: email,
+      imageUrl: filePath,
       age: props?.user?.age,
       phone: phoneNumber,
       address: address,
       dob: moment(date).format('YYYY-MM-DD'),
       role: 'coach',
-      deleteTrainingType: [],
-      deleteTrainingSubCategory: [],
+      deleteTrainingType: deletedCategories,
+      deleteTrainingSubCategory: deletedSubCategories,
       country: country,
       // ageGroupCoach: ageObject,
       trainingType: {
@@ -379,6 +452,25 @@ const AccountSettingsScreen = (props) => {
   const isPhoneValid = (phone) => {
     return /^\+[0-9]{10,13}$/.test(phone)
   }
+
+  const selectingTrainingType = async (iteration) => {
+    var categoriesArr = [...categories];
+    let deletedCategories = []
+    for (let index = 0; index < categoriesArr.length; index++) {
+      if (props.user.coachTrainings[index].TrainingTypeId == categoriesArr[iteration].id) {
+        deletedSubCategoris.push(props.user.coachTrainings[index].id);
+      }
+    }
+    console.log(deletedCategories)
+    setDeletedCategories(deletedCategories);
+    for (let index = 0; index < categoriesArr.length; index++) {
+      categoriesArr[index].selected = false;
+    }
+    categoriesArr[iteration].selected = true;
+    getSubCategories(categoriesArr[iteration])
+    await setCategories(categoriesArr);
+    await setCat(true);
+  };
 
   return (
     <View style={styles.container}>
@@ -511,29 +603,25 @@ const AccountSettingsScreen = (props) => {
           submit && phoneNumber.length && !isPhoneValid(phoneNumber) ? <Text style={[styles.errorStyle]}>Phone number is incomplete </Text> : null
         }
         <Text style={styles.text}>Instructor Type</Text>
-        <View style={styles.outerView}>
-          <TouchableOpacity
-            style={styles.dropDown}
-            onPress={() => {
-              setInstructorModalVisible(true);
-              setCategoriesLoading(true);
-              getCategories();
-              setCheckInstructorTypes(false)
-            }}
-          >
-            {selectInstructor != undefined &&
-              Object.keys(selectInstructor).length > 0 ? (
-              // setCheckInstructorTypes(false)
-              <Text style={styles.innertext}>{selectInstructor.title}</Text>
-            ) : (
-              <Text style={styles.innertext}>Select</Text>
-            )}
-            <Image
-              source={require("../../assets/drop-down.png")}
-              style={styles.dropImage}
-            />
-          </TouchableOpacity>
-        </View>
+    
+        <FlatList
+          data={categories}
+          // showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.contentContainerStyle}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item, index }) => {
+            return (
+              <View style={styles.outerView}>
+                <View style={[styles.innerView1]}>
+                  <MaterialIcons onPress={() => selectingTrainingType(index)}
+                    size={20}
+                    name={item.selected ? "check-box" : "check-box-outline-blank"} />
+                  <Text style={styles.innertext}>{item.title}</Text>
+                </View>
+              </View>
+            );
+          }}
+        />
         {submit && selectInstructor.title == undefined && (
           <Text style={styles.errorStyle}>Instructor Type cannot be empty</Text>
         )}
@@ -541,51 +629,24 @@ const AccountSettingsScreen = (props) => {
 
 
         <Text style={styles.text}>Instruction Types</Text>
-        <View style={styles.outerView}>
-          {subCategories.length == 0 ?
-            <TouchableOpacity
-              style={styles.dropDown}
-              onPress={() => {
-                if (categories.length != 0) {
-                  setInstructionModalVisible(true);
+        <FlatList
+          data={subCategories}
+          contentContainerStyle={styles.contentContainerStyle}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item, index }) => {
+            return (
+              <View style={styles.outerView}>
+                <View style={[styles.innerView1]}>
+                  <MaterialIcons onPress={() => checkBoxFunc(index)}
+                    size={20}
+                    name={item.selected ? "check-box" : "check-box-outline-blank"} />
+                  <Text style={styles.innertext}>{item.title}</Text>
+                </View>
+              </View>
+            );
+          }}
+        />
 
-                } else {
-                  setMessage(`Please select instructor first`)
-                  setVisible(true);
-                }
-                // setSubCategoriesLoading(true);
-              }}
-            >
-              {selectInstruction.title != undefined &&
-                Object.keys(selectInstruction).length > 0 ? (
-                <Text style={styles.innertext}>{selectInstruction.title}</Text>
-              ) : (
-                <Text style={styles.innertext}>Select</Text>
-              )}
-              <Image
-                source={require("../../assets/drop-down.png")}
-                style={styles.dropImage}
-              />
-            </TouchableOpacity>
-            :
-            <FlatList
-              data={subCategories}
-              contentContainerStyle={styles.contentContainerStyle}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item, index }) => {
-                return (
-                  <View style={styles.outerView}>
-                    <View style={[styles.innerView1]}>
-                      <MaterialIcons onPress={() => checkBoxFunc(index)}
-                        size={20}
-                        name={item.selected ? "check-box" : "check-box-outline-blank"} />
-                      <Text style={styles.innertext}>{item.title}</Text>
-                    </View>
-                  </View>
-                );
-              }}
-            />}
-        </View>
         {submit && subCatVal != true && (
           <Text style={styles.errorStyle}>
             Instruction Type cannot be empty
@@ -630,31 +691,14 @@ const AccountSettingsScreen = (props) => {
                   <MaterialIcons onPress={() => {
                     let ageArr = [...age];
                     let array = arr;
-                    // array[prev].flag = false;
                     array[index].flag = true;
                     setArr(arr);
                     ageArr.push({ ageGroup: item.age })
                     setAge(ageArr);
-                    // setPrev(index);
                   }}
                     size={20}
                     name={item.flag ? "check-box" : "check-box-outline-blank"} />
-                  {/* <RadioButton
-                    color={Colors.blackColor}
-                    size={10}
-                    uncheckedColor={Colors.blackColor}
-                    status={item.flag ? "checked" : "unchecked"}
-                    onPress={() => {
-                      let ageArr = [...age];
-                      let array = arr;
-                      // array[prev].flag = false;
-                      array[index].flag = true;
-                      setArr(arr);
-                      ageArr.push({ ageGroup: item.age })
-                      setAge(ageArr);
-                      // setPrev(index);
-                    }}
-                  /> */}
+                
                   <Text style={styles.innertext}>{item.age}</Text>
                 </View>
               </View>
@@ -668,7 +712,6 @@ const AccountSettingsScreen = (props) => {
           text={'Update'}
           onPress={() => {
             checkNetwork()
-            // props.navigation.navigate('Booking');
           }}
         />
         <View style={{ marginTop: 20 }}></View>
@@ -685,17 +728,6 @@ const AccountSettingsScreen = (props) => {
         setModalVisible={setInstructionModalVisible}
         setInstructionType={setInstruction}
       />
-      {/* <AgeGroupModal
-        modalVisible={ageModalVisible}
-        setModalVisible={setAgeModalVisible}
-        setAge={setAge}
-      /> */}
-      {/* <AccountModal
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-        // setPickImage={chooseImage}
-      /> */}
-
       <Modal
         style={styles.modal}
         width={'100%'}

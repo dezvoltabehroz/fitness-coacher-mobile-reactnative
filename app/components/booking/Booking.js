@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from "react";
 import {
-  SafeAreaView,
   StyleSheet,
-  ScrollView,
   View,
   Text,
   StatusBar,
-  ImageBackground,
   Image,
-  NativeModules,
-  Platform,
   Dimensions,
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
-  ToastAndroid,
 } from "react-native";
 import { Colors } from "../../style/colors";
 import { FontFamily } from "../../style/typograpy";
@@ -37,33 +31,16 @@ const BookingScreen = (props) => {
     getActiveBookings();
     getCompletedBookings()
   }, []);
-  // const getBookings = async () => {
-  //   let response = await fetchBookingsService.fetchBookingsFunc(
-  //     GlobalVariables.authenticationToken,
-  //     GlobalVariables.userDetails.id
-  //   );
-  //   if (response.data.success != undefined && response.data.success == true) {
-  //     alert("hello");
-  //     setState({
-  //       bookingDetails: response.data.coursesDetail,
-  //     });
-  //   }
-  //   console.log("booking details are", state.bookingDetails);
-  // };
 
   const getActiveBookings = async () => {
     setLoading(true)
-    // console.log("booking details are", state.bookingDetails);
     BookingServices.getActiveBookings(props?.user?.id, props?.token)
       .then((response) => {
-        // alert("success");
         if (response.data.success) {
-          let arr = Array(10);
           setMessage(response.data.msg)
           setVisible(true);
           setLoading(false)
-          // setBookings(response.data.coursesDetail.rows);
-          setBookings(arr);
+          setBookings(response.data.coursesDetail.rows);
           console.log("booking details are", bookings);
         }
         else {
@@ -83,15 +60,11 @@ const BookingScreen = (props) => {
 
   const getCompletedBookings = async () => {
     setLoading(true)
-    // console.log("booking details are", state.bookingDetails);
-    BookingServices.getCompletedBookings(props?.user?.id, props?.token)
+    BookingServices.getActiveBookings(props?.user?.id, props?.token)
       .then((response) => {
-        // alert("success");
         if (response.data.success) {
-          let arr = Array(10);
           setLoading(false)
-          // setBookings(response.data.coursesDetail.rows);
-          setCompletedBookings(arr);
+          setCompletedBookings(response.data.coursesDetail.rows);
           console.log("booking details are", bookings);
         }
         else {
@@ -125,19 +98,18 @@ const BookingScreen = (props) => {
             }}
           >
             <Image
-              source={require("../../assets/splash.jpg")}
+              source={props?.user?.imageUrl != null ? { uri: props?.user?.imageUrl } : require('../../assets/splash.jpg')}
+              resizeMode="contain"
               style={styles.image1}
             />
           </TouchableOpacity>
         </View>
       </View>
-      {/* <NotificationCard item={item} navigation={props.navigation} /> */}
       <View style={styles.bottom}>
         <View
           style={{
             flexDirection: "row",
             marginLeft: 5,
-            // justifyContent: "space-around",
             height: 50,
             width: "100%",
             alignItems: "center",
@@ -165,11 +137,7 @@ const BookingScreen = (props) => {
           >
             <Text
               style={[
-                styles.text1,
-                {
-                  color: active ? Colors.textColor : Colors.blackColor,
-                  // paddingRight: height > 667 ? 45 : 45,
-                },
+                styles.text1, { color: active ? Colors.textColor : Colors.blackColor, },
               ]}
             >
               Completed Bookings
@@ -183,29 +151,39 @@ const BookingScreen = (props) => {
             </View>
             :
             active ?
-              <FlatList
-                contentContainerStyle={{ paddingBottom: "20%" }}
-                showsVerticalScrollIndicator={false}
-                data={bookings}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item, index }) => {
-                  return (
-                    <BookingCard navigation={props.navigation} active={active} />
-                  );
-                }}
-              />
+              bookings.length == 0 ?
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                  <Text>No Bookings Found</Text>
+                </View>
+                :
+                <FlatList
+                  contentContainerStyle={{ paddingBottom: "20%" }}
+                  showsVerticalScrollIndicator={false}
+                  data={bookings}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={({ item, index }) => {
+                    return (
+                      <BookingCard navigation={props.navigation} item={item} active={active} />
+                    );
+                  }}
+                />
               :
-              <FlatList
-                contentContainerStyle={{ paddingBottom: "20%" }}
-                showsVerticalScrollIndicator={false}
-                data={completedBookings}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item, index }) => {
-                  return (
-                    <BookingCard navigation={props.navigation} active={false} />
-                  );
-                }}
-              />
+              completedBookings.length == 0 ?
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                  <Text>No Bookings Found</Text>
+                </View>
+                :
+                <FlatList
+                  contentContainerStyle={{ paddingBottom: "20%" }}
+                  showsVerticalScrollIndicator={false}
+                  data={completedBookings}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={({ item, index }) => {
+                    return (
+                      <BookingCard navigation={props.navigation} item={item} active={false} />
+                    );
+                  }}
+                />
         }
         <View style={styles.snackbarContainerStyle}>
           <Snackbar

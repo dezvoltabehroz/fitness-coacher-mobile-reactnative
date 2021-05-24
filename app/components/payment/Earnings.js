@@ -32,6 +32,7 @@ const height = Dimensions.get('window').height;
 const Earnings = props => {
   const [visible, setVisible] = useState(false)
   const [message, setMessage] = useState("")
+  const [totalAmount, setTotalAmount] = useState("")
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const fill = 'rgb(4, 11, 34)';
@@ -57,6 +58,7 @@ const Earnings = props => {
     PaymentServices.getAmountOfCoaches(props?.user.id, props?.token)
       .then((response) => {
         if (response.data.success) {
+          setTotalAmount(response.data.bookings[0].total_amount)
           console.log(response.data)
           PaymentServices.coachGraphData(props?.user.id, props?.token)
             .then((resData) => {
@@ -66,14 +68,17 @@ const Earnings = props => {
             .catch((err) => {
               setMessage(`${err}`)
               setVisible(true); console.log(err)
+              setLoading(false);
             })
         }
         else {
           setMessage(`${response.data.msg}`)
           setVisible(true);
+          setLoading(false);
         }
       })
       .catch((error) => {
+        setLoading(false);
         setMessage(`${error}`)
         setVisible(true);
       })
@@ -126,8 +131,8 @@ const Earnings = props => {
                     marginTop: 10,
                     fontWeight: 'bold',
                   }}>
-                  $728
-            </Text>
+                  ${totalAmount}
+                </Text>
               </View>
               <View style={styles.barChartContainer}>
                 <BarChart

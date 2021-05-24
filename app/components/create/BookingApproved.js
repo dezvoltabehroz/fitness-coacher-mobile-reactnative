@@ -37,18 +37,11 @@ const AcceptBooking = props => {
   const [review, setReview] = useState('');
   const [visible, setVisible] = useState(false)
   const [message, setMessage] = useState("")
-  //   useEffect(() => {
-  //     if (props.route.params != undefined) {
-  //       const {flag} = props?.route?.params;
-  //       if (flag) {
-  //         setModalVisible(true);
-  //       }
-  //     }
-  //   }, []);
 
+  let { bookingData } = props.route.params
   const handleSubmit = () => {
     let userData = {
-      "AthleteId": 5,
+      "AthleteId": bookingData.AthleteId,
       "stars": starCount,
       "review": review,
       "ratingBy": props?.user?.id
@@ -86,7 +79,7 @@ const AcceptBooking = props => {
               style={{ marginTop: 3 }}
             />
           </TouchableOpacity>
-          <Text style={styles.headertext}>PORTER SHUE - CCH643311</Text>
+          <Text style={styles.headertext}>{bookingData.athlete.firstName} {bookingData.athlete.lastName} - {bookingData.athlete.uniqueId} </Text>
         </View>
       </View>
 
@@ -95,7 +88,7 @@ const AcceptBooking = props => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             flex: 1,
-             paddingBottom: height > 667 ? '30%' : '90%'
+            paddingBottom: height > 667 ? '30%' : '90%'
           }}>
           <View style={styles.congratulationsContainer}>
             <View style={styles.congratulationView}>
@@ -110,7 +103,7 @@ const AcceptBooking = props => {
                 fontSize: height > 667 ? 14 : 12,
                 color: 'red',
               }}>
-              You have successfully earned $220.20
+              You have successfully earned ${bookingData.price}
             </Text>
           </View>
           <View style={styles.border}>
@@ -131,30 +124,6 @@ const AcceptBooking = props => {
                 fullStarColor={'yellow'}
               />
             </View>
-            {/* <Text
-              style={{
-                fontSize: height > 667 ? 13 : 11,
-                color: Colors.textColor,
-                paddingLeft: 15,
-              }}>
-              Add a booking review
-            </Text> */}
-            {/* <View
-              style={[
-                styles.congratulationsContainer,
-                {height: 100, marginVertical: 5},
-              ]}> */}
-            {/* <View
-                style={{
-                  backgroundColor: Colors.lightGreyColor,
-                  height: 100,
-                  borderRadius: 10,
-                  padding: 10,
-                }}> */}
-            {/* <Text style={[styles.text, {marginTop: 0, color: 'black'}]}>
-                Extremely professional and dedicated individuals with
-                exceptional dedication and eagerness to learn.
-              </Text> */}
             <AccountInput
               multiline={true}
               value={review}
@@ -162,8 +131,6 @@ const AcceptBooking = props => {
               isActive={isActive}
               onChangeText={(e) => setReview(e)}
             />
-            {/* </View> */}
-            {/* </View> */}
           </View>
           <TouchableOpacity
             onPress={() => handleSubmit()}

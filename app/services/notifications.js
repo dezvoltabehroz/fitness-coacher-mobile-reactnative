@@ -11,15 +11,13 @@ let configToken = (token) => {
     }
 }
 const Api = {
-    getAmountOfCoaches: function (id, token) {
-        return axiosInstance.get(`coach/getAmounts/${id}`, configToken(token))
+    getNotifications: function (token) {
+        return axiosInstance.get(`coach/notification`, configToken(token))
     },
-    coachPayout: function (userData, token) {
-        return axiosInstance.get('coach/payout', userData, configToken(token))
-    },
-    coachGraphData: function (id, token) {
-        return axiosInstance.get(`coach/graphData?CoachId=${id}`, configToken(token))
-    },
+    notificationSetting: function (userData, token) {
+        return axiosInstance.post(`user/notificationSetting`, userData, configToken(token))
+    }
+
 
 };
 

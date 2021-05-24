@@ -9,7 +9,7 @@ import {
   ImageBackground,
   Image,
   AsyncStorage,
-  NativeModules,
+  ActivityIndicator,
   Platform,
   Dimensions,
   TextInput,
@@ -24,11 +24,19 @@ import { Container, Header, Content, Tab, Tabs } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { BookingServices } from '../../services';
 import { connect } from 'react-redux';
+import moment from 'moment';
 const height = Dimensions.get('window').height;
 const BookingDetails = props => {
   const [modalVisible, setModalVisible] = useState(false);
   const [visible, setVisible] = useState(false)
-  const [message, setMessage] = useState("")
+  const [message, setMessage] = useState("");
+  const [bookingDetails, setBookingDetails] = useState({})
+  const [loading, setLoading] = useState(true)
+  console.log(props.route.params)
+  useEffect(() => {
+    getBookingDetail();
+
+  }, [])
   // useEffect(() => {
   //   if (props.route.params != undefined) {
   //     const {flag} = props?.route?.params;
@@ -38,10 +46,33 @@ const BookingDetails = props => {
   //   }
   // }, []);
 
+  const getBookingDetail = () => {
+    setLoading(true)
+    BookingServices.getBookingDetails(props?.route?.params?.bookingId, props?.token)
+      .then((response) => {
+        if (response.data.success) {
+          console.log(response.data)
+          setBookingDetails(response.data.bookingDetail.rows[0])
+          setLoading(false)
+        } else {
+          setMessage(`${response.data.msg}`)
+          setVisible(true);
+          setLoading(false)
+          console.log(response.data)
+          setModalVisible(false)
+        }
+      })
+      .catch((err) => {
+        setMessage(`${err}`)
+        setLoading(false)
+        setVisible(true); setModalVisible(false); console.log(err)
+      })
+  }
+
   const handleYes = () => {
     let userData = {
-      "CoachId": props?.user?.id,
-      "BookingId": 1
+      "CoachId": bookingDetails.coach.id,
+      "BookingId": bookingDetails.id
     }
     BookingServices.completeBooking(userData, props?.token)
       .then((response) => {
@@ -69,166 +100,179 @@ const BookingDetails = props => {
         translucent
         backgroundColor={'transparent'}
       />
-
-      <View style={styles.completeProfileContainer}>
-        <View style={styles.backIconView}>
-          <TouchableOpacity onPress={() => props.navigation.goBack()}>
-            <Ionicons
-              name="arrow-back"
-              size={height > 667 ? 20 : 16}
-              style={{ paddingLeft: 20 }}
-            />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.titleView}>
-          <Text style={styles.headertext}>PORTER SHUE - CCH67684</Text>
-        </View>
-        <View style={styles.backIconView}>
-          <TouchableOpacity onPress={() => setModalVisible(true)}>
-            <Ionicons
-              name="ellipsis-horizontal"
-              size={height > 667 ? 20 : 16}
-              style={{ paddingLeft: 20 }}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.bottom}>
-        <Tabs
-          tabBarUnderlineStyle={[styles.tabUnderline]}
-          tabContainerStyle={{
-            elevation: 0,
-            borderTopLeftRadius: 30,
-            borderTopRightRadius: 30,
-            height: height > 667 ? 60 : 50,
-            borderWidth: 0,
-            borderColor: 'white',
-          }}>
-          <Tab
-            heading="Details"
-            tabStyle={[styles.tab, { borderTopLeftRadius: 30 }]}
-            activeTabStyle={[styles.activeTab, { borderTopLeftRadius: 30 }]}
-            textStyle={styles.tabText}
-            activeTextStyle={styles.activeTabText}>
-            <ScrollView
-              contentContainerStyle={{
-                paddingBottom: '30%',
-              }}>
-              <View style={styles.border}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      props.navigation.navigate('AthleteDetails');
-                    }}>
-                    <Image
-                      source={require('../../assets/splash.jpg')}
-                      style={styles.profile}
-                    />
-                  </TouchableOpacity>
-                  <Text style={{ textAlign: 'left' }}>Porter Shue</Text>
-                  <Text
-                    style={{
-                      textAlign: 'right',
-                      marginLeft: height > 667 ? '40%' : '30%',
-                      fontSize: 12,
-                    }}>
-                    12 mins ago
-                  </Text>
-                </View>
-                <View style={styles.mainView}>
-                  <Text style={styles.text1}>Requirements</Text>
-                  <Image
-                    style={styles.image}
-                    source={require('../../assets/down-arrow.png')}
+      {
+        loading ?
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <ActivityIndicator size={20} color={'#030E2D'} />
+          </View>
+          :
+          <>
+            <View style={styles.completeProfileContainer}>
+              <View style={styles.backIconView}>
+                <TouchableOpacity onPress={() => props.navigation.goBack()}>
+                  <Ionicons
+                    name="arrow-back"
+                    size={height > 667 ? 20 : 16}
+                    style={{ paddingLeft: 20 }}
                   />
-                </View>
-                <View style={styles.mainView}>
-                  <Text style={styles.text}>Sports Time</Text>
-                  <Text style={styles.text1}>Baseball</Text>
-                </View>
-                <View style={styles.mainView}>
-                  <Text style={styles.text}>Category</Text>
-                  <Text style={styles.text1}>Hitting</Text>
-                </View>
-                <View style={styles.mainView}>
-                  <Text style={styles.text}>Age Group</Text>
-                  <Text style={styles.text1}>12u</Text>
-                </View>
-                <View style={styles.mainView}>
-                  <Text style={styles.text}>Instruction type</Text>
-                  <Text style={styles.text1}>Dartfish Ananlytics</Text>
-                </View>
-                <View style={styles.mainView}>
-                  <Text style={styles.text}>Baseball Category</Text>
-                  <Text style={styles.text1}>Hitting</Text>
-                </View>
-                <Text style={[styles.text, { marginLeft: 10 }]}>Media</Text>
-                <Image
-                  style={styles.video}
-                  source={require('../../assets/splash.jpg')}
-                />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                onPress={() => setModalVisible(true)}
-                style={styles.btnStyle}>
-                <Text style={{ color: 'white', fontWeight: '700' }}>
-                  Mark as Delivered
-                </Text>
-              </TouchableOpacity>
-              <View style={styles.snackbarContainerStyle}>
-                <Snackbar
-                  visible={visible}
-                  onDismiss={() => setVisible(!visible)}
-                  action={{
-                    label: 'OK',
-                    onPress: () => {
-                      console.log("hello")
-                    },
-                  }}>
-                  {message}
-                </Snackbar>
+              <View style={styles.titleView}>
+                <Text style={styles.headertext}>{bookingDetails.athlete.firstName} {bookingDetails.athlete.lastName} - {bookingDetails.athlete.uniqueId} </Text>
               </View>
-            </ScrollView>
-          </Tab>
-          <Tab
-            heading="Contact Information"
-            tabStyle={[styles.tab, { borderTopRightRadius: 30 }]}
-            activeTabStyle={[styles.activeTab, { borderTopRightRadius: 30 }]}
-            textStyle={styles.tabText}
-            activeTextStyle={styles.activeTabText}>
-            <View style={[styles.mainView, { marginTop: 10 }]}>
-              <Text style={styles.text}>Mobile Phone</Text>
-              <Text style={styles.text1}>+92 3333 3333333</Text>
+              <View style={styles.backIconView}>
+                <TouchableOpacity onPress={() => setModalVisible(true)}>
+                  <Ionicons
+                    name="ellipsis-horizontal"
+                    size={height > 667 ? 20 : 16}
+                    style={{ paddingLeft: 20 }}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.mainView}>
-              <Text style={styles.text}>Email</Text>
-              <Text style={styles.text1}>xyz@gmail.com</Text>
-            </View>
-            <View style={styles.mainView}>
-              <Text style={styles.text}>Whatsapp</Text>
-              <Text style={styles.text1}>+92 3333 3333333</Text>
-            </View>
-            <View style={styles.snackbarContainerStyle}>
-              <Snackbar
-                visible={visible}
-                onDismiss={() => setVisible(!visible)}
-                action={{
-                  label: 'OK',
-                  onPress: () => {
-                    console.log("hello")
-                  },
+
+            <View style={styles.bottom}>
+              <Tabs
+                tabBarUnderlineStyle={[styles.tabUnderline]}
+                tabContainerStyle={{
+                  elevation: 0,
+                  borderTopLeftRadius: 30,
+                  borderTopRightRadius: 30,
+                  height: height > 667 ? 60 : 50,
+                  borderWidth: 0,
+                  borderColor: 'white',
                 }}>
-                {message}
-              </Snackbar>
+                <Tab
+                  heading="Details"
+                  tabStyle={[styles.tab, { borderTopLeftRadius: 30 }]}
+                  activeTabStyle={[styles.activeTab, { borderTopLeftRadius: 30 }]}
+                  textStyle={styles.tabText}
+                  activeTextStyle={styles.activeTabText}>
+                  <ScrollView
+                    contentContainerStyle={{
+                      paddingBottom: '30%',
+                    }}>
+                    <View style={styles.border}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          justifyContent: "space-between",
+                          alignItems: 'center',
+                        }}>
+                        <View style={{
+                          flexDirection: 'row',
+
+                          alignItems: 'center',
+                        }}>
+                          <TouchableOpacity
+                            onPress={() => {
+                              props.navigation.navigate('AthleteDetails');
+                            }}>
+                            <Image
+                              resizeMode="contain"
+                              source={bookingDetails.athlete.imageUrl != null ? { uri: bookingDetails.athlete.imageUrl } : require('../../assets/splash.jpg')}
+                              style={styles.profile}
+                            />
+                          </TouchableOpacity>
+                          <Text style={{ textAlign: 'left' }}>{bookingDetails.athlete.firstName} {bookingDetails.athlete.lastName}</Text>
+                        </View>
+                        <View>
+                          <Text
+                            style={{
+                              textAlign: 'right',
+                              marginRight: "15%",
+                              // marginLeft: height > 667 ? '40%' : '30%',
+                              fontSize: 12,
+                            }}>
+                            {moment(bookingDetails.createdAt).fromNow()}
+                          </Text>
+                        </View>
+
+                      </View>
+                      <View style={styles.mainView}>
+                        <Text style={styles.text1}>Requirements</Text>
+                        <Image
+                          style={styles.image}
+                          source={require('../../assets/down-arrow.png')}
+                        />
+                      </View>
+                      <View style={styles.mainView}>
+                        <Text style={styles.text}>Sports</Text>
+                        <Text style={styles.text1}>{bookingDetails.athleteRequest.trainingType.title}</Text>
+                      </View>
+                      <View style={styles.mainView}>
+                        <Text style={styles.text}>Age Group</Text>
+                        <Text style={styles.text1}>{bookingDetails.athleteRequest.coachAgeGroup}</Text>
+                      </View>
+                      <View style={styles.mainView}>
+                        <Text style={styles.text}>Instruction type</Text>
+                        <Text style={styles.text1}>{bookingDetails.athleteRequest.trainingSubCategory.title}</Text>
+                      </View>
+                      <Text style={[styles.text, { marginLeft: 10 }]}>Media</Text>
+                      <Image
+                        style={styles.video}
+                        source={require('../../assets/splash.jpg')}
+                      />
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => setModalVisible(true)}
+                      style={styles.btnStyle}>
+                      <Text style={{ color: 'white', fontWeight: '700' }}>
+                        Mark as Delivered
+                </Text>
+                    </TouchableOpacity>
+                    <View style={styles.snackbarContainerStyle}>
+                      <Snackbar
+                        visible={visible}
+                        onDismiss={() => setVisible(!visible)}
+                        action={{
+                          label: 'OK',
+                          onPress: () => {
+                            console.log("hello")
+                          },
+                        }}>
+                        {message}
+                      </Snackbar>
+                    </View>
+                  </ScrollView>
+                </Tab>
+                <Tab
+                  heading="Contact Information"
+                  tabStyle={[styles.tab, { borderTopRightRadius: 30 }]}
+                  activeTabStyle={[styles.activeTab, { borderTopRightRadius: 30 }]}
+                  textStyle={styles.tabText}
+                  activeTextStyle={styles.activeTabText}>
+                  <View style={[styles.mainView, { marginTop: 10 }]}>
+                    <Text style={styles.text}>Mobile Phone</Text>
+                    <Text style={styles.text1}>{bookingDetails.athlete.phone}</Text>
+                  </View>
+                  <View style={styles.mainView}>
+                    <Text style={styles.text}>Email</Text>
+                    <Text style={styles.text1}>{bookingDetails.athlete.email}</Text>
+                  </View>
+                  <View style={styles.mainView}>
+                    <Text style={styles.text}>Whatsapp</Text>
+                    <Text style={styles.text1}>{bookingDetails.athlete.phone}</Text>
+                  </View>
+                  <View style={styles.snackbarContainerStyle}>
+                    <Snackbar
+                      visible={visible}
+                      onDismiss={() => setVisible(!visible)}
+                      action={{
+                        label: 'OK',
+                        onPress: () => {
+                          console.log("hello")
+                        },
+                      }}>
+                      {message}
+                    </Snackbar>
+                  </View>
+                </Tab>
+              </Tabs>
             </View>
-          </Tab>
-        </Tabs>
-      </View>
+          </>
+      }
+
       <DetailsModal
         onYes={() => handleYes()}
         setModalVisible={setModalVisible}
@@ -266,6 +310,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   headertext: {
+    textTransform: "uppercase",
     fontFamily: FontFamily.helveticaBold,
     fontSize: height > 667 ? 16 : 12,
     // marginLeft: 20,

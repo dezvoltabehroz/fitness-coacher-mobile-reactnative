@@ -17,8 +17,8 @@ const Api = {
             password: userData.password
         }, config)
     },
-    getUserProfile: function (token) {
-        return axiosInstance.get('user/current', configToken(token))
+    getUserProfile: function (userData) {
+        return axiosInstance.get(`coach/details/${userData.id}`, configToken(userData.token))
     },
     updateProfile: function (id, userData, token) {
         return axiosInstance.put(`coach/updateCoach/${id}`, userData, configToken(token))
@@ -52,8 +52,8 @@ const Api = {
     changePassword: function (id, userData, token) {
         return axiosInstance.put(`user/change-password/${id}`, userData, configToken(token))
     },
-    getUrl: function (userData, token) {
-        return axiosInstance.post(`getUrl`, userData, configToken(token))
+    getUrl: function (userData) {
+        return axiosInstance.post(`getUrl`, userData, config)
     },
     addFCMToken: function () {
         return axiosInstance.post(`user/addFCMToken`, userData, configToken(token))
