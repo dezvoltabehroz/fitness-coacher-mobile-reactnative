@@ -17,6 +17,7 @@ import { Colors } from '../../style/colors';
 import { authActions } from '../../redux/actions/auth';
 import { connect } from 'react-redux';
 import { bindActionCreators } from "redux";
+import { AuthServices } from '../../services';
 const height = Dimensions.get('window').height;
 const SplashScreen = props => {
   useEffect(() => {

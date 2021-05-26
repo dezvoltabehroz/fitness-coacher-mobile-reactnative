@@ -89,13 +89,14 @@ const SplashScreen = (props) => {
     AuthServices.userLogin(loginDetails)
       .then(async (res) => {
         if (res.status == 200) {
-          let userData={
-            id:res.data.userData.userInfo.id,
-            token:res.data.userData.tokenInfo
-          }
+          console.log("res :", res.data.userData.userInfo);
           await AsyncStorage.setItem('Token', JSON.stringify(res.data.userData.tokenInfo))
+          let userData = {
+              id: res.data.userData.userInfo.id,
+              token: res.data.userData.tokenInfo
+          }
           props.authActions.getUserProfile(userData, props.navigation.replace);
-          console.log("res :", res.data.userData.tokenInfo);
+          
         }
 
       })

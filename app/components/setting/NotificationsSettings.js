@@ -20,10 +20,12 @@ import { Switch } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NotificationServices } from '../../services';
 import { connect } from 'react-redux'
+import { authActions } from '../../redux/actions/auth';
+import { bindActionCreators } from "redux";
 const height = Dimensions.get('window').height;
 const NotificatinsSettings = props => {
   const [isSwitchOn, setIsSwitchOn] = React.useState(false);
-  const [isSwitchOn1, setIsSwitchOn1] = React.useState(false);
+  const [isSwitchOn1, setIsSwitchOn1] = React.useState(props?.user?.notification);
   const [isSwitchOn2, setIsSwitchOn2] = React.useState(false);
 
   const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
@@ -36,9 +38,14 @@ const NotificatinsSettings = props => {
       "notification": !isSwitchOn1
     }
     NotificationServices.notificationSetting(userData, props.token)
-      .then((res) => {
+      .then(async(res) => {
         if (res.data.success) {
           onToggleSwitch1()
+          let data = {
+            id: props?.user.id,
+            token: props?.token
+          }
+          await props.authActions.getUserProfile(data, props.navigation.replace)
         }
         else {
           console.log(res.data)
@@ -189,4 +196,10 @@ const mapStateToProps = (state) => {
     token: state.authReducer.userToken
   };
 };
-export default connect(mapStateToProps)(NotificatinsSettings);
+const mapDispatchToProps = dispatch => {
+  return {
+    authActions: bindActionCreators(authActions, dispatch)
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(NotificatinsSettings);

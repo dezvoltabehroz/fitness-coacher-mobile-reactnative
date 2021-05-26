@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { Colors } from '../../style/colors';
 import { FontFamily } from '../../style/typograpy';
+import moment from 'moment';
 const height = Dimensions.get('window').height;
 const NotificationsCard = ({ item, navigation }) => {
   return (
@@ -27,6 +28,7 @@ const NotificationsCard = ({ item, navigation }) => {
             style={styles.image}
           />
           <View>
+            <Text style={styles.text}>{item.title}</Text>
             {item.type == 'completed_booking' || item.type == 'request' ? (
               <View
                 style={{
@@ -35,6 +37,7 @@ const NotificationsCard = ({ item, navigation }) => {
                   alignSelf: 'center',
                   // marginTop: 2,
                 }}>
+
                 <Text style={styles.text}>{item.body}</Text>
                 <Text
                   style={[
@@ -45,7 +48,7 @@ const NotificationsCard = ({ item, navigation }) => {
                       color: Colors.textColor,
                     },
                   ]}>
-                  12 mins ago
+                  {moment(item.createdAt).fromNow()}
                 </Text>
               </View>
             ) : (

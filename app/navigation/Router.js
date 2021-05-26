@@ -350,6 +350,16 @@ function BookingStack() {
           },
         }}
       />
+      <Stack.Screen name="ChangePassword" component={ChangePassword} options={{
+        headerTitle: 'CHANGE PASSWORD',
+        headerTitleAllowFontScaling: true,
+        headerShown: false,
+        headerTransparent: true,
+        headerTitleStyle: {
+          fontFamily: FontFamily.helveticaBold,
+          fontSize: 16,
+        }
+      }} />
     </Stack.Navigator>
   );
 }

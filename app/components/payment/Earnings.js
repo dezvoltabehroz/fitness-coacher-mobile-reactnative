@@ -108,7 +108,7 @@ const Earnings = props => {
             </View>
             :
             <ScrollView
-              contentContainerStyle={{ flex: 1, paddingBottom: '45%' }}
+              contentContainerStyle={{ paddingBottom: '45%' }}
               showsVerticalScrollIndicator={false}>
               <View
                 style={{
@@ -190,10 +190,11 @@ const Earnings = props => {
                   {message}
                 </Snackbar>
               </View>
+              <View style={{ height: 50 }}></View>
             </ScrollView>
         }
       </View>
-    </View>
+    </View >
   );
 };
 

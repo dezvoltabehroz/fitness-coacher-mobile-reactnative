@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { Colors } from '../../style/colors';
 import { FontFamily } from '../../style/typograpy';
-import { Switch } from 'react-native-paper';
+import { Snackbar } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Input from "../../common/Input";
 import { AuthServices, } from '../../services';
@@ -37,8 +37,6 @@ const ChangePassword = props => {
     const checkNetwork = async () => {
         setLoading(true)
         console.log("internet called");
-        setSubmit(true);
-        console.log(submit)
         try {
             let state = await NetInfo.fetch();
             if (state.isConnected == true) {
@@ -52,6 +50,7 @@ const ChangePassword = props => {
             return null;
         }
     };
+   
 
     const checkValidations = () => {
 
@@ -59,6 +58,7 @@ const ChangePassword = props => {
             changePassword();
         } else {
             setSubmit(true);
+            setLoading(false)
             console.log(submit)
         }
     };
@@ -87,7 +87,6 @@ const ChangePassword = props => {
                 setVisible(true); setLoading(false);
             })
     }
-
     return (
         <View style={styles.container}>
             <StatusBar
@@ -98,7 +97,7 @@ const ChangePassword = props => {
             <View style={styles.titleContainer}>
                 <View style={styles.backIconView}>
                     <TouchableOpacity
-                        onPress={() => props.navigation.navigate('Settings')}>
+                        onPress={() => props.navigation.goBack()}>
                         <Ionicons
                             name="arrow-back"
                             size={height > 667 ? 20 : 16}
@@ -132,6 +131,7 @@ const ChangePassword = props => {
                         <Input
                             full={true}
                             text={"New Password"}
+                            secureTextEntry={true}
                             value={newPassword}
                             onChangeText={(value) => {
                                 setNewPassword(value);
@@ -141,13 +141,14 @@ const ChangePassword = props => {
                             submit && newPassword == "" ? <Text style={styles.errorStyle}>New Password cannot be empty </Text> : null
                         }
                         {
-                            submit ? newPassword.length <= 7 ? <Text style={[styles.errorStyle]}>New Password must be between 8 to 16 characters </Text> : newPassword.length > 16 ? <Text style={[styles.errorStyle]}>New Password must be between 8 to 16 characters </Text> : null : null
+                            submit&& newPassword  ? newPassword.length <= 7 ? <Text style={[styles.errorStyle]}>New Password must be between 8 to 16 characters </Text> : newPassword.length > 16 ? <Text style={[styles.errorStyle]}>New Password must be between 8 to 16 characters </Text> : null : null
                         }
                     </View>
                     <View style={styles.inner}>
                         <Input
                             full={true}
                             text={"Confirm New Password"}
+                            secureTextEntry={true}
                             value={confirmNewPassword}
                             onChangeText={(value) => {
                                 setConfirmNewPassword(value);

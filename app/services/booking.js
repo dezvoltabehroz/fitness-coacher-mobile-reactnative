@@ -12,7 +12,7 @@ let configToken = (token) => {
 }
 const Api = {
     completeBooking: function (userData, token) {
-        return axiosInstance.get('coach/completeBooking', userData, configToken(token))
+        return axiosInstance.post('coach/completeBooking', userData, configToken(token))
     },
     getActiveBookings: function (id, token) {
         return axiosInstance.get(`coach/getBookings?CoachId=${id}`, configToken(token))
@@ -27,10 +27,10 @@ const Api = {
         return axiosInstance.get(`coach/getBookingDetails/${id}`, configToken(token))
     },
     addRatingtoAthele: function (userData,token) {
-        return axiosInstance.get(`coach/athleteRating`, userData, configToken(token))
+        return axiosInstance.post(`coach/athleteRating`, userData, configToken(token))
     },
     acceptRequest: function (userData, token) {
-        return axiosInstance.get(`coach/acceptRequest`, userData, configToken(token))
+        return axiosInstance.post(`coach/acceptRequest`, userData, configToken(token))
     },
     getRequestDetails: function (id, token) {
         return axiosInstance.get(`coach/requestDetails/${id}`, configToken(token))

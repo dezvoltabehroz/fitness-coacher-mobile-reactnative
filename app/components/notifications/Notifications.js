@@ -25,30 +25,30 @@ const NotificationsScreen = props => {
     getNotifications();
   }, [])
   const [data, setdata] = useState([
-    {
-      type: 'completed_booking',
-      message: 'You have a new booking opportunity',
-    },
     // {
-    //   type: 'booking_request',
-    //   message: 'Zimry Mayfield has responded to your booking request',
+    //   type: 'completed_booking',
+    //   message: 'You have a new booking opportunity',
     // },
-    {
-      type: 'started_booking',
-      message: 'Your booking with Porter Shue has started',
-    },
-    {
-      type: 'review',
-      message: 'Porter Shue left a 5 star review',
-    },
-    {
-      type: 'review',
-      message: 'Porter Shue left a 5 star review',
-    },
-    {
-      type: 'review',
-      message: 'Porter Shue left a 5 star review',
-    },
+    // // {
+    // //   type: 'booking_request',
+    // //   message: 'Zimry Mayfield has responded to your booking request',
+    // // },
+    // {
+    //   type: 'started_booking',
+    //   message: 'Your booking with Porter Shue has started',
+    // },
+    // {
+    //   type: 'review',
+    //   message: 'Porter Shue left a 5 star review',
+    // },
+    // {
+    //   type: 'review',
+    //   message: 'Porter Shue left a 5 star review',
+    // },
+    // {
+    //   type: 'review',
+    //   message: 'Porter Shue left a 5 star review',
+    // },
   ]);
 
 

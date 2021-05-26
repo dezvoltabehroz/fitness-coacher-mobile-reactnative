@@ -208,6 +208,10 @@ const BookingDetails = props => {
                         <Text style={styles.text}>Instruction type</Text>
                         <Text style={styles.text1}>{bookingDetails.athleteRequest.trainingSubCategory.title}</Text>
                       </View>
+                      <View style={styles.mainView}>
+                        <Text style={styles.text}>Skill Type</Text>
+                        <Text style={styles.text1}>{bookingDetails?.athleteRequest?.subCategorySkill?.skill}</Text>
+                      </View>
                       <Text style={[styles.text, { marginLeft: 10 }]}>Media</Text>
                       <Image
                         style={styles.video}

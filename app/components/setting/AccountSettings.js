@@ -9,7 +9,7 @@ import {
   FlatList,
   Image,
   AsyncStorage,
-  NativeModules,
+  ActivityIndicator,
   Platform,
   Dimensions,
   TouchableOpacity,
@@ -42,7 +42,6 @@ import axios from 'axios';
 const height = Dimensions.get('window').height;
 const width = Dimensions.get("window").width;
 const AccountSettingsScreen = (props) => {
-  console.log(props?.user)
   const [instructorModalVisible, setInstructorModalVisible] = useState(false);
   const [instructionModalVisible, setInstructionModalVisible] = useState(false);
   const [instructor, setInstructor] = useState("");
@@ -66,9 +65,10 @@ const AccountSettingsScreen = (props) => {
   const [phoneNumber, setPhoneNumber] = useState(props?.user?.phone);
   const [date, setDate] = useState(props?.user?.dob);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [age, setAge] = useState([]);
+  const [age, setAge] = useState(props?.user?.ageGroupCoach);
   const [address, setAddress] = useState(props?.user?.address);
   const [submit, setSubmit] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [subCatVal, setSubCat] = useState(false);
   const [deletedSubCategories, setDeletedSubCategories] = useState([]);
   const [deletedCategories, setDeletedCategories] = useState([])
@@ -100,8 +100,21 @@ const AccountSettingsScreen = (props) => {
   const [visible, setVisible] = useState(false)
   const [message, setMessage] = useState("")
   useEffect(() => {
+    setLoading(true)
     getCategories();
     getSkills();
+    for (let index = 0; index < arr.length; index++) {
+      age.map((item, index) => {
+        if (item.ageGroup == arr[index].age) {
+          arr[index].flag = true;
+        } else {
+          arr[index].flag = false;
+        }
+      })
+    }
+    setTimeout(() => {
+      setLoading(false)
+    }, 5000);
   }, []);
 
   const getCategories = () => {
@@ -109,7 +122,7 @@ const AccountSettingsScreen = (props) => {
       .then((response) => {
         var trainingTypes = response.data.trainingTypes
         for (let index = 0; index < response.data.trainingTypes.length; index++) {
-          if (props.user.coachTrainings[0].TrainingTypeId == trainingTypes[index].id) {
+          if (props.user.TrainingTypeId == trainingTypes[index].id) {
             trainingTypes[index].selected = true;
             setSelectInstructor(trainingTypes[index])
             getSubCategories(trainingTypes[index]);
@@ -128,14 +141,14 @@ const AccountSettingsScreen = (props) => {
       .then((response) => {
         setCategoriesLoading(false)
         var skill = response.data.subCategories;
-        console.log("skill level", skill);
         for (let index = 0; index < response.data.subCategories.length; index++) {
-          if (props.user.coachTrainings[0].coachTrainingSubCategory[index].TrainingSubCategoryId == skill[index].id) {
-            skill[index].selected = true;
-          } else {
-            skill[index].selected = false;
-          }
-
+          props.user.coachTrainingSubCategory.map((item, index) => {
+            if (item.id == skill[index].id) {
+              skill[index].selected = true;
+            } else {
+              skill[index].selected = false;
+            }
+          })
         }
         setSubCategories(skill);
       })
@@ -146,9 +159,8 @@ const AccountSettingsScreen = (props) => {
     TrainingCategoryServices.getSkillsBy()
       .then((response) => {
         var skill = response.data.skills;
-        console.log("skill level", skill);
         for (let index = 0; index < response.data.skills.length; index++) {
-          if (props.user.coachTrainings[0].coachTrainingSubCategory[index].SkillId == skill[index].id) {
+          if (props.user.SkillId == skill[index].id) {
             skill[index].selected = true;
           } else {
             skill[index].selected = false;
@@ -497,225 +509,234 @@ const AccountSettingsScreen = (props) => {
       </View>
 
       <ScrollView style={styles.bottom}>
-        <View>
-          {renderFileData()}
-          <TouchableOpacity onPress={() => launchGallery()} style={styles.imageView}>
-            <Image source={require('../../assets/pen.png')} style={styles.pen} />
-          </TouchableOpacity>
-        </View>
-        <AccountInput text={'First Name'} placeholder=" " value={first_name} onChangeText={(val) => setFirstname(val)} />
-        {submit == true && first_name == "" && (
-          <Text style={styles.errorStyle}>First Name canot be empty</Text>
-        )}
-        <AccountInput text={'Last Name'} placeholder=" " value={last_name} onChangeText={(val) => setLastname(val)} />
-        {submit == true && last_name == "" && (
-          <Text style={styles.errorStyle}>Last Name canot be empty</Text>
-        )}
-        <AccountInput editable={false} text={'Email Address'} value={email} placeholder="john@example.com" />
-        <Text style={styles.inputText}>Password</Text>
-        <View style={styles.input}>
-          <Text style={styles.passwordText}>*********</Text>
-          <TouchableOpacity onPress={() => props.navigation.navigate('ChangePassword')}>
-            <Text style={styles.changeTextStyle} >Change</Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={styles.text}>Date Of Birth</Text>
-        <View style={styles.outerView}>
-          <TouchableOpacity
-            style={styles.dropDown}
-            onPress={() => {
-              setShowDatePicker(!showDatePicker)
-              console.log("showDatePicker: ", showDatePicker)
-            }}
-          >
-            {date != undefined && date != '' ? (
-
-              <Text style={styles.innertext}>{moment(date).format('M / DD / YYYY')}</Text>
-            ) : (
-              <Text style={styles.innertext}>- / -- / ----</Text>
-            )}
-            <Calendar
-              name="calendar"
-              color="grey" size={15}
-            />
-          </TouchableOpacity>
-          <DateTimePickerModal
-            isVisible={showDatePicker}
-            onConfirm={(date) => handleConfirm(date)}
-            onCancel={() => hideDatePicker}
-          />
-        </View>
-        {submit == true && date == "" && (
-          <Text style={styles.errorStyle}>Please select your date of birth</Text>
-        )}
-
-        <Text style={styles.text}>Country</Text>
-        <View style={styles.outerView}>
-          <TouchableOpacity
-            style={styles.dropDown}
-            onPress={() => {
-              setCountryModal(!countryModal)
-              console.log("countryModal : ", countryModal)
-            }}
-          >
-            {country != undefined && country != '' ? (
-              // setCheckInstructorTypes(false)
-              <Text style={styles.innertext}>{country}</Text>
-            ) : (
-              <Text style={styles.innertext}>Select</Text>
-            )}
-            <Image
-              source={require("../../assets/drop-down.png")}
-              style={styles.dropImage}
-            />
-          </TouchableOpacity>
-        </View>
-        {submit == true && country == '' && (
-          <Text style={styles.errorStyle}>Please select a Country</Text>
-        )}
-        <Input
-          full={true}
-          text={"Address"}
-          value={address}
-          onChangeText={(value) => {
-            setAddress(value);
-          }}
-        />
-        {submit == true && address == "" && (
-          <Text style={styles.errorStyle}>
-            Address cannot be empty
-          </Text>
-        )}
-        <Input
-          full={true}
-          text={"Phone"}
-          keyboardType={'number-pad'}
-          value={phoneNumber}
-          onChangeText={(value) => {
-            setPhoneNumber(value)
-          }}
-        />
         {
-          submit && phoneNumber == "" ? <Text style={styles.errorStyle}> Phonenumber cannot be empty </Text> : null
-        }
-        {
-          submit && phoneNumber.length && !isPhoneValid(phoneNumber) ? <Text style={[styles.errorStyle]}>Phone number is incomplete </Text> : null
-        }
-        <Text style={styles.text}>Instructor Type</Text>
-    
-        <FlatList
-          data={categories}
-          // showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.contentContainerStyle}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => {
-            return (
-              <View style={styles.outerView}>
-                <View style={[styles.innerView1]}>
-                  <MaterialIcons onPress={() => selectingTrainingType(index)}
-                    size={20}
-                    name={item.selected ? "check-box" : "check-box-outline-blank"} />
-                  <Text style={styles.innertext}>{item.title}</Text>
-                </View>
+          loading ?
+            <View style={{ marginTop: '50%', justifyContent: "center", alignItems: "center" }}>
+              <ActivityIndicator size={20} color={'#030E2D'} />
+            </View>
+            :
+            <>
+              <View>
+                {renderFileData()}
+                <TouchableOpacity onPress={() => launchGallery()} style={styles.imageView}>
+                  <Image source={require('../../assets/pen.png')} style={styles.pen} />
+                </TouchableOpacity>
               </View>
-            );
-          }}
-        />
-        {submit && selectInstructor.title == undefined && (
-          <Text style={styles.errorStyle}>Instructor Type cannot be empty</Text>
-        )}
-
-
-
-        <Text style={styles.text}>Instruction Types</Text>
-        <FlatList
-          data={subCategories}
-          contentContainerStyle={styles.contentContainerStyle}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => {
-            return (
-              <View style={styles.outerView}>
-                <View style={[styles.innerView1]}>
-                  <MaterialIcons onPress={() => checkBoxFunc(index)}
-                    size={20}
-                    name={item.selected ? "check-box" : "check-box-outline-blank"} />
-                  <Text style={styles.innertext}>{item.title}</Text>
-                </View>
+              <AccountInput text={'First Name'} placeholder=" " value={first_name} onChangeText={(val) => setFirstname(val)} />
+              {submit == true && first_name == "" && (
+                <Text style={styles.errorStyle}>First Name canot be empty</Text>
+              )}
+              <AccountInput text={'Last Name'} placeholder=" " value={last_name} onChangeText={(val) => setLastname(val)} />
+              {submit == true && last_name == "" && (
+                <Text style={styles.errorStyle}>Last Name canot be empty</Text>
+              )}
+              <AccountInput editable={false} text={'Email Address'} value={email} placeholder="john@example.com" />
+              <Text style={styles.inputText}>Password</Text>
+              <View style={styles.input}>
+                <Text style={styles.passwordText}>*********</Text>
+                <TouchableOpacity onPress={() => props.navigation.navigate('ChangePassword')}>
+                  <Text style={styles.changeTextStyle} >Change</Text>
+                </TouchableOpacity>
               </View>
-            );
-          }}
-        />
 
-        {submit && subCatVal != true && (
-          <Text style={styles.errorStyle}>
-            Instruction Type cannot be empty
-          </Text>
-        )}
-        <Text style={[styles.text, { marginTop: 5 }]}>Skill Level</Text>
-
-        <FlatList
-          data={coachSkills}
-          // showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.contentContainerStyle}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => {
-            return (
+              <Text style={styles.text}>Date Of Birth</Text>
               <View style={styles.outerView}>
-                <View style={[styles.innerView1]}>
-                  <MaterialIcons onPress={() => selectingSkills(index)}
-                    size={20}
-                    name={item.selected ? "check-box" : "check-box-outline-blank"} />
-                  <Text style={styles.innertext}>{item.skill}</Text>
-                </View>
-              </View>
-            );
-          }}
-        />
-        {submit == true && dummy == false ? (
-          <Text style={styles.errorStyle}>
-            Please select atleast one skill level
-          </Text>
-        ) : null}
-
-        <Text style={styles.text}>Age Group</Text>
-        <FlatList
-          data={arr}
-          // showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.contentContainerStyle}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => {
-            return (
-              <View style={styles.outerView}>
-                <View style={[styles.innerView1]}>
-                  <MaterialIcons onPress={() => {
-                    let ageArr = [...age];
-                    let array = arr;
-                    array[index].flag = true;
-                    setArr(arr);
-                    ageArr.push({ ageGroup: item.age })
-                    setAge(ageArr);
+                <TouchableOpacity
+                  style={styles.dropDown}
+                  onPress={() => {
+                    setShowDatePicker(!showDatePicker)
+                    console.log("showDatePicker: ", showDatePicker)
                   }}
-                    size={20}
-                    name={item.flag ? "check-box" : "check-box-outline-blank"} />
-                
-                  <Text style={styles.innertext}>{item.age}</Text>
-                </View>
+                >
+                  {date != undefined && date != '' ? (
+
+                    <Text style={styles.innertext}>{moment(date).format('M / DD / YYYY')}</Text>
+                  ) : (
+                    <Text style={styles.innertext}>- / -- / ----</Text>
+                  )}
+                  <Calendar
+                    name="calendar"
+                    color="grey" size={15}
+                  />
+                </TouchableOpacity>
+                <DateTimePickerModal
+                  isVisible={showDatePicker}
+                  onConfirm={(date) => handleConfirm(date)}
+                  onCancel={() => hideDatePicker}
+                />
               </View>
-            );
-          }}
-        />
-        {submit && age.length == 0 && (
-          <Text style={styles.errorStyle}>  Please select atleast one age group qualified coach</Text>
-        )}
-        <Button
-          text={'Update'}
-          onPress={() => {
-            checkNetwork()
-          }}
-        />
-        <View style={{ marginTop: 20 }}></View>
+              {submit == true && date == "" && (
+                <Text style={styles.errorStyle}>Please select your date of birth</Text>
+              )}
+
+              <Text style={styles.text}>Country</Text>
+              <View style={styles.outerView}>
+                <TouchableOpacity
+                  style={styles.dropDown}
+                  onPress={() => {
+                    setCountryModal(!countryModal)
+                    console.log("countryModal : ", countryModal)
+                  }}
+                >
+                  {country != undefined && country != '' ? (
+                    // setCheckInstructorTypes(false)
+                    <Text style={styles.innertext}>{country}</Text>
+                  ) : (
+                    <Text style={styles.innertext}>Select</Text>
+                  )}
+                  <Image
+                    source={require("../../assets/drop-down.png")}
+                    style={styles.dropImage}
+                  />
+                </TouchableOpacity>
+              </View>
+              {submit == true && country == '' && (
+                <Text style={styles.errorStyle}>Please select a Country</Text>
+              )}
+              <Input
+                full={true}
+                text={"Address"}
+                value={address}
+                onChangeText={(value) => {
+                  setAddress(value);
+                }}
+              />
+              {submit == true && address == "" && (
+                <Text style={styles.errorStyle}>
+                  Address cannot be empty
+                </Text>
+              )}
+              <Input
+                full={true}
+                text={"Phone"}
+                keyboardType={'number-pad'}
+                value={phoneNumber}
+                onChangeText={(value) => {
+                  setPhoneNumber(value)
+                }}
+              />
+              {
+                submit && phoneNumber == "" ? <Text style={styles.errorStyle}> Phonenumber cannot be empty </Text> : null
+              }
+              {
+                submit && phoneNumber.length && !isPhoneValid(phoneNumber) ? <Text style={[styles.errorStyle]}>Phone number is incomplete </Text> : null
+              }
+              <Text style={styles.text}>Instructor Type</Text>
+
+              <FlatList
+                data={categories}
+                // showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.contentContainerStyle}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item, index }) => {
+                  return (
+                    <View style={styles.outerView}>
+                      <View style={[styles.innerView1]}>
+                        <MaterialIcons onPress={() => selectingTrainingType(index)}
+                          size={20}
+                          name={item.selected ? "check-box" : "check-box-outline-blank"} />
+                        <Text style={styles.innertext}>{item.title}</Text>
+                      </View>
+                    </View>
+                  );
+                }}
+              />
+              {submit && selectInstructor.title == undefined && (
+                <Text style={styles.errorStyle}>Instructor Type cannot be empty</Text>
+              )}
+
+
+
+              <Text style={styles.text}>Instruction Types</Text>
+              <FlatList
+                data={subCategories}
+                contentContainerStyle={styles.contentContainerStyle}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item, index }) => {
+                  return (
+                    <View style={styles.outerView}>
+                      <View style={[styles.innerView1]}>
+                        <MaterialIcons onPress={() => checkBoxFunc(index)}
+                          size={20}
+                          name={item.selected ? "check-box" : "check-box-outline-blank"} />
+                        <Text style={styles.innertext}>{item.title}</Text>
+                      </View>
+                    </View>
+                  );
+                }}
+              />
+
+              {submit && subCatVal != true && (
+                <Text style={styles.errorStyle}>
+                  Instruction Type cannot be empty
+                </Text>
+              )}
+              <Text style={[styles.text, { marginTop: 5 }]}>Skill Level</Text>
+
+              <FlatList
+                data={coachSkills}
+                // showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.contentContainerStyle}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item, index }) => {
+                  return (
+                    <View style={styles.outerView}>
+                      <View style={[styles.innerView1]}>
+                        <MaterialIcons onPress={() => selectingSkills(index)}
+                          size={20}
+                          name={item.selected ? "check-box" : "check-box-outline-blank"} />
+                        <Text style={styles.innertext}>{item.skill}</Text>
+                      </View>
+                    </View>
+                  );
+                }}
+              />
+              {submit == true && dummy == false ? (
+                <Text style={styles.errorStyle}>
+                  Please select atleast one skill level
+                </Text>
+              ) : null}
+
+              <Text style={styles.text}>Age Group</Text>
+              <FlatList
+                data={arr}
+                // showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.contentContainerStyle}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item, index }) => {
+                  return (
+                    <View style={styles.outerView}>
+                      <View style={[styles.innerView1]}>
+                        <MaterialIcons onPress={() => {
+                          let ageArr = [...age];
+                          let array = arr;
+                          array[index].flag = true;
+                          setArr(arr);
+                          ageArr.push({ ageGroup: item.age })
+                          setAge(ageArr);
+                        }}
+                          size={20}
+                          name={item.flag ? "check-box" : "check-box-outline-blank"} />
+
+                        <Text style={styles.innertext}>{item.age}</Text>
+                      </View>
+                    </View>
+                  );
+                }}
+              />
+              {submit && age.length == 0 && (
+                <Text style={styles.errorStyle}>  Please select atleast one age group qualified coach</Text>
+              )}
+              <Button
+                text={'Update'}
+                onPress={() => {
+                  checkNetwork()
+                }}
+              />
+              <View style={{ marginTop: 20 }}></View>
+            </>}
       </ScrollView>
+
       <InstructorTypeModal
         modalVisible={instructorModalVisible}
         setModalVisible={setInstructorModalVisible}

@@ -7,12 +7,10 @@ import { AuthServices, RegisterUser } from '../../services';
 import { Alert, Linking, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const setUserProfile = (userData, navigate) => {
+const setUserProfile = (userData, token, navigate) => {
     return async (dispatch) => {
-        let token = await AsyncStorage.getItem('Token')
-        let data = JSON.parse(token)
         if (userData) {
-            await dispatch({ type: USER_LOGIN_SUCCESS, userData: userData, userToken: data, loading: false });
+            await dispatch({ type: USER_LOGIN_SUCCESS, userData: userData, userToken: token, loading: false });
             if (navigate != null)
                 navigate('TabContainer');
         }
@@ -27,9 +25,9 @@ const getUserProfile = (userData, navigate) => {
         }
         AuthServices.getUserProfile(userData)
             .then(async (responseData) => {
-                console.log(responseData.data.requestDetail)
-                await AsyncStorage.setItem('USER', JSON.stringify(responseData.data.requestDetail))
-                await dispatch(setUserProfile(responseData.data.requestDetail, navigate))
+                console.log(responseData.data.requestDetails)
+                await AsyncStorage.setItem('USER', JSON.stringify(responseData.data.requestDetails))
+                await dispatch(setUserProfile(responseData.data.requestDetails, userData.token, navigate))
                 // if (responseData.data.success) {
                 //     console.log(responseData.data.user)
                 //     await AsyncStorage.setItem('USER', JSON.stringify(responseData.data.user))

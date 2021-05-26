@@ -57,8 +57,10 @@ const Api = {
     },
     addFCMToken: function () {
         return axiosInstance.post(`user/addFCMToken`, userData, configToken(token))
+    },
+    validateUser: function (token) {
+        return axiosInstance.post(`validation`, {}, configToken(token))
     }
-
 };
 
 export default Api;

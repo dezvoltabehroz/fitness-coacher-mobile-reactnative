@@ -37,31 +37,45 @@ const AcceptBooking = props => {
   const [review, setReview] = useState('');
   const [visible, setVisible] = useState(false)
   const [message, setMessage] = useState("")
-
+  const [submit, setSubmit] = useState(false)
   let { bookingData } = props.route.params
+  console.log("bookingData : ", props?.token)
+
+
+
   const handleSubmit = () => {
-    let userData = {
-      "AthleteId": bookingData.AthleteId,
-      "stars": starCount,
-      "review": review,
-      "ratingBy": props?.user?.id
-    }
-    BookingServices.addRatingtoAthele(userData, props?.token)
-      .then((response) => {
-        if (response.data.success) {
+    if (submit && starCount > 0 && review) {
+      let userData = {
+        "AthleteId": bookingData.AthleteId,
+        "stars": starCount,
+        "review": review,
+        "ratingBy": bookingData.CoachId
+      }
+      console.log(userData)
+      BookingServices.addRatingtoAthele(userData, props?.token)
+        .then((response) => {
           console.log(response.data)
-          props.navigation.replace('TabContainer');
-        }
-        else {
-          setMessage(`${response.data.msg}`)
+          if (response.data.success) {
+            console.log(response.data)
+            props.navigation.replace('TabContainer');
+          }
+          else {
+            setMessage(`${response.data.msg}`)
+            setVisible(true);
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+          setMessage(`${err}`)
           setVisible(true);
-        }
-      })
-      .catch((err) => {
-        setMessage(`${err}`)
-        setVisible(true);
-      })
+        })
+    }
+    else {
+      setSubmit(true)
+    }
+
   }
+
 
   return (
     <View style={styles.container}>
@@ -109,7 +123,8 @@ const AcceptBooking = props => {
           <View style={styles.border}>
             <View
               style={{
-                height: '30%',
+                paddingVertical: "2.5%",
+                // height: '25%',
                 justifyContent: 'space-evenly',
                 alignItems: 'center',
                 flexDirection: 'row',
@@ -123,7 +138,14 @@ const AcceptBooking = props => {
                 selectedStar={(rating) => setStarCount(rating)}
                 fullStarColor={'yellow'}
               />
+
             </View>
+            {
+              submit == true && starCount == 0 ?
+                <Text style={styles.errorStyle}>Please select atleast one star</Text>
+                :
+                null
+            }
             <AccountInput
               multiline={true}
               value={review}
@@ -131,6 +153,12 @@ const AcceptBooking = props => {
               isActive={isActive}
               onChangeText={(e) => setReview(e)}
             />
+            {
+              submit == true && !review ?
+                <Text style={styles.errorStyle}>Please add a review</Text>
+                :
+                null
+            }
           </View>
           <TouchableOpacity
             onPress={() => handleSubmit()}
@@ -162,7 +190,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   snackbarContainerStyle: {
-    top: '30%',
+    top: '20%',
     justifyContent: "flex-end",
     alignItems: "center"
   },
@@ -183,7 +211,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-
+  errorStyle: {
+    fontSize: 12,
+    color: "red",
+    // margin:10,
+    paddingLeft: 10,
+    bottom: 5
+  },
   titleContainer: {
     height: '7%',
     marginTop: height > 667 ? '8%' : '7%',
