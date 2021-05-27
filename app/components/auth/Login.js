@@ -60,6 +60,7 @@ const SplashScreen = (props) => {
   const [checkCountry, setCheckCountry] = useState(false);
   const [checkRole, setCheckRole] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const onHandleLoginInputs = (name, value) => {
     if (name == "loginEmail") {
       setCheckLoginEmail(false);

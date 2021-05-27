@@ -40,8 +40,6 @@ const SplashScreen = props => {
             // await props.authActions.getUserProfile(userData, props.navigation.replace);
           })
           .catch((err) => console.log(err))
-
-
       } else { props.navigation.replace('Login'); }
     }, 2000);
   });
