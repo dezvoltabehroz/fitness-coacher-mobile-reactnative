@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1052322435698",
+    "project_id": "coacher-mobile-app",
+    "storage_bucket": "coacher-mobile-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1052322435698:android:c283842d4e7f2090dfa8eb",
+        "android_client_info": {
+          "package_name": "com.coacherapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1052322435698-2puejbu8396imkrtqb6ds61h5fnpf2pv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJcELA1ZkMGrtu4FIDeZhg2_iTEPDgwLQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1052322435698-2puejbu8396imkrtqb6ds61h5fnpf2pv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

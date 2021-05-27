@@ -55,8 +55,11 @@ const Api = {
     getUrl: function (userData) {
         return axiosInstance.post(`getUrl`, userData, config)
     },
-    addFCMToken: function () {
-        return axiosInstance.post(`user/addFCMToken`, userData, configToken(token))
+    addFCMToken: function (userData) {
+        return axiosInstance.post(`user/addFCMToken`, {
+            "fcmToken": userData.fcmToken,
+            "UserId": userData.id
+        }, configToken(userData.token))
     },
     validateUser: function (token) {
         return axiosInstance.post(`validation`, {}, configToken(token))

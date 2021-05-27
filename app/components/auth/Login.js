@@ -24,7 +24,7 @@ import { bindActionCreators } from "redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthServices } from "../../services";
 import { Snackbar } from 'react-native-paper';
-
+import messaging from '@react-native-firebase/messaging';
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 var keyheight = "";
@@ -80,6 +80,50 @@ const SplashScreen = (props) => {
     }
   };
 
+  
+  const requestUserPermission = async function (data) {
+    try {
+      const authStatus = await messaging().hasPermission();
+      const enabled =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+      if (enabled) {
+        console.log('permission granted');
+        getFcmToken(data);
+      }
+    } catch (error) {
+      // User has rejected permissions
+      console.log('permission rejected');
+    }
+
+  }
+
+  const getFcmToken = async (userData) => {
+    const fcmToken = await messaging().getToken();
+    if (fcmToken) {
+      let data = {
+        id: userData.id,
+        fcmToken: fcmToken,
+        token: userData.token
+      }
+      AuthServices.addFCMToken(data)
+        .then(async (res) => {
+          console.log("res.data :", res.data)
+          if (res.data.status) {
+            await props.authActions.getUserProfile(userData, props.navigation.replace);
+          } else {
+            await props.authActions.getUserProfile(userData, props.navigation.replace);
+            // this.props.actions.removeUser(this.props.navigation.replace)
+          }
+        })
+        .catch((err) => { console.log("err : ", err); props.authActions.removeUser(props.navigation.replace) })
+    } else {
+      console.log("Failed", "No token received");
+    }
+
+  }
+
   const loginService = async () => {
     setLoading(true);
     let loginDetails = {
@@ -95,10 +139,9 @@ const SplashScreen = (props) => {
               id: res.data.userData.userInfo.id,
               token: res.data.userData.tokenInfo
           }
-          props.authActions.getUserProfile(userData, props.navigation.replace);
-          
+          requestUserPermission(userData)
+          // props.authActions.getUserProfile(userData, props.navigation.replace);
         }
-
       })
       .catch((err) => {
         setLoading(false);
