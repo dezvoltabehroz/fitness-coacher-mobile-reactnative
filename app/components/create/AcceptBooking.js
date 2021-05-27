@@ -24,6 +24,7 @@ import { Container, Header, Content, Tab, Tabs } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { BookingServices } from '../../services';
 import { connect } from 'react-redux';
+import { errorUtils } from '../../common/Utilities';
 
 const height = Dimensions.get('window').height;
 const AcceptBooking = props => {
@@ -54,7 +55,7 @@ const AcceptBooking = props => {
 
       })
       .catch((err) => {
-        setMessage(`${err}`)
+        setMessage(`${errorUtils.getError(err)}`)
         setVisible(true);
         console.log(err)
       })
@@ -77,12 +78,13 @@ const AcceptBooking = props => {
         }
       })
       .catch((err) => {
-        setMessage(`${err}`)
+        setMessage(`${errorUtils.getError(err)}`)
         setVisible(true);
       })
   }
 
   return (
+    <Container onPress={() => setVisible(!visible)} message={message} visible={visible}>
     <View style={styles.container}>
       <StatusBar
         barStyle="dark-content"
@@ -208,6 +210,7 @@ const AcceptBooking = props => {
 
       </View>
     </View>
+    </Container>
   );
 };
 

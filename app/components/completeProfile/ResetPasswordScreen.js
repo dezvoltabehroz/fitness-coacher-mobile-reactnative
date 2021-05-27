@@ -16,6 +16,8 @@ import * as resetPasswordService from "../../../services/ResetPassword";
 import NetInfo from "@react-native-community/netinfo";
 import { ActivityIndicator } from "react-native";
 import { AuthServices } from "../../services";
+import { errorUtils } from "../../common/Utilities";
+import Container from "../../common/Container";
 
 const ResetPassword = ({ navigation, route }) => {
   console.log(navigation)
@@ -45,7 +47,7 @@ const ResetPassword = ({ navigation, route }) => {
   };
 
   const _onHandleChange = (name, value) => {
-    
+
     if (name == "code") {
       setCheckCode(false);
       setCode(value);
@@ -71,13 +73,13 @@ const ResetPassword = ({ navigation, route }) => {
   };
 
   const checkValidations = () => {
-    
+
     if (password == "") {
       setCheckPassword(true);
     } else if (code == "") {
       setCheckCode(true);
     }
-   
+
     else if (String(password).length <= 7) {
       setMessage(`Password must be between 8 to 16 characters`)
       setVisible(true);
@@ -112,7 +114,7 @@ const ResetPassword = ({ navigation, route }) => {
         }
       })
       .catch((error) => {
-        setMessage(`${error}`)
+        setMessage(`${errorUtils.getError(error)}`)
         setVisible(true);
         setLoading(false)
         console.log(error);
@@ -121,80 +123,59 @@ const ResetPassword = ({ navigation, route }) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={{ paddingBottom: "100%" }}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("../../assets/coacherlogo.png")}
-            style={styles.logo}
-          />
-          <Text style={{ textAlign: "center" }}>
-            Please enter your new password to update it.
+    <Container onPress={() => setVisible(!visible)} message={message} visible={visible}>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={{ paddingBottom: "100%" }}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../../assets/coacherlogo.png")}
+              style={styles.logo}
+            />
+            <Text style={{ textAlign: "center" }}>
+              Please enter your new password to update it.
           </Text>
-        </View>
+          </View>
 
-        <View style={styles.inputContainer}>
-          {/* <Input
-            text={"Enter your email here"}
-            value={state.email}
-            onChangeText={(value) => {
-              _onHandleChange("email", value);
-              setCheckEmail(false);
-            }}
-          />
-          {checkEmail == true && (
-            <Text style={styles.errorStyle}>Code cannot be empty</Text>
-          )}  */}
-          <Text style={{ textAlign: "center" }}>{newOtp}</Text>
-          <Input
-            text={"Enter your new password here"}
-            secureTextEntry={true}
-            value={password}
-            onChangeText={(value) => {
-              _onHandleChange("password", value);
-              setCheckPassword(false);
-            }}
-          />
-          {checkPassword == true && (
-            <Text style={styles.errorStyle}>Password cannot be empty</Text>
-          )}
-          <Input
-            text={"Enter your code here"}
-            value={code}
-            onChangeText={(value) => {
-              _onHandleChange("code", value);
-              setCheckCode(false);
-            }}
-          />
-          {checkCode == true && (
-            <Text style={styles.errorStyle}>Code cannot be empty</Text>
-          )}
+          <View style={styles.inputContainer}>
+            <Text style={{ textAlign: "center" }}>{newOtp}</Text>
+            <Input
+              text={"Enter your new password here"}
+              secureTextEntry={true}
+              value={password}
+              onChangeText={(value) => {
+                _onHandleChange("password", value);
+                setCheckPassword(false);
+              }}
+            />
+            {checkPassword == true && (
+              <Text style={styles.errorStyle}>Password cannot be empty</Text>
+            )}
+            <Input
+              text={"Enter your code here"}
+              value={code}
+              onChangeText={(value) => {
+                _onHandleChange("code", value);
+                setCheckCode(false);
+              }}
+            />
+            {checkCode == true && (
+              <Text style={styles.errorStyle}>Code cannot be empty</Text>
+            )}
 
-          <TouchableOpacity
-            style={styles.btnStyle}
-            onPress={() => checkNetwork()}
-          >{
-              loading ?
-                <ActivityIndicator color={"white"} />
-                :
-                <Text style={styles.btnText}>Update</Text>}
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-      <View style={styles.snackbarContainerStyle}>
-        <Snackbar
-          visible={visible}
-          onDismiss={() => setVisible(!visible)}
-          action={{
-            label: 'OK',
-            onPress: () => {
-              console.log("hello")
-            },
-          }}>
-          {message}
-        </Snackbar>
-      </View>
-    </SafeAreaView>
+            <TouchableOpacity
+              style={styles.btnStyle}
+              onPress={() => checkNetwork()}
+            >{
+                loading ?
+                  <ActivityIndicator color={"white"} />
+                  :
+                  <Text style={styles.btnText}>Update</Text>}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+
+      </SafeAreaView>
+    </Container>
   );
 };
 

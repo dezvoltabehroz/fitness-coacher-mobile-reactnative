@@ -26,6 +26,8 @@ const height = Dimensions.get('window').height;
 import NetInfo from "@react-native-community/netinfo";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { connect } from 'react-redux';
+import { errorUtils } from '../../common/Utilities';
+import Container from '../../common/Container';
 const ChangePassword = props => {
     const [oldPassword, setOldPassword] = React.useState("");
     const [newPassword, setNewPassword] = React.useState("");
@@ -50,7 +52,7 @@ const ChangePassword = props => {
             return null;
         }
     };
-   
+
 
     const checkValidations = () => {
 
@@ -80,111 +82,99 @@ const ChangePassword = props => {
                     setMessage(`${respone.data.msg}`)
                     setVisible(true);;
                 }
-
             })
             .catch((error) => {
-                setMessage(`${error}`)
+                setMessage(`${errorUtils.getError(error)}`)
                 setVisible(true); setLoading(false);
             })
     }
     return (
-        <View style={styles.container}>
-            <StatusBar
-                barStyle="dark-content"
-                translucent
-                backgroundColor={'transparent'}
-            />
-            <View style={styles.titleContainer}>
-                <View style={styles.backIconView}>
-                    <TouchableOpacity
-                        onPress={() => props.navigation.goBack()}>
-                        <Ionicons
-                            name="arrow-back"
-                            size={height > 667 ? 20 : 16}
-                            style={{ paddingLeft: 20, marginTop: 3 }}
-                        />
-                    </TouchableOpacity>
+        <Container onPress={() => setVisible(!visible)} message={message} visible={visible}>
+            <View style={styles.container}>
+                <StatusBar
+                    barStyle="dark-content"
+                    translucent
+                    backgroundColor={'transparent'}
+                />
+                <View style={styles.titleContainer}>
+                    <View style={styles.backIconView}>
+                        <TouchableOpacity
+                            onPress={() => props.navigation.goBack()}>
+                            <Ionicons
+                                name="arrow-back"
+                                size={height > 667 ? 20 : 16}
+                                style={{ paddingLeft: 20, marginTop: 3 }}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.titleView}>
+                        <Text style={styles.titleText}>CHANGE PASSWORD</Text>
+                    </View>
                 </View>
-                <View style={styles.titleView}>
-                    <Text style={styles.titleText}>CHANGE PASSWORD</Text>
+
+                <View style={styles.bottom}>
+                    <KeyboardAwareScrollView style={{}} showsVerticalScrollIndicator={false}>
+
+
+                        <View style={{ marginTop: '5%' }}>
+                            <Input
+                                full={true}
+                                text={"Old Password"}
+                                value={oldPassword}
+                                onChangeText={(value) => {
+                                    setOldPassword(value);
+                                }}
+                            />
+                            {
+                                submit && oldPassword == "" ? <Text style={styles.errorStyle}>Old Password cannot be empty </Text> : null
+                            }
+                        </View>
+                        <View style={styles.inner}>
+                            <Input
+                                full={true}
+                                text={"New Password"}
+                                secureTextEntry={true}
+                                value={newPassword}
+                                onChangeText={(value) => {
+                                    setNewPassword(value);
+                                }}
+                            />
+                            {
+                                submit && newPassword == "" ? <Text style={styles.errorStyle}>New Password cannot be empty </Text> : null
+                            }
+                            {
+                                submit && newPassword ? newPassword.length <= 7 ? <Text style={[styles.errorStyle]}>New Password must be between 8 to 16 characters </Text> : newPassword.length > 16 ? <Text style={[styles.errorStyle]}>New Password must be between 8 to 16 characters </Text> : null : null
+                            }
+                        </View>
+                        <View style={styles.inner}>
+                            <Input
+                                full={true}
+                                text={"Confirm New Password"}
+                                secureTextEntry={true}
+                                value={confirmNewPassword}
+                                onChangeText={(value) => {
+                                    setConfirmNewPassword(value);
+                                }}
+                            />
+                            {
+                                submit && confirmNewPassword == "" ? <Text style={styles.errorStyle}>Confirm New Password cannot be empty </Text> : null
+                            }
+                            {
+                                submit && confirmNewPassword.length && confirmNewPassword != newPassword ? <Text style={[styles.errorStyle]}>Password Mismatch</Text> : null
+                            }
+                        </View>
+                        <Button
+                            text={'Update'}
+                            loading={loading}
+                            onPress={() => {
+                                checkNetwork()
+                                // props.navigation.navigate('Booking');
+                            }}
+                        />
+                    </KeyboardAwareScrollView>
                 </View>
             </View>
-
-            <View style={styles.bottom}>
-                <KeyboardAwareScrollView style={{}} showsVerticalScrollIndicator={false}>
-
-
-                    <View style={{ marginTop: '5%' }}>
-                        <Input
-                            full={true}
-                            text={"Old Password"}
-                            value={oldPassword}
-                            onChangeText={(value) => {
-                                setOldPassword(value);
-                            }}
-                        />
-                        {
-                            submit && oldPassword == "" ? <Text style={styles.errorStyle}>Old Password cannot be empty </Text> : null
-                        }
-                    </View>
-                    <View style={styles.inner}>
-                        <Input
-                            full={true}
-                            text={"New Password"}
-                            secureTextEntry={true}
-                            value={newPassword}
-                            onChangeText={(value) => {
-                                setNewPassword(value);
-                            }}
-                        />
-                        {
-                            submit && newPassword == "" ? <Text style={styles.errorStyle}>New Password cannot be empty </Text> : null
-                        }
-                        {
-                            submit&& newPassword  ? newPassword.length <= 7 ? <Text style={[styles.errorStyle]}>New Password must be between 8 to 16 characters </Text> : newPassword.length > 16 ? <Text style={[styles.errorStyle]}>New Password must be between 8 to 16 characters </Text> : null : null
-                        }
-                    </View>
-                    <View style={styles.inner}>
-                        <Input
-                            full={true}
-                            text={"Confirm New Password"}
-                            secureTextEntry={true}
-                            value={confirmNewPassword}
-                            onChangeText={(value) => {
-                                setConfirmNewPassword(value);
-                            }}
-                        />
-                        {
-                            submit && confirmNewPassword == "" ? <Text style={styles.errorStyle}>Confirm New Password cannot be empty </Text> : null
-                        }
-                        {
-                            submit && confirmNewPassword.length && confirmNewPassword != newPassword ? <Text style={[styles.errorStyle]}>Password Mismatch</Text> : null
-                        }
-                    </View>
-                    <Button
-                        text={'Update'}
-                        loading={loading}
-                        onPress={() => {
-                            checkNetwork()
-                            // props.navigation.navigate('Booking');
-                        }}
-                    />
-                    <View style={styles.snackbarContainerStyle}>
-                        <Snackbar
-                            visible={visible}
-                            onDismiss={() => setVisible(!visible)}
-                            action={{
-                                label: 'OK',
-                                onPress: () => {
-                                    console.log("hello")
-                                },
-                            }}>
-                            {message}
-                        </Snackbar>
-                    </View>
-                </KeyboardAwareScrollView>
-            </View>
-        </View>
+        </Container>
     );
 };
 

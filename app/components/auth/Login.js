@@ -25,6 +25,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthServices } from "../../services";
 import { Snackbar } from 'react-native-paper';
 import messaging from '@react-native-firebase/messaging';
+import Container from "../../common/Container";
+import { errorUtils } from "../../common/Utilities";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 var keyheight = "";
@@ -81,7 +83,7 @@ const SplashScreen = (props) => {
     }
   };
 
-  
+
   const requestUserPermission = async function (data) {
     try {
       const authStatus = await messaging().hasPermission();
@@ -137,8 +139,8 @@ const SplashScreen = (props) => {
           console.log("res :", res.data.userData.userInfo);
           await AsyncStorage.setItem('Token', JSON.stringify(res.data.userData.tokenInfo))
           let userData = {
-              id: res.data.userData.userInfo.id,
-              token: res.data.userData.tokenInfo
+            id: res.data.userData.userInfo.id,
+            token: res.data.userData.tokenInfo
           }
           requestUserPermission(userData)
           // props.authActions.getUserProfile(userData, props.navigation.replace);
@@ -146,7 +148,7 @@ const SplashScreen = (props) => {
       })
       .catch((err) => {
         setLoading(false);
-        setMessage(`${err}`)
+        setMessage(`${errorUtils.getError(err)}`)
         setVisible(true);
         console.log(err)
       })
@@ -274,231 +276,226 @@ const SplashScreen = (props) => {
   }, [keyboardHeigth]);
 
   return (
-    // <KeyboardAvoidingView
-    //   style={{flex: 1}}§
-    //   behavior="padding"
-    //   keyboardVerticalOffset={screenHeight > 667 ? -100 : 0}>
-    /* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */
-    <View style={styles.container}>
-      <StatusBar
-        barStyle="dark-content"
-        translucent
-        backgroundColor={"transparent"}
-      />
-      <Image
-        source={require("../../assets/coacherlogo.png")}
-        style={[
-          styles.logo,
-          {
-            marginTop:
-              keyboardHeigth != 0
-                ? screenHeight > 667
-                  ? "-20%"
-                  : "-30%"
-                : screenHeight > 667
-                  ? "20%"
-                  : "15%",
-          },
-        ]}
-      />
+    <Container onPress={() => setVisible(!visible)} message={message} visible={visible}>
+      <View style={styles.container}>
+        <StatusBar
+          barStyle="dark-content"
+          translucent
+          backgroundColor={"transparent"}
+        />
+        <Image
+          source={require("../../assets/coacherlogo.png")}
+          style={[
+            styles.logo,
+            {
+              marginTop:
+                keyboardHeigth != 0
+                  ? screenHeight > 667
+                    ? "-20%"
+                    : "-30%"
+                  : screenHeight > 667
+                    ? "20%"
+                    : "15%",
+            },
+          ]}
+        />
 
-      <View style={styles.bottom}>
-        <Tabs
-          tabBarUnderlineStyle={[styles.tabUnderline]}
-          tabContainerStyle={{
-            elevation: 0,
-            borderTopLeftRadius: 30,
-            borderTopRightRadius: 30,
-            height: 70,
-            borderWidth: 0,
-            borderBottomColor: "white",
-          }}
-        >
-          <Tab
-            heading="Login"
-            tabStyle={[
-              styles.tab,
-              {
-                borderTopLeftRadius: 30,
-              },
-            ]}
-            activeTabStyle={[styles.activeTab, { borderTopLeftRadius: 30 }]}
-            textStyle={styles.tabText}
-            activeTextStyle={styles.activeTabText}
+        <View style={styles.bottom}>
+          <Tabs
+            tabBarUnderlineStyle={[styles.tabUnderline]}
+            tabContainerStyle={{
+              elevation: 0,
+              borderTopLeftRadius: 30,
+              borderTopRightRadius: 30,
+              height: 70,
+              borderWidth: 0,
+              borderBottomColor: "white",
+            }}
           >
-            {/* <ScrollView showsVerticalScrollIndicator={false}> */}
-            <View style={{ height: "70%" }}>
-              <Input
-                text={"Email-Address"}
-                value={loginEmail}
-                onChangeText={(value) => {
-                  onHandleLoginInputs("loginEmail", value);
-                  setCheckLoginEmail(false);
-                }}
-              />
-              {checkLoginEmail == true && (
-                <Text style={styles.errorStyle}>Email cannot be empty</Text>
-              )}
-              <Input
-                text={"Password"}
-                secureTextEntry={true}
-                value={loginPassword}
-                onChangeText={(value) => {
-                  onHandleLoginInputs("loginPassword", value);
-                  setCheckLoginPassword(false);
-                }}
-              />
-              {checkLoginPassword == true && (
-                <Text style={styles.errorStyle}>Password cannot be empty</Text>
-              )}
-
-              <View style={{ paddingHorizontal: 20 }}>
-                <Button
-                  loading={loading}
-                  text={"Login"}
-                  onPress={() => {
-                    loginValidations();
-                    // props.navigation.navigate("EmailSent");
-                  }}
-                />
-              </View>
-              <Link style={styles.linkText} to="/ForgotPassword">
-                Forgot your password?
-              </Link>
-            </View>
-            <View style={styles.snackbarContainerStyle}>
-              <Snackbar
-                visible={visible}
-                onDismiss={() => setVisible(!visible)}
-                action={{
-                  label: 'OK',
-                  onPress: () => {
-                    console.log("hello")
-                  },
-                }}>
-                {message}
-              </Snackbar>
-            </View>
-            {/* </ScrollView> */}
-          </Tab>
-          <Tab
-            heading="Register"
-            tabStyle={[styles.tab, { borderTopRightRadius: 30 }]}
-            activeTabStyle={[styles.activeTab, { borderTopRightRadius: 30 }]}
-            textStyle={styles.tabText}
-            activeTextStyle={styles.activeTabText}
-          >
-            <ScrollView
-              contentContainerStyle={{
-                paddingBottom: screenHeight > 667 ? "25%" : "15%",
-              }}
-              showsVerticalScrollIndicator={false}
+            <Tab
+              heading="Login"
+              tabStyle={[
+                styles.tab,
+                {
+                  borderTopLeftRadius: 30,
+                },
+              ]}
+              activeTabStyle={[styles.activeTab, { borderTopLeftRadius: 30 }]}
+              textStyle={styles.tabText}
+              activeTextStyle={styles.activeTabText}
             >
-              <View style={{
-                // height: 610
-              }}>
+              {/* <ScrollView showsVerticalScrollIndicator={false}> */}
+              <View style={{ height: "70%" }}>
                 <Input
-                  text={"First Name"}
-                  value={first_name}
+                  text={"Email-Address"}
+                  value={loginEmail}
                   onChangeText={(value) => {
-                    _onHandleChange("first_name", value);
-                    setCheckFirstname(false);
+                    onHandleLoginInputs("loginEmail", value);
+                    setCheckLoginEmail(false);
                   }}
                 />
-                {checkFirst_name == true && (
-                  <Text style={styles.errorStyle}>
-                    Fisrt Name cannot be empty
-                  </Text>
-                )}
-                <Input
-                  text={"Last Name"}
-                  value={last_name}
-                  onChangeText={(value) => {
-                    _onHandleChange("last_name", value);
-                    setCheckFirstname(false);
-                  }}
-                />
-                {checkLast_name == true && (
-                  <Text style={styles.errorStyle}>
-                    Last Name cannot be empty
-                  </Text>
-                )}
-
-                <Input
-                  text={"Email Address"}
-                  value={state.email}
-                  onChangeText={(value) => {
-                    _onHandleChange("email", value);
-                    setCheckEmail(false);
-                  }}
-                />
-                {checkEmail == true && (
+                {checkLoginEmail == true && (
                   <Text style={styles.errorStyle}>Email cannot be empty</Text>
                 )}
                 <Input
-                  secureTextEntry={true}
                   text={"Password"}
-                  value={password}
-                  onChangeText={(value) => {
-                    _onHandleChange("password", value);
-                    setCheckPassword(false);
-                  }}
-                />
-                {checkPassword == true && (
-                  <Text style={styles.errorStyle}>
-                    Password cannot be empty
-                  </Text>
-                )}
-                <Input
                   secureTextEntry={true}
-                  text={"Confirm Password"}
-                  value={confirmPassword}
+                  value={loginPassword}
                   onChangeText={(value) => {
-                    _onHandleChange("confirmPassword", value);
-                    setCheckPassword(false);
+                    onHandleLoginInputs("loginPassword", value);
+                    setCheckLoginPassword(false);
                   }}
                 />
-                {checkPassword == true && (
-                  <Text style={styles.errorStyle}>
-                    Confirm password cannot be empty
-                  </Text>
+                {checkLoginPassword == true && (
+                  <Text style={styles.errorStyle}>Password cannot be empty</Text>
                 )}
 
                 <View style={{ paddingHorizontal: 20 }}>
                   <Button
-                    text={"Next"}
                     loading={loading}
-                    onPress={() => checkNetwork()}
+                    text={"Login"}
+                    onPress={() => {
+                      loginValidations();
+                      // props.navigation.navigate("EmailSent");
+                    }}
                   />
                 </View>
-                <Text style={[styles.text, { textAlign: "center" }]}>
-                  By signing up, you agree to ECHO's Terms of Use & Privacy
-                  Policy
-                </Text>
-                <View style={styles.snackbarContainerStyle}>
-                  <Snackbar
-                    visible={visible}
-                    onDismiss={() => setVisible(!visible)}
-                    action={{
-                      label: 'OK',
-                      onPress: () => {
-                        console.log("hello")
-                      },
-                    }}>
-                    {message}
-                  </Snackbar>
-                </View>
-                <View style={{ marginBottom: 150 }}></View>
+                <Link style={styles.linkText} to="/ForgotPassword">
+                  Forgot your password?
+              </Link>
               </View>
+              <View style={styles.snackbarContainerStyle}>
+                <Snackbar
+                  visible={visible}
+                  onDismiss={() => setVisible(!visible)}
+                  action={{
+                    label: 'OK',
+                    onPress: () => {
+                      console.log("hello")
+                    },
+                  }}>
+                  {message}
+                </Snackbar>
+              </View>
+              {/* </ScrollView> */}
+            </Tab>
+            <Tab
+              heading="Register"
+              tabStyle={[styles.tab, { borderTopRightRadius: 30 }]}
+              activeTabStyle={[styles.activeTab, { borderTopRightRadius: 30 }]}
+              textStyle={styles.tabText}
+              activeTextStyle={styles.activeTabText}
+            >
+              <ScrollView
+                contentContainerStyle={{
+                  paddingBottom: screenHeight > 667 ? "25%" : "15%",
+                }}
+                showsVerticalScrollIndicator={false}
+              >
+                <View style={{
+                  // height: 610
+                }}>
+                  <Input
+                    text={"First Name"}
+                    value={first_name}
+                    onChangeText={(value) => {
+                      _onHandleChange("first_name", value);
+                      setCheckFirstname(false);
+                    }}
+                  />
+                  {checkFirst_name == true && (
+                    <Text style={styles.errorStyle}>
+                      Fisrt Name cannot be empty
+                    </Text>
+                  )}
+                  <Input
+                    text={"Last Name"}
+                    value={last_name}
+                    onChangeText={(value) => {
+                      _onHandleChange("last_name", value);
+                      setCheckFirstname(false);
+                    }}
+                  />
+                  {checkLast_name == true && (
+                    <Text style={styles.errorStyle}>
+                      Last Name cannot be empty
+                    </Text>
+                  )}
 
-            </ScrollView>
+                  <Input
+                    text={"Email Address"}
+                    value={state.email}
+                    onChangeText={(value) => {
+                      _onHandleChange("email", value);
+                      setCheckEmail(false);
+                    }}
+                  />
+                  {checkEmail == true && (
+                    <Text style={styles.errorStyle}>Email cannot be empty</Text>
+                  )}
+                  <Input
+                    secureTextEntry={true}
+                    text={"Password"}
+                    value={password}
+                    onChangeText={(value) => {
+                      _onHandleChange("password", value);
+                      setCheckPassword(false);
+                    }}
+                  />
+                  {checkPassword == true && (
+                    <Text style={styles.errorStyle}>
+                      Password cannot be empty
+                    </Text>
+                  )}
+                  <Input
+                    secureTextEntry={true}
+                    text={"Confirm Password"}
+                    value={confirmPassword}
+                    onChangeText={(value) => {
+                      _onHandleChange("confirmPassword", value);
+                      setCheckPassword(false);
+                    }}
+                  />
+                  {checkPassword == true && (
+                    <Text style={styles.errorStyle}>
+                      Confirm password cannot be empty
+                    </Text>
+                  )}
 
-          </Tab>
-        </Tabs>
+                  <View style={{ paddingHorizontal: 20 }}>
+                    <Button
+                      text={"Next"}
+                      loading={loading}
+                      onPress={() => checkNetwork()}
+                    />
+                  </View>
+                  <Text style={[styles.text, { textAlign: "center" }]}>
+                    By signing up, you agree to ECHO's Terms of Use & Privacy
+                    Policy
+                </Text>
+                  <View style={styles.snackbarContainerStyle}>
+                    <Snackbar
+                      visible={visible}
+                      onDismiss={() => setVisible(!visible)}
+                      action={{
+                        label: 'OK',
+                        onPress: () => {
+                          console.log("hello")
+                        },
+                      }}>
+                      {message}
+                    </Snackbar>
+                  </View>
+                  <View style={{ marginBottom: 150 }}></View>
+                </View>
+
+              </ScrollView>
+
+            </Tab>
+          </Tabs>
+        </View>
       </View>
-    </View>
-    /* </TouchableWithoutFeedback> */
-    // </KeyboardAvoidingView>
+    </Container>
   );
 };
 

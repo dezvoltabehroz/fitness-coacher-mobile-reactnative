@@ -16,6 +16,8 @@ import * as verifyEmailService from "../../../services/VerifyEmail";
 import * as resendOtpService from "../../../services/ResendCode";
 import NetInfo from "@react-native-community/netinfo";
 import { Snackbar } from 'react-native-paper';
+import { errorUtils } from "../../common/Utilities";
+import Container from "../../common/Container";
 const EmailSent = (props) => {
   const [code, setCode] = useState("");
   const [checkCode, setCheckCode] = useState("");
@@ -96,7 +98,7 @@ const EmailSent = (props) => {
         console.log("error in service");
       }
     } catch (error) {
-      setMessage(`${error}`)
+      setMessage(`${errorUtils.getError(error)}`)
       setVisible(true);
       console.log(error);
     }
@@ -118,78 +120,67 @@ const EmailSent = (props) => {
         console.log("error in service");
       }
     } catch (error) {
-      setMessage(`${error}`)
+      setMessage(`${errorUtils.getError(error)}`)
       setVisible(true);
       console.log(error);
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={{ paddingBottom: "100%" }}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("../../assets/coacherlogo.png")}
-            style={styles.logo}
-          />
-          <Text style={{ textAlign: "center" }}>
-            Please enter the code sent to your email address to Verfiy your
-            Account.
+    <Container onPress={() => setVisible(!visible)} message={message} visible={visible}>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={{ paddingBottom: "100%" }}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../../assets/coacherlogo.png")}
+              style={styles.logo}
+            />
+            <Text style={{ textAlign: "center" }}>
+              Please enter the code sent to your email address to Verfiy your
+              Account.
           </Text>
-        </View>
+          </View>
 
-        <View style={styles.inputContainer}>
-          <Input
-            text={"Enter your email here"}
-            value={state.email}
-            onChangeText={(value) => {
-              _onHandleChange("email", value);
-              setCheckEmail(false);
-            }}
-          />
-          {checkEmail == true && (
-            <Text style={styles.errorStyle}>Code cannot be empty</Text>
-          )}
-          <Input
-            text={"Enter your code here"}
-            value={code}
-            onChangeText={(value) => {
-              _onHandleChange("code", value);
-              setCheckCode(false);
-            }}
-          />
-          {checkCode == true && (
-            <Text style={styles.errorStyle}>Code cannot be empty</Text>
-          )}
+          <View style={styles.inputContainer}>
+            <Input
+              text={"Enter your email here"}
+              value={state.email}
+              onChangeText={(value) => {
+                _onHandleChange("email", value);
+                setCheckEmail(false);
+              }}
+            />
+            {checkEmail == true && (
+              <Text style={styles.errorStyle}>Code cannot be empty</Text>
+            )}
+            <Input
+              text={"Enter your code here"}
+              value={code}
+              onChangeText={(value) => {
+                _onHandleChange("code", value);
+                setCheckCode(false);
+              }}
+            />
+            {checkCode == true && (
+              <Text style={styles.errorStyle}>Code cannot be empty</Text>
+            )}
 
-          <TouchableOpacity
-            style={styles.btnStyle}
-            onPress={() => checkNetwork()}
-          >
-            <Text style={styles.btnText}>Verify</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.btnStyle}
-            onPress={() => resendCode()}
-          >
-            <Text style={styles.btnText}>Resend Code</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.snackbarContainerStyle}>
-          <Snackbar
-            visible={visible}
-            onDismiss={() => setVisible(!visible)}
-            action={{
-              label: 'OK',
-              onPress: () => {
-                console.log("hello")
-              },
-            }}>
-            {message}
-          </Snackbar>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+            <TouchableOpacity
+              style={styles.btnStyle}
+              onPress={() => checkNetwork()}
+            >
+              <Text style={styles.btnText}>Verify</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.btnStyle}
+              onPress={() => resendCode()}
+            >
+              <Text style={styles.btnText}>Resend Code</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </Container>
   );
 };
 

@@ -28,6 +28,7 @@ import { BarChart, Grid } from 'react-native-svg-charts';
 import * as shape from 'd3-shape';
 import { PaymentServices } from '../../services';
 import { connect } from 'react-redux';
+import { errorUtils } from '../../common/Utilities';
 const height = Dimensions.get('window').height;
 const Earnings = props => {
   const [visible, setVisible] = useState(false)
@@ -45,7 +46,7 @@ const Earnings = props => {
         }
       })
       .catch((error) => {
-        setMessage(`${error}`)
+        setMessage(`${errorUtils.getError(error)}`)
         setVisible(true);
         console.log(error)
       })
@@ -66,7 +67,7 @@ const Earnings = props => {
               setLoading(false);
             })
             .catch((err) => {
-              setMessage(`${err}`)
+              setMessage(`${errorUtils.getError(err)}`)
               setVisible(true); console.log(err)
               setLoading(false);
             })
@@ -79,7 +80,7 @@ const Earnings = props => {
       })
       .catch((error) => {
         setLoading(false);
-        setMessage(`${error}`)
+        setMessage(`${errorUtils.getError(error)}`)
         setVisible(true);
       })
   }

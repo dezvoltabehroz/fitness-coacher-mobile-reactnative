@@ -22,6 +22,7 @@ import { NotificationServices } from '../../services';
 import { connect } from 'react-redux'
 import { authActions } from '../../redux/actions/auth';
 import { bindActionCreators } from "redux";
+import Container from '../../common/Container';
 const height = Dimensions.get('window').height;
 const NotificatinsSettings = props => {
   const [isSwitchOn, setIsSwitchOn] = React.useState(false);
@@ -38,7 +39,7 @@ const NotificatinsSettings = props => {
       "notification": !isSwitchOn1
     }
     NotificationServices.notificationSetting(userData, props.token)
-      .then(async(res) => {
+      .then(async (res) => {
         if (res.data.success) {
           onToggleSwitch1()
           let data = {
@@ -48,97 +49,104 @@ const NotificatinsSettings = props => {
           await props.authActions.getUserProfile(data, props.navigation.replace)
         }
         else {
-          console.log(res.data)
+          setMessage(`${res.data.msg}`)
+          setVisible(true);
         }
       })
-      .catch((err) => console.log(err))
+      .catch((err) => {
+        console.log(err.response)
+        setMessage(`${errorUtils.getError(err)}`)
+        setVisible(true);
+      })
   }
 
   return (
-    <View style={styles.container}>
-      <StatusBar
-        barStyle="dark-content"
-        translucent
-        backgroundColor={'transparent'}
-      />
-      <View style={styles.titleContainer}>
-        <View style={styles.backIconView}>
-          <TouchableOpacity
-            onPress={() => props.navigation.navigate('Settings')}>
-            <Ionicons
-              name="arrow-back"
-              size={height > 667 ? 20 : 16}
-              style={{ paddingLeft: 20, marginTop: 3 }}
-            />
-          </TouchableOpacity>
+    <Container onPress={() => setVisible(!visible)} message={message} visible={visible}>
+      <View style={styles.container}>
+        <StatusBar
+          barStyle="dark-content"
+          translucent
+          backgroundColor={'transparent'}
+        />
+        <View style={styles.titleContainer}>
+          <View style={styles.backIconView}>
+            <TouchableOpacity
+              onPress={() => props.navigation.navigate('Settings')}>
+              <Ionicons
+                name="arrow-back"
+                size={height > 667 ? 20 : 16}
+                style={{ paddingLeft: 20, marginTop: 3 }}
+              />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.titleView}>
+            <Text style={styles.titleText}>NOTIFICATION SETTINGS</Text>
+          </View>
         </View>
-        <View style={styles.titleView}>
-          <Text style={styles.titleText}>NOTIFICATION SETTINGS</Text>
-        </View>
-      </View>
 
-      <View style={styles.bottom}>
-        <View style={styles.inner}>
-          <View>
-            <Text style={styles.text}>App Notifications</Text>
-            <Text style={styles.text1}>Play sound for in-app update</Text>
+        <View style={styles.bottom}>
+          <View style={styles.inner}>
+            <View>
+              <Text style={styles.text}>App Notifications</Text>
+              <Text style={styles.text1}>Play sound for in-app update</Text>
+            </View>
+            <Switch
+              style={{
+                transform: [
+                  { scaleX: height > 667 ? 1 : 0.7 },
+                  { scaleY: height > 667 ? 1 : 0.7 },
+                ],
+              }}
+              trackColor={{ true: Colors.buttonColor, false: 'grey' }}
+              value={isSwitchOn}
+              onValueChange={onToggleSwitch}
+              color={Colors.buttonColor}
+            />
           </View>
-          <Switch
-            style={{
-              transform: [
-                { scaleX: height > 667 ? 1 : 0.7 },
-                { scaleY: height > 667 ? 1 : 0.7 },
-              ],
-            }}
-            trackColor={{ true: Colors.buttonColor, false: 'grey' }}
-            value={isSwitchOn}
-            onValueChange={onToggleSwitch}
-            color={Colors.buttonColor}
-          />
-        </View>
-        <View style={styles.inner}>
-          <View>
-            <Text style={styles.text}>Push Notifications</Text>
+          <View style={styles.inner}>
+            <View>
+              <Text style={styles.text}>Push Notifications</Text>
+            </View>
+            <Switch
+              style={{
+                transform: [
+                  { scaleX: height > 667 ? 1 : 0.7 },
+                  { scaleY: height > 667 ? 1 : 0.7 },
+                ],
+              }}
+              trackColor={{ true: Colors.buttonColor, false: 'grey' }}
+              value={isSwitchOn1}
+              onValueChange={() => handleNotificationSetting()}
+              color={Colors.buttonColor}
+            />
           </View>
-          <Switch
-            style={{
-              transform: [
-                { scaleX: height > 667 ? 1 : 0.7 },
-                { scaleY: height > 667 ? 1 : 0.7 },
-              ],
-            }}
-            trackColor={{ true: Colors.buttonColor, false: 'grey' }}
-            value={isSwitchOn1}
-            onValueChange={() => handleNotificationSetting()}
-            color={Colors.buttonColor}
-          />
-        </View>
-        <View style={styles.inner}>
-          <View>
-            <Text style={styles.text}>Vibration</Text>
-            <Text style={styles.text1}>On</Text>
+          <View style={styles.inner}>
+            <View>
+              <Text style={styles.text}>Vibration</Text>
+              <Text style={styles.text1}>On</Text>
+            </View>
+            <Switch
+              style={{
+                transform: [
+                  { scaleX: height > 667 ? 1 : 0.7 },
+                  { scaleY: height > 667 ? 1 : 0.7 },
+                ],
+              }}
+              trackColor={{ true: Colors.buttonColor, false: 'grey' }}
+              value={isSwitchOn2}
+              onValueChange={onToggleSwitch2}
+              color={Colors.buttonColor}
+            />
           </View>
-          <Switch
-            style={{
-              transform: [
-                { scaleX: height > 667 ? 1 : 0.7 },
-                { scaleY: height > 667 ? 1 : 0.7 },
-              ],
-            }}
-            trackColor={{ true: Colors.buttonColor, false: 'grey' }}
-            value={isSwitchOn2}
-            onValueChange={onToggleSwitch2}
-            color={Colors.buttonColor}
-          />
-        </View>
-        <View style={styles.inner}>
-          <View>
-            <Text style={styles.text}>Notifications sound</Text>
-            <Text style={styles.text1}>Default [IOS]</Text>
+          <View style={styles.inner}>
+            <View>
+              <Text style={styles.text}>Notifications sound</Text>
+              <Text style={styles.text1}>Default [IOS]</Text>
+            </View>
           </View>
         </View>
       </View>
-    </View>
+    </Container>
   );
 };
 

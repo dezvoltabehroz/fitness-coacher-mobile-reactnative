@@ -18,6 +18,8 @@ import NetInfo from "@react-native-community/netinfo";
 import { AuthServices } from "../../services";
 import { ActivityIndicator } from "react-native";
 import { Snackbar } from 'react-native-paper';
+import { errorUtils } from "../../common/Utilities";
+import Container from "../../common/Container";
 const ForgotPassword = (props) => {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -89,63 +91,51 @@ const ForgotPassword = (props) => {
         }
       })
       .catch((err) => {
-        setMessage(`${err}`)
+        setMessage(`${errorUtils.getError(err)}`)
         setVisible(true);
         setLoading(false)
       })
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={{ paddingBottom: "100%" }}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("../../assets/coacherlogo.png")}
-            style={styles.logo}
-          />
-          <Text style={{ textAlign: "center" }}>
-            Forgot your password? No worries! Enter your email to get an OTP
+    <Container onPress={() => setVisible(!visible)} message={message} visible={visible}>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={{ paddingBottom: "100%" }}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../../assets/coacherlogo.png")}
+              style={styles.logo}
+            />
+            <Text style={{ textAlign: "center" }}>
+              Forgot your password? No worries! Enter your email to get an OTP
           </Text>
-        </View>
+          </View>
 
-        <View style={styles.inputContainer}>
-          <Input
-            text={"Enter your email here"}
-            value={state.email}
-            onChangeText={(value) => {
-              _onHandleChange("email", value);
-              setCheckEmail(false);
-            }}
-          />
-          {checkEmail == true && (
-            <Text style={styles.errorStyle}>Code cannot be empty</Text>
-          )}
-          <TouchableOpacity
-            style={styles.btnStyle}
-            onPress={() => checkNetwork()}
-          >{
-              loading ?
-                <ActivityIndicator color={'white'} />
-                :
-                <Text style={styles.btnText}>Get new OTP</Text>}
-          </TouchableOpacity>
-        </View>
-
-      </ScrollView>
-      <View style={styles.snackbarContainerStyle}>
-        <Snackbar
-          visible={visible}
-          onDismiss={() => setVisible(!visible)}
-          action={{
-            label: 'OK',
-            onPress: () => {
-              console.log("hello")
-            },
-          }}>
-          {message}
-        </Snackbar>
-      </View>
-    </SafeAreaView>
+          <View style={styles.inputContainer}>
+            <Input
+              text={"Enter your email here"}
+              value={state.email}
+              onChangeText={(value) => {
+                _onHandleChange("email", value);
+                setCheckEmail(false);
+              }}
+            />
+            {checkEmail == true && (
+              <Text style={styles.errorStyle}>Code cannot be empty</Text>
+            )}
+            <TouchableOpacity
+              style={styles.btnStyle}
+              onPress={() => checkNetwork()}
+            >{
+                loading ?
+                  <ActivityIndicator color={'white'} />
+                  :
+                  <Text style={styles.btnText}>Get new OTP</Text>}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </Container>
   );
 };
 

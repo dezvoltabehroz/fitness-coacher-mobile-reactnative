@@ -34,6 +34,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Calendar from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import axios from "axios";
+import { errorUtils } from "../../common/Utilities";
+import Container from "../../common/Container";
 const height = Dimensions.get("window").height;
 const width = Dimensions.get("window").width;
 function CompleteProfile({ navigation, route }) {
@@ -151,11 +153,11 @@ function CompleteProfile({ navigation, route }) {
     try {
       let state = await NetInfo.fetch();
       if (state.isConnected == true) {
-         checkValidations();
-       } else {
+        checkValidations();
+      } else {
         setMessage(`Please check your internet connection and try again`)
         setVisible(true);
-       }
+      }
     } catch (error) {
       console.log(error);
       return null;
@@ -239,7 +241,7 @@ function CompleteProfile({ navigation, route }) {
         }
       })
       .catch((error) => {
-        setMessage(`${error}`)
+        setMessage(`${errorUtils.getError(error)}`)
         setVisible(true);
         console.log(error);
       })
@@ -370,6 +372,7 @@ function CompleteProfile({ navigation, route }) {
   };
 
   return (
+    <Container onPress={() => setVisible(!visible)} message={message} visible={visible}>
     <View style={styles.container}>
       <StatusBar
         barStyle="dark-content"
@@ -504,7 +507,7 @@ function CompleteProfile({ navigation, route }) {
             Address cannot be empty
           </Text>
         )}
-       
+
         <Input
           full={true}
           text={"Phone"}
@@ -672,20 +675,8 @@ function CompleteProfile({ navigation, route }) {
       >
         <View />
       </CountryPicker>
-      <View style={styles.snackbarContainerStyle}>
-        <Snackbar
-          visible={visible}
-          onDismiss={() => setVisible(!visible)}
-          action={{
-            label: 'OK',
-            onPress: () => {
-              console.log("hello")
-            },
-          }}>
-          {message}
-        </Snackbar>
-      </View>
     </View >
+    </Container>
   );
 }
 
