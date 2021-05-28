@@ -123,15 +123,18 @@ const AccountSettingsScreen = (props) => {
     TrainingCategoryServices.allTrainingTypes()
       .then((response) => {
         var trainingTypes = response.data.trainingTypes
-        for (let index = 0; index < response.data.trainingTypes.length; index++) {
-          if (props.user.TrainingTypeId == trainingTypes[index].id) {
-            trainingTypes[index].selected = true;
+        trainingTypes.forEach((item, index) => {
+          console.log(item.id)
+          console.log(props?.user?.TrainingTypeId)
+          if (props?.user?.TrainingTypeId == item.id) {
+            trainingTypes[index] = { ...trainingTypes[index], selected: true };
+
             setSelectInstructor(trainingTypes[index])
             getSubCategories(trainingTypes[index]);
           } else {
-            trainingTypes[index].selected = false;
+            trainingTypes[index] = { ...trainingTypes[index], selected: false };
           }
-        }
+        })
         setCategories(trainingTypes);
       })
       .catch((err) => console.log(err))
@@ -151,7 +154,7 @@ const AccountSettingsScreen = (props) => {
         }
         subCategoriesArr.forEach((item, i) => {
           for (let index = 0; index < data.length; index++) {
-            if (item.id == subCategoriesArr[index].id) {
+            if (item.id == data[index].id) {
               subCategoriesArr[index] = { ...subCategoriesArr[index], selected: true };
             }
           }
@@ -250,7 +253,7 @@ const AccountSettingsScreen = (props) => {
   };
 
   const selectingSkills = (iteration) => {
-    var skill = coachSkills;
+    var skill = [...coachSkills];
     for (let index = 0; index < skill.length; index++) {
       skill[index].selected = false;
     }
@@ -315,6 +318,7 @@ const AccountSettingsScreen = (props) => {
             fileName: new Date().getTime() + response.fileName,
             fileType: response.type
           }
+          setFilePath(source.uri);
           AuthServices.getUrl(userData)
             .then((res) => {
               //console.log(res.data)
@@ -332,7 +336,7 @@ const AccountSettingsScreen = (props) => {
                 }).catch((err) => { console.log(err) })
             })
             .catch((err) => { console.log(err) })
-          setFilePath(source.uri);
+          
         }
       })
   }
@@ -393,8 +397,11 @@ const AccountSettingsScreen = (props) => {
       .then(async (response) => {
         console.log(response.data)
         if (response.data.success != undefined && response.data.success == true) {
-          await props.authActions.getUserProfile(props?.token)
-          props.navigation.replace("Booking");
+          let data = {
+            id: response.data.user.id,
+            token: props?.token
+          }
+          await props.authActions.getUserProfile(data, props.navigation.replace);
         } else {
           setMessage(`${response.data.msg}`)
           setVisible(true);
@@ -457,7 +464,7 @@ const AccountSettingsScreen = (props) => {
       firstName: first_name,
       lastName: last_name,
       email: email,
-      imageUrl: "https://static.vecteezy.com/system/resources/previews/001/202/557/original/mustache-png.png",
+      imageUrl: filePath,
       age: props?.user?.age,
       phone: phoneNumber,
       address: address,
@@ -486,6 +493,7 @@ const AccountSettingsScreen = (props) => {
       categoriesArr[index].selected = false;
     }
     categoriesArr[iteration].selected = true;
+    setSelectInstructor(categoriesArr[iteration])
     getSubCategories(categoriesArr[iteration])
     await setCategories(categoriesArr);
     await setCat(true);
@@ -683,6 +691,7 @@ const AccountSettingsScreen = (props) => {
 
                 <FlatList
                   data={coachSkills}
+                  // numColumns={4}
                   // showsVerticalScrollIndicator={false}
                   contentContainerStyle={styles.contentContainerStyle}
                   keyExtractor={(item, index) => index.toString()}
@@ -874,7 +883,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginBottom: "5%",
-    width: width,
+    width: width*0.9,
   },
   dropDown: {
     height: 40,

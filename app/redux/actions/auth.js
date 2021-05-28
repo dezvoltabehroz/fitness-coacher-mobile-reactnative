@@ -6,7 +6,7 @@ import {
 import { AuthServices, RegisterUser } from '../../services';
 import { Alert, Linking, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { trainingActions } from './trainingType';
 const setUserProfile = (userData, token, navigate) => {
     return async (dispatch) => {
         if (userData) {
@@ -28,6 +28,10 @@ const getUserProfile = (userData, navigate) => {
                 console.log(responseData.data.requestDetails)
                 await AsyncStorage.setItem('USER', JSON.stringify(responseData.data.requestDetails))
                 await dispatch(setUserProfile(responseData.data.requestDetails, userData.token, navigate))
+                await dispatch(trainingActions.categories())
+                await dispatch(trainingActions.subCategories({ id: responseData.data.requestDetails.TrainingTypeId }));
+                await dispatch(trainingActions.getSkills());
+              
                 // if (responseData.data.success) {
                 //     console.log(responseData.data.user)
                 //     await AsyncStorage.setItem('USER', JSON.stringify(responseData.data.user))

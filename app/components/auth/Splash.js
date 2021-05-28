@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { Colors } from '../../style/colors';
 import { authActions } from '../../redux/actions/auth';
+import { trainingActions } from '../../redux/actions/trainingType';
 import { connect } from 'react-redux';
 import { bindActionCreators } from "redux";
 import { AuthServices } from '../../services';
@@ -76,8 +77,8 @@ const SplashScreen = props => {
           if (res.data.status) {
             await props.authActions.getUserProfile(userData, props.navigation.replace);
           } else {
-            await props.authActions.getUserProfile(userData, props.navigation.replace);
-            // this.props.actions.removeUser(this.props.navigation.replace)
+            // await props.authActions.getUserProfile(userData, props.navigation.replace);
+            props.actions.removeUser(this.props.navigation.replace)
           }
         })
         .catch((err) => { console.log("err : ", err); props.authActions.removeUser(props.navigation.replace) })
@@ -131,13 +132,14 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
-  user: state.user,
+  user: state.authReducer.userData || {},
 
 });
 
 const mapDispatchToProps = dispatch => {
   return {
-    authActions: bindActionCreators(authActions, dispatch)
+    authActions: bindActionCreators(authActions, dispatch),
+    trainingActions: bindActionCreators(trainingActions, dispatch)
   };
 };
 

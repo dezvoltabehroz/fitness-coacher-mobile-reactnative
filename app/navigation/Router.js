@@ -66,7 +66,7 @@ function SettingsStack() {
           },
         }}
       />
-      {/* <Stack.Screen
+      <Stack.Screen
         name="AccountSettings"
         component={AccountSettings}
         options={{
@@ -79,7 +79,7 @@ function SettingsStack() {
             fontSize: 16,
           },
         }}
-      /> */}
+      />
       <Stack.Screen
         name="ChangePassword"
         component={ChangePassword}
@@ -368,6 +368,7 @@ function TabContainer() {
     <Tab.Navigator
       shifting={false}
       tabBarOptions={{
+        unmountOnBlur:true,
         headerShown: true,
         activeTintColor: Colors.buttonColor,
         inactiveTintColor: "gray",
@@ -403,6 +404,7 @@ function TabContainer() {
         name="Booking"
         component={BookingStack}
         options={{
+          unmountOnBlur:true,
           tabBarLabel: "Booking",
           tabBarIcon: ({ focused }) => (
             <Ionicons
@@ -417,6 +419,7 @@ function TabContainer() {
         name="NotificationsStack"
         component={NotificationsStack}
         options={{
+          unmountOnBlur:true,
           tabBarLabel: "Notifications",
           tabBarIcon: ({ focused }) => (
             <Ionicons
@@ -455,6 +458,7 @@ function TabContainer() {
             if (exploreActiveRoute.name === "ChangePassword") { tabBarVisible = false };
           }
           return {
+            unmountOnBlur:true,
             headerShown: false,
             tabBarVisible,
             tabBarLabel: "Settings",

@@ -14,11 +14,66 @@ import {
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
+import { bindActionCreators } from "redux";
 import { Colors } from '../../style/colors';
 import { FontFamily } from '../../style/typograpy';
 import moment from 'moment';
+import { connect } from 'react-redux';
+import { trainingActions } from '../../redux/actions/trainingType';
+import { TrainingCategoryServices } from '../../services';
 const height = Dimensions.get('window').height;
-const NotificationsCard = ({ item, navigation }) => {
+const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigation, actions }) => {
+  const [id, setId] = useState("");
+  const [instructor, setInstructor] = useState("")
+  const [instruction, setInstruction] = useState("")
+  const [skill, setSkill] = useState("");
+  const [parsedObj, setParsedObj] = useState({});
+  const [ageGroup, setAgeGroup] = useState("");
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    setLoading(true)
+    let data = item;
+    let parsedData = JSON.parse(data.obj);
+    setParsedObj(parsedData);
+    if (parsedData != null) {
+      console.log(parsedData)
+      var trainingType = trainingTypes
+      trainingType.forEach((item, index) => {
+        if (parsedData != null && parsedData.TrainingTypeId == item.id) {
+          setId(parseInt(parsedData.id))
+          setInstructor(item.title)
+          TrainingCategoryServices.subCategories(item.id)
+            .then((res) => {
+              var subCategoriesArr = res.data.subCategories
+              subCategoriesArr.forEach((items, index) => {
+                if (parsedData != null && parsedData.TrainingSubCategoryId == items.id) {
+                  setInstruction(items.title)
+                  var skill = [...skills];
+                  for (let index = 0; index < skill.length; index++) {
+                    if (parsedData.SkillId == skill[index].id) {
+                      setSkill(skill[index].skill)
+                      setAgeGroup(parsedData.coachAgeGroup)
+                      setLoading(false)
+                    }
+                  }
+                }
+              })
+            })
+            .catch((err) => console.log(err.response))
+        }
+      })
+    }
+
+  },[2])
+
+
+
+
+
+
+
+
+
   return (
     <View style={styles.container}>
       <View style={styles.outer}>
@@ -29,7 +84,7 @@ const NotificationsCard = ({ item, navigation }) => {
           />
           <View>
             <Text style={styles.text}>{item.title}</Text>
-            {item.type == 'completed_booking' || item.type == 'request' ? (
+            {item.type == 'completed_booking' || item.type == 'coachRequest' ? (
               <View
                 style={{
                   // justifyContent:'',
@@ -67,34 +122,39 @@ const NotificationsCard = ({ item, navigation }) => {
                       color: Colors.textColor,
                     },
                   ]}>
-                  17 hours ago
+                  {moment(item.createdAt).fromNow()}
                 </Text>
               </>
             )}
           </View>
         </View>
 
-        {item.type == 'completed_booking' || item.type == 'request' ? (
+        {item.type == 'completed_booking' || item.type == 'coachRequest' ? (
           <>
             <View style={styles.detailsView}>
               <View>
-                <Text style={styles.text1}>Sport Time</Text>
-                <Text style={styles.text1}>Category</Text>
+                <Text style={styles.text1}>Sport Type</Text>
+                <Text style={styles.text1}>Instruction Type</Text>
+                <Text style={styles.text1}>Skill Type</Text>
                 <Text style={styles.text1}>Age Group</Text>
               </View>
 
               <View>
                 <Text
                   style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
-                  Baseball
+                  {instructor}
                 </Text>
                 <Text
                   style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
-                  Hitting
+                  {instruction}
                 </Text>
                 <Text
                   style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
-                  12u
+                  {skill}
+                </Text>
+                <Text
+                  style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
+                  {ageGroup}
                 </Text>
               </View>
             </View>
@@ -116,12 +176,12 @@ const NotificationsCard = ({ item, navigation }) => {
           </>
         ) : null}
       </View>
-      {item.type == 'completed_booking' || item.type == 'request' ? (
+      {item.type == 'completed_booking' || item.type == 'coachRequest' ? (
         <View style={styles.buttonView}>
           <TouchableOpacity
             style={[styles.button, { borderBottomLeftRadius: 10 }]}
             onPress={() => {
-              navigation.navigate('AcceptBooking', { flag: true });
+              navigation.navigate('AcceptBooking', { requestId: parsedObj.id, flag: true });
             }}>
             <Text style={styles.text3}>Accept</Text>
           </TouchableOpacity>
@@ -243,4 +303,15 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NotificationsCard;
+const mapStateToProps = (state) => ({
+  user: state.authReducer.userData || {},
+  token: state.authReducer.userToken || {},
+});
+
+const mapDispatchToProps = dispatch => {
+  return {
+    actions: bindActionCreators(trainingActions, dispatch)
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(NotificationsCard)

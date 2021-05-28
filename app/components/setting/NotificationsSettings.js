@@ -28,7 +28,8 @@ const NotificatinsSettings = props => {
   const [isSwitchOn, setIsSwitchOn] = React.useState(false);
   const [isSwitchOn1, setIsSwitchOn1] = React.useState(props?.user?.notification);
   const [isSwitchOn2, setIsSwitchOn2] = React.useState(false);
-
+  const [visible, setVisible] = useState(false)
+  const [message, setMessage] = useState("")
   const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
   const onToggleSwitch1 = () => setIsSwitchOn1(!isSwitchOn1);
   const onToggleSwitch2 = () => setIsSwitchOn2(!isSwitchOn2);

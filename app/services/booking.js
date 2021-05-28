@@ -26,14 +26,14 @@ const Api = {
     getBookingDetails: function (id, token) {
         return axiosInstance.get(`coach/getBookingDetails/${id}`, configToken(token))
     },
-    addRatingtoAthele: function (userData,token) {
+    addRatingtoAthele: function (userData, token) {
         return axiosInstance.post(`coach/athleteRating`, userData, configToken(token))
     },
     acceptRequest: function (userData, token) {
         return axiosInstance.post(`coach/acceptRequest`, userData, configToken(token))
     },
     getRequestDetails: function (id, token) {
-        return axiosInstance.get(`coach/requestDetails/${id}`, configToken(token))
+        return axiosInstance.get(`coach/requestDetails/${id}`,configToken(token))
     },
 
 };

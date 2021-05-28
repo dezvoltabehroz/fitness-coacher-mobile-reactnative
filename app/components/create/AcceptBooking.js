@@ -8,7 +8,7 @@ import {
   StatusBar,
   ImageBackground,
   Image,
-  AsyncStorage,
+  ActivityIndicator,
   NativeModules,
   Platform,
   Dimensions,
@@ -16,21 +16,25 @@ import {
   ToastAndroid,
 } from 'react-native';
 import { Colors } from '../../style/colors';
-import { RadioButton, Checkbox, Snackbar } from 'react-native-paper';
 import { FontFamily } from '../../style/typograpy';
 import Button from '../../common/Button';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { Container, Header, Content, Tab, Tabs } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { BookingServices } from '../../services';
+import { BookingServices, TrainingCategoryServices } from '../../services';
 import { connect } from 'react-redux';
 import { errorUtils } from '../../common/Utilities';
-
+import Container from '../../common/Container';
+import moment from 'moment'
 const height = Dimensions.get('window').height;
 const AcceptBooking = props => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [bookingDetails, setBookingDetails] = useState({})
+  const [loading, setLoading] = useState(true)
   const [visible, setVisible] = useState(false)
   const [message, setMessage] = useState("")
+  const [instructor, setInstructor] = useState("")
+  const [instruction, setInstruction] = useState("")
+  const [skill, setSkill] = useState("");
   useEffect(() => {
     // if (props.route.params != undefined) {
     //   const { flag } = props?.route?.params;
@@ -42,35 +46,70 @@ const AcceptBooking = props => {
   }, []);
 
   const getRequestDetails = () => {
-    BookingServices.getRequestDetails()
+    console.log(props.route.params);
+    console.log("props?.route?.params?.requestId : ", props?.route?.params)
+    BookingServices.getRequestDetails(props.route.params.requestId, props?.token)
       .then((response) => {
-        if (response.data.success) {
+        if (!response.data.success) {
           console.log(response.data)
-          props.navigation.replace('TabContainer')
+          setBookingDetails(response.data.requestDetail)
+          var trainingType = props?.trainingTypes
+          trainingType.forEach((item, index) => {
+            if (response.data.requestDetail != null && response.data.requestDetail.TrainingTypeId == item.id) {
+              setInstructor(item.title)
+              TrainingCategoryServices.subCategories(item.id)
+                .then((res) => {
+                  var subCategoriesArr = res.data.subCategories
+                  subCategoriesArr.forEach((items, index) => {
+                    if (response.data.requestDetail != null && response.data.requestDetail.TrainingSubCategoryId == items.id) {
+                      setInstruction(items.title)
+                      var skill = [...props?.skills];
+                      for (let index = 0; index < skill.length; index++) {
+                        if (response.data.requestDetail.SkillId == skill[index].id) {
+                          setSkill(skill[index].skill)
+                          setLoading(false)
+                        }
+                      }
+                    }
+                  })
+                })
+                .catch((err) => console.log(err.response))
+            }
+          })
+          setLoading(false)
         }
         else {
+          setBookingDetails(response.data.requestDetail)
+          console.log(response.data)
           setMessage(`${response.data.msg}`)
+          setLoading(false)
           setVisible(true);
         }
 
       })
       .catch((err) => {
+        console.log(err.response)
         setMessage(`${errorUtils.getError(err)}`)
         setVisible(true);
+        setLoading(false)
         console.log(err)
       })
   }
 
   const handleAccept = () => {
     let userData = {
-      "RequestId": 4,
+      "RequestId": props.route.params.requestId,
       "CoachId": props?.user?.id
     }
     BookingServices.acceptRequest(userData, props?.token)
       .then((res) => {
         if (res.data.success) {
           console.log(res.data)
-          props.navigation.navigate('TabContainer')
+          setMessage(`${res.data.msg}`)
+          setVisible(true);
+          // setTimeout(() => {
+          //   props.navigation.replace('TabContainer')
+          // }, 2000);
         }
         else {
           setMessage(`${res.data.msg}`)
@@ -85,131 +124,118 @@ const AcceptBooking = props => {
 
   return (
     <Container onPress={() => setVisible(!visible)} message={message} visible={visible}>
-    <View style={styles.container}>
-      <StatusBar
-        barStyle="dark-content"
-        translucent
-        backgroundColor={'transparent'}
-      />
-      <View style={styles.header}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity onPress={() => props.navigation.goBack()}>
-            <Ionicons name="arrow-back" size={height > 667 ? 20 : 16} />
-          </TouchableOpacity>
-          <Text style={styles.headertext}>BOOKING DETAILS</Text>
-        </View>
-        {/* <TouchableOpacity onPress={() => setModalVisible(true)}>
+      <View style={styles.container}>
+        <StatusBar
+          barStyle="dark-content"
+          translucent
+          backgroundColor={'transparent'}
+        />
+        {
+          loading ?
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+              <ActivityIndicator size={20} color={'#030E2D'} />
+            </View>
+            :
+            <>
+              <View style={styles.header}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <TouchableOpacity onPress={() => props.navigation.goBack()}>
+                    <Ionicons name="arrow-back" size={height > 667 ? 20 : 16} />
+                  </TouchableOpacity>
+                  <Text style={styles.headertext}>BOOKING DETAILS</Text>
+                </View>
+                {/* <TouchableOpacity onPress={() => setModalVisible(true)}>
           <Image
             style={styles.headerLeft}
             source={require('../../assets/menu.png')}
           />
         </TouchableOpacity> */}
-      </View>
-
-      <View style={styles.bottom}>
-        <ScrollView
-          contentContainerStyle={{ paddingBottom: '25%' }}
-          showsVerticalScrollIndicator={false}>
-          <View style={styles.border}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
-              <TouchableOpacity
-                // style={{width: '25%'}}
-                onPress={() => {
-                  props.navigation.navigate('AthleteDetails');
-                }}>
-                <Image
-                  source={require('../../assets/splash.jpg')}
-                  style={styles.profile}
-                />
-              </TouchableOpacity>
-              <View
-                style={{
-                  width: height > 667 ? '83%' : '82%',
-                  justifyContent: 'space-between',
-                  flexDirection: 'row',
-                }}>
-                <Text style={{ fontSize: height > 667 ? 11 : 10 }}>
-                  You have a new booking opportunity
-                </Text>
-                <Text
-                  style={{
-                    fontSize: height > 667 ? 10 : 9,
-                    color: Colors.textColor,
-                    marginTop: 1,
-                  }}>
-                  12 mins ago
-                </Text>
               </View>
-            </View>
-            <View style={styles.mainView}>
-              <Text style={styles.text}>Athlete</Text>
-              <Text style={styles.text1}>Porter Shue</Text>
-            </View>
-            <View style={styles.mainView}>
-              <Text style={styles.text}>Gig ID</Text>
-              <Text style={styles.text1}>CCH3HSR</Text>
-            </View>
-            <View style={styles.mainView}>
-              <Text style={styles.text}>Sport Time</Text>
-              <Text style={styles.text1}>Baseball</Text>
-            </View>
-            <View style={styles.mainView}>
-              <Text style={styles.text}>Category</Text>
-              <Text style={styles.text1}>Hitting</Text>
-            </View>
-            <View style={styles.mainView}>
-              <Text style={styles.text}>Age Group</Text>
-              <Text style={styles.text1}>12u</Text>
-            </View>
-            <View style={styles.mainView}>
-              <Text style={styles.text}>Instruction type</Text>
-              <Text style={styles.text1}>Dartfish Ananlytics</Text>
-            </View>
-            <View style={styles.mainView}>
-              <Text style={styles.text}>Baseball Category</Text>
-              <Text style={styles.text1}>Hitting</Text>
-            </View>
-            <Text style={[styles.text, { marginLeft: 10 }]}>Media</Text>
-            <Image
-              style={styles.video}
-              source={require('../../assets/splash.jpg')}
-            />
-          </View>
-          <TouchableOpacity
-            onPress={() => handleAccept()}
-            style={styles.btnStyle}>
-            <Text style={{ color: 'white', fontWeight: '700' }}>Accept</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.btnStyle,
-              { backgroundColor: 'white', borderWidth: 0.4 },
-            ]}>
-            <Text style={{ color: Colors.textColor, fontWeight: '700' }}>
-              Reject
-            </Text>
-          </TouchableOpacity>
-          <View style={styles.snackbarContainerStyle}>
-            <Snackbar
-              visible={visible}
-              onDismiss={() => setVisible(!visible)}
-              action={{
-                label: 'OK',
-                onPress: () => {
-                  console.log("hello")
-                },
-              }}>
-              {message}
-            </Snackbar>
-          </View>
-        </ScrollView>
 
+              <View style={styles.bottom}>
+                <ScrollView
+                  contentContainerStyle={{ paddingBottom: '25%' }}
+                  showsVerticalScrollIndicator={false}>
+                  <View style={styles.border}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                      }}>
+                      <TouchableOpacity
+                        // style={{width: '25%'}}
+                        onPress={() => {
+                          props.navigation.navigate('AthleteDetails');
+                        }}>
+                        <Image
+                          source={bookingDetails.athlete.imageUrl != null ? { uri: bookingDetails.athlete.imageUrl } : require('../../assets/splash.jpg')}
+                          style={styles.profile}
+                        />
+                      </TouchableOpacity>
+                      <View
+                        style={{
+                          width: height > 667 ? '83%' : '82%',
+                          justifyContent: 'space-between',
+                          flexDirection: 'row',
+                        }}>
+                        <Text style={{ fontSize: height > 667 ? 11 : 10 }}>
+                          You have a new booking opportunity
+                </Text>
+                        <Text
+                          style={{
+                            fontSize: height > 667 ? 10 : 9,
+                            color: Colors.textColor,
+                            marginTop: 1,
+                          }}>
+                          {moment(bookingDetails.createdAt).fromNow()}
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.mainView}>
+                      <Text style={styles.text}>Athlete</Text>
+                      <Text style={styles.text1}>{bookingDetails.athlete.firstName} {bookingDetails.athlete.lastName}</Text>
+                    </View>
+                    <View style={styles.mainView}>
+                      <Text style={styles.text}>Sports</Text>
+                      <Text style={styles.text1}>{instructor}</Text>
+                    </View>
+                    <View style={styles.mainView}>
+                      <Text style={styles.text}>Age Group</Text>
+                      <Text style={styles.text1}>{bookingDetails.coachAgeGroup}</Text>
+                    </View>
+                    <View style={styles.mainView}>
+                      <Text style={styles.text}>Instruction type</Text>
+                      <Text style={styles.text1}>{instruction}</Text>
+                    </View>
+                    <View style={styles.mainView}>
+                      <Text style={styles.text}>Skill Type</Text>
+                      <Text style={styles.text1}>{skill}</Text>
+                    </View>
+                    <Text style={[styles.text, { marginLeft: 10 }]}>Media</Text>
+                    <Image
+                      style={styles.video}
+                      source={require('../../assets/splash.jpg')}
+                    />
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => handleAccept()}
+                    style={styles.btnStyle}>
+                    <Text style={{ color: 'white', fontWeight: '700' }}>Accept</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.btnStyle,
+                      { backgroundColor: 'white', borderWidth: 0.4 },
+                    ]}>
+                    <Text style={{ color: Colors.textColor, fontWeight: '700' }}>
+                      Reject
+            </Text>
+                  </TouchableOpacity>
+                </ScrollView>
+              </View>
+            </>
+        }
       </View>
-    </View>
     </Container>
   );
 };
@@ -228,7 +254,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 35,
     borderTopLeftRadius: 35,
     marginTop: '4%',
-    height: '100%',
+    // height: '100%',
     // paddingHorizontal: 20,
   },
   header: {
@@ -342,7 +368,10 @@ const styles = StyleSheet.create({
 });
 const mapStateToProps = (state) => ({
   user: state.authReducer.userData || {},
-  token: state.authReducer.userToken || {}
+  token: state.authReducer.userToken || {},
+  trainingTypes: state.trainingReducer.trainingTypes || {},
+  skills: state.trainingReducer.skills || {},
+  subCategories: state.trainingReducer.subCategories || {}
 });
 
 
