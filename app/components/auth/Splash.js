@@ -43,7 +43,7 @@ const SplashScreen = props => {
           .catch((err) => console.log(err))
       } else { props.navigation.replace('Login'); }
     }, 2000);
-  });
+  },[]);
 
   const requestUserPermission = async function (data) {
     try {
@@ -78,7 +78,7 @@ const SplashScreen = props => {
             await props.authActions.getUserProfile(userData, props.navigation.replace);
           } else {
             await props.authActions.getUserProfile(userData, props.navigation.replace);
-            // props.actions.removeUser(this.props.navigation.replace)
+            // this.props.actions.removeUser(this.props.navigation.replace)
           }
         })
         .catch((err) => { console.log("err : ", err); props.authActions.removeUser(props.navigation.replace) })

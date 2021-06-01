@@ -34,12 +34,11 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
     setLoading(true)
     let data = item;
     let parsedData = JSON.parse(data.obj);
-    setParsedObj(parsedData);
-    if (parsedData != null) {
-      console.log(parsedData)
-      var trainingType = trainingTypes
+    if (data.obj != null) {
+      setParsedObj(parsedData);
+      var trainingType = [...trainingTypes]
       trainingType.forEach((item, index) => {
-        if (parsedData != null && parsedData.TrainingTypeId == item.id) {
+        if ( parsedData.TrainingTypeId == item.id) {
           setId(parseInt(parsedData.id))
           setInstructor(item.title)
           TrainingCategoryServices.subCategories(item.id)
@@ -51,6 +50,7 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
                   var skill = [...skills];
                   for (let index = 0; index < skill.length; index++) {
                     if (parsedData.SkillId == skill[index].id) {
+                      console.log(skill[index].skill)
                       setSkill(skill[index].skill)
                       setAgeGroup(parsedData.coachAgeGroup)
                       setLoading(false)
@@ -64,7 +64,7 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
       })
     }
 
-  },[2])
+  },[3])
 
 
 

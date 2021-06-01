@@ -113,8 +113,9 @@ const ForgotPassword = (props) => {
 
           <View style={styles.inputContainer}>
             <Input
-              text={"Enter your email here"}
+              text={"Email"}
               value={state.email}
+              keyboardType={"email-address"}
               onChangeText={(value) => {
                 _onHandleChange("email", value);
                 setCheckEmail(false);

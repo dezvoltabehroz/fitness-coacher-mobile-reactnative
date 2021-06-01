@@ -56,7 +56,7 @@ const ChangePassword = props => {
 
     const checkValidations = () => {
 
-        if (oldPassword && newPassword && confirmNewPassword && submit && confirmNewPassword == newPassword) {
+        if (oldPassword && newPassword && confirmNewPassword &&  confirmNewPassword == newPassword) {
             changePassword();
         } else {
             setSubmit(true);
@@ -114,12 +114,11 @@ const ChangePassword = props => {
 
                 <View style={styles.bottom}>
                     <KeyboardAwareScrollView style={{}} showsVerticalScrollIndicator={false}>
-
-
                         <View style={{ marginTop: '5%' }}>
                             <Input
                                 full={true}
                                 text={"Old Password"}
+                                secureTextEntry={true}
                                 value={oldPassword}
                                 onChangeText={(value) => {
                                     setOldPassword(value);

@@ -23,11 +23,13 @@ import { connect } from 'react-redux'
 import { authActions } from '../../redux/actions/auth';
 import { bindActionCreators } from "redux";
 import Container from '../../common/Container';
+import { ActivityIndicator } from 'react-native';
 const height = Dimensions.get('window').height;
 const NotificatinsSettings = props => {
   const [isSwitchOn, setIsSwitchOn] = React.useState(false);
   const [isSwitchOn1, setIsSwitchOn1] = React.useState(props?.user?.notification);
   const [isSwitchOn2, setIsSwitchOn2] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
   const [visible, setVisible] = useState(false)
   const [message, setMessage] = useState("")
   const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
@@ -35,6 +37,7 @@ const NotificatinsSettings = props => {
   const onToggleSwitch2 = () => setIsSwitchOn2(!isSwitchOn2);
 
   const handleNotificationSetting = () => {
+    setLoading(true)
     let userData = {
       "UserId": props.user.id,
       "notification": !isSwitchOn1
@@ -47,7 +50,8 @@ const NotificatinsSettings = props => {
             id: props?.user.id,
             token: props?.token
           }
-          await props.authActions.getUserProfile(data, props.navigation.replace)
+          await props.authActions.getUserProfile(data)
+          setLoading(false)
         }
         else {
           setMessage(`${res.data.msg}`)
@@ -108,18 +112,21 @@ const NotificatinsSettings = props => {
             <View>
               <Text style={styles.text}>Push Notifications</Text>
             </View>
-            <Switch
-              style={{
-                transform: [
-                  { scaleX: height > 667 ? 1 : 0.7 },
-                  { scaleY: height > 667 ? 1 : 0.7 },
-                ],
-              }}
-              trackColor={{ true: Colors.buttonColor, false: 'grey' }}
-              value={isSwitchOn1}
-              onValueChange={() => handleNotificationSetting()}
-              color={Colors.buttonColor}
-            />
+            {loading ?
+              <ActivityIndicator size={"small"} color={Colors.buttonColor} />
+              :
+              <Switch
+                style={{
+                  transform: [
+                    { scaleX: height > 667 ? 1 : 0.7 },
+                    { scaleY: height > 667 ? 1 : 0.7 },
+                  ],
+                }}
+                trackColor={{ true: Colors.buttonColor, false: 'grey' }}
+                value={isSwitchOn1}
+                onValueChange={() => handleNotificationSetting()}
+                color={Colors.buttonColor}
+              />}
           </View>
           <View style={styles.inner}>
             <View>

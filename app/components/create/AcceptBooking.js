@@ -30,6 +30,7 @@ const AcceptBooking = props => {
   const [modalVisible, setModalVisible] = useState(false);
   const [bookingDetails, setBookingDetails] = useState({})
   const [loading, setLoading] = useState(true)
+  const [acceptLoading, setAcceptLoading] = useState(false)
   const [visible, setVisible] = useState(false)
   const [message, setMessage] = useState("")
   const [instructor, setInstructor] = useState("")
@@ -97,26 +98,33 @@ const AcceptBooking = props => {
   }
 
   const handleAccept = () => {
+    setAcceptLoading(true)
     let userData = {
       "RequestId": props.route.params.requestId,
       "CoachId": props?.user?.id
     }
+    console.log(userData)
     BookingServices.acceptRequest(userData, props?.token)
       .then((res) => {
+        console.log(res.data)
         if (res.data.success) {
           console.log(res.data)
           setMessage(`${res.data.msg}`)
           setVisible(true);
+          setAcceptLoading(false)
           // setTimeout(() => {
-          //   props.navigation.replace('TabContainer')
+          props.navigation.replace('TabContainer')
           // }, 2000);
         }
         else {
           setMessage(`${res.data.msg}`)
           setVisible(true);
+          setAcceptLoading(false)
         }
       })
       .catch((err) => {
+        console.log(err.response.data)
+        setAcceptLoading(false)
         setMessage(`${errorUtils.getError(err)}`)
         setVisible(true);
       })
@@ -218,9 +226,15 @@ const AcceptBooking = props => {
                     />
                   </View>
                   <TouchableOpacity
-                    onPress={() => handleAccept()}
+                    onPress={handleAccept}
                     style={styles.btnStyle}>
-                    <Text style={{ color: 'white', fontWeight: '700' }}>Accept</Text>
+                    {
+                      acceptLoading ?
+                        <ActivityIndicator size={20} color={'#FFFFFF'} />
+                        :
+                        <Text style={{ color: 'white', fontWeight: '700' }}>Accept</Text>
+                    }
+
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[

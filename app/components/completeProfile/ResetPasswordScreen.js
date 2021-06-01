@@ -124,72 +124,73 @@ const ResetPassword = ({ navigation, route }) => {
 
   return (
     <Container onPress={() => setVisible(!visible)} message={message} visible={visible}>
-      <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={{ paddingBottom: "100%" }}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require("../../assets/coacherlogo.png")}
-              style={styles.logo}
-            />
-            <Text style={{ textAlign: "center" }}>
-              Please enter your new password to update it.
+      <View style={styles.safeArea}>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("../../assets/coacherlogo.png")}
+            style={styles.logo}
+          />
+          <Text style={{ textAlign: "center" }}>
+            Please enter your new password to update it.
           </Text>
-          </View>
+        </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={{ textAlign: "center" }}>{newOtp}</Text>
-            <Input
-              text={"Enter your new password here"}
-              secureTextEntry={true}
-              value={password}
-              onChangeText={(value) => {
-                _onHandleChange("password", value);
-                setCheckPassword(false);
-              }}
-            />
-            {checkPassword == true && (
-              <Text style={styles.errorStyle}>Password cannot be empty</Text>
-            )}
-            <Input
-              text={"Enter your code here"}
-              value={code}
-              onChangeText={(value) => {
-                _onHandleChange("code", value);
-                setCheckCode(false);
-              }}
-            />
-            {checkCode == true && (
-              <Text style={styles.errorStyle}>Code cannot be empty</Text>
-            )}
+        <View style={styles.inputContainer}>
+          <Text style={{ textAlign: "center" }}>{newOtp}</Text>
+          <Input
+            text={"New Password "}
+            secureTextEntry={true}
+            value={password}
+            onChangeText={(value) => {
+              _onHandleChange("password", value);
+              setCheckPassword(false);
+            }}
+          />
+          {checkPassword == true && (
+            <Text style={styles.errorStyle}>Password cannot be empty</Text>
+          )}
+          <Input
+            text={"Code"}
+            value={code}
+            keyboardType={'number-pad'}
+            onChangeText={(value) => {
+              _onHandleChange("code", value);
+              setCheckCode(false);
+            }}
+          />
+          {checkCode == true && (
+            <Text style={styles.errorStyle}>Code cannot be empty</Text>
+          )}
 
-            <TouchableOpacity
-              style={styles.btnStyle}
-              onPress={() => checkNetwork()}
-            >{
-                loading ?
-                  <ActivityIndicator color={"white"} />
-                  :
-                  <Text style={styles.btnText}>Update</Text>}
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+          <TouchableOpacity
+            style={styles.btnStyle}
+            onPress={() => checkNetwork()}
+          >{
+              loading ?
+                <ActivityIndicator color={"white"} />
+                :
+                <Text style={styles.btnText}>Update</Text>}
+          </TouchableOpacity>
+        </View>
 
-      </SafeAreaView>
+      </View>
     </Container>
   );
 };
 
 const styles = StyleSheet.create({
   safeArea: {
+    flex: 1,
+    justifyContent: "center",
     backgroundColor: Colors.backgroundColor,
-    height: "100%",
+    // height: "100%",
   },
   snackbarContainerStyle: {
     justifyContent: "flex-end",
     alignItems: "center"
   },
   logoContainer: {
-    height: "40%",
+    // height: "40%",
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
     marginBottom: "10%",
   },
   inputContainer: {
-    height: "100%",
+    // height: "100%",
     justifyContent: "space-evenly",
     // backgroundColor: "pink",
   },

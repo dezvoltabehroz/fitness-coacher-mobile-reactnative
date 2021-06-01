@@ -72,9 +72,8 @@ const AccountSettingsScreen = (props) => {
   const [address, setAddress] = useState(props?.user?.address);
   const [submit, setSubmit] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [btnLoading, setBtnLoading] = useState(false);
   const [subCatVal, setSubCat] = useState(false);
-  const [deletedSubCategories, setDeletedSubCategories] = useState([]);
-  const [deletedCategories, setDeletedCategories] = useState([])
   const [arr, setArr] = useState([
     {
       flag: false,
@@ -336,7 +335,7 @@ const AccountSettingsScreen = (props) => {
                 }).catch((err) => { console.log(err) })
             })
             .catch((err) => { console.log(err) })
-          
+
         }
       })
   }
@@ -358,7 +357,7 @@ const AccountSettingsScreen = (props) => {
   };
 
   const checkNetwork = async () => {
-    //console.log("internet called");
+    setBtnLoading(true)
     setSubmit(true);
     //console.log(submit)
     try {
@@ -368,6 +367,7 @@ const AccountSettingsScreen = (props) => {
       } else {
         setMessage(`Please check your internet connection and try again`)
         setVisible(true);
+        setBtnLoading(false)
       }
     } catch (error) {
       //console.log(error);
@@ -382,9 +382,10 @@ const AccountSettingsScreen = (props) => {
         selectedSkill.push(coachSkills[index]);
       }
     }
-    if (first_name && last_name && selectInstructor != undefined && selectedSkill.length != 0 && subCatVal && age.length != 0 && date && submit && country && address && phoneNumber && isPhoneValid(phoneNumber)) {
+    if (first_name && last_name && selectInstructor != undefined && selectedSkill.length != 0 && subCatVal && age.length != 0 && date && country && address && phoneNumber && isPhoneValid(phoneNumber)) {
       getCoachDetails();
     } else {
+      setBtnLoading(false)
       setSubmit(true);
       //console.log(submit)
     }
@@ -405,12 +406,14 @@ const AccountSettingsScreen = (props) => {
         } else {
           setMessage(`${response.data.msg}`)
           setVisible(true);
+          setBtnLoading(false)
         }
       })
       .catch((error) => {
         console.log(error.response)
         setMessage(`${errorUtils.getError(error)}`)
         setVisible(true);
+        setBtnLoading(false)
       })
   }
 
@@ -572,7 +575,7 @@ const AccountSettingsScreen = (props) => {
                     )}
                     <Calendar
                       name="calendar"
-                      color="grey" size={15}
+                      color={Colors.buttonColor} size={15}
                     />
                   </TouchableOpacity>
                   <DateTimePickerModal
@@ -647,12 +650,12 @@ const AccountSettingsScreen = (props) => {
                   renderItem={({ item, index }) => {
                     return (
                       <View style={styles.outerView}>
-                        <View style={[styles.innerView1]}>
-                          <MaterialIcons onPress={() => selectingTrainingType(index)}
+                        <TouchableOpacity onPress={() => selectingTrainingType(index)} style={[styles.innerView1]}>
+                          <MaterialIcons
                             size={20}
                             name={item.selected ? "check-box" : "check-box-outline-blank"} />
                           <Text style={styles.innertext}>{item.title}</Text>
-                        </View>
+                        </TouchableOpacity>
                       </View>
                     );
                   }}
@@ -671,12 +674,12 @@ const AccountSettingsScreen = (props) => {
                   renderItem={({ item, index }) => {
                     return (
                       <View style={styles.outerView}>
-                        <View style={[styles.innerView1]}>
-                          <MaterialIcons onPress={() => checkBoxFunc(index)}
+                        <TouchableOpacity onPress={() => checkBoxFunc(index)} style={[styles.innerView1]}>
+                          <MaterialIcons
                             size={20}
                             name={item.selected ? "check-box" : "check-box-outline-blank"} />
                           <Text style={styles.innertext}>{item.title}</Text>
-                        </View>
+                        </TouchableOpacity>
                       </View>
                     );
                   }}
@@ -698,12 +701,12 @@ const AccountSettingsScreen = (props) => {
                   renderItem={({ item, index }) => {
                     return (
                       <View style={styles.outerView}>
-                        <View style={[styles.innerView1]}>
-                          <MaterialIcons onPress={() => selectingSkills(index)}
+                        <TouchableOpacity onPress={() => selectingSkills(index)} style={[styles.innerView1]}>
+                          <MaterialIcons
                             size={20}
                             name={item.selected ? "check-box" : "check-box-outline-blank"} />
                           <Text style={styles.innertext}>{item.skill}</Text>
-                        </View>
+                        </TouchableOpacity>
                       </View>
                     );
                   }}
@@ -723,23 +726,23 @@ const AccountSettingsScreen = (props) => {
                   renderItem={({ item, index }) => {
                     return (
                       <View style={styles.outerView}>
-                        <View style={[styles.innerView1]}>
-                          <MaterialIcons onPress={() => {
-                            let ageArr = [...age];
-                            let array = arr;
-                            if (array[index].flag) {
-                              array[index].flag = false
-                            } else
-                              array[index].flag = true;
-                            setArr(arr);
-                            ageArr.push({ ageGroup: item.age })
-                            setAge(ageArr);
-                          }}
+                        <TouchableOpacity onPress={() => {
+                          let ageArr = [...age];
+                          let array = arr;
+                          if (array[index].flag) {
+                            array[index].flag = false
+                          } else
+                            array[index].flag = true;
+                          setArr(arr);
+                          ageArr.push({ ageGroup: item.age })
+                          setAge(ageArr);
+                        }} style={[styles.innerView1]}>
+                          <MaterialIcons
                             size={20}
                             name={item.flag ? "check-box" : "check-box-outline-blank"} />
 
                           <Text style={styles.innertext}>{item.age}</Text>
-                        </View>
+                        </TouchableOpacity>
                       </View>
                     );
                   }}
@@ -748,6 +751,7 @@ const AccountSettingsScreen = (props) => {
                   <Text style={styles.errorStyle}>  Please select atleast one age group qualified coach</Text>
                 )}
                 <Button
+                  loading={btnLoading}
                   text={'Update'}
                   onPress={() => {
                     checkNetwork()
@@ -883,7 +887,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginBottom: "5%",
-    width: width*0.9,
+    width: width * 0.9,
   },
   dropDown: {
     height: 40,

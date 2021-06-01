@@ -227,19 +227,6 @@ const BookingDetails = props => {
                           Mark as Delivered
                 </Text>
                       </TouchableOpacity>
-                      <View style={styles.snackbarContainerStyle}>
-                        <Snackbar
-                          visible={visible}
-                          onDismiss={() => setVisible(!visible)}
-                          action={{
-                            label: 'OK',
-                            onPress: () => {
-                              console.log("hello")
-                            },
-                          }}>
-                          {message}
-                        </Snackbar>
-                      </View>
                     </ScrollView>
                   </Tab>
                   <Tab
@@ -259,19 +246,6 @@ const BookingDetails = props => {
                     <View style={styles.mainView}>
                       <Text style={styles.text}>Whatsapp</Text>
                       <Text style={styles.text1}>{bookingDetails.athlete.phone}</Text>
-                    </View>
-                    <View style={styles.snackbarContainerStyle}>
-                      <Snackbar
-                        visible={visible}
-                        onDismiss={() => setVisible(!visible)}
-                        action={{
-                          label: 'OK',
-                          onPress: () => {
-                            console.log("hello")
-                          },
-                        }}>
-                        {message}
-                      </Snackbar>
                     </View>
                   </Tab>
                 </Tabs>

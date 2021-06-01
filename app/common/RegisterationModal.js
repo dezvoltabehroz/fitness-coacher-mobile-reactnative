@@ -42,7 +42,7 @@ const RegisterationModal = ({modalVisible, setModalVisible, navigation}) => {
         </Text>
         <Button
           onPress={() => {
-            setModalVisible(false), navigation.navigate('Login');
+            setModalVisible(false), navigation.replace('Login');
           }}
           flag={true}
           text={'Ok'}

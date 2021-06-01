@@ -23,6 +23,8 @@ const Input = ({ text,
   placeholderTextColor,
   secureTextEntry,
   full,
+  maxLength,
+  editable,
   value,
   onChangeText,
   keyboardType, }) => {
@@ -65,6 +67,8 @@ const Input = ({ text,
         secureTextEntry={secureTextEntry}
         style={styles.input}
         placeholder={placeholder}
+        editable={editable}
+        maxLength={maxLength}
         placeholderTextColor={placeholderTextColor}
         value={value}
         onChangeText={onChangeText}

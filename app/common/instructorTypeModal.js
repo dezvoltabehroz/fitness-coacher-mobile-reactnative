@@ -16,9 +16,9 @@ import {
 import { FontFamily } from "../style/typograpy";
 import { Colors } from "../style/colors";
 import Modal from "react-native-modal";
-import { RadioButton, Checkbox } from "react-native-paper";
+import { RadioButton, Checkbox, IconButton } from "react-native-paper";
 import { ActivityIndicator } from "react-native";
-const height = Dimensions.get("window").height;
+const { height, width } = Dimensions.get("window");
 const InstructorTypeModal = ({
   modalVisible,
   setModalVisible,
@@ -54,7 +54,7 @@ const InstructorTypeModal = ({
       hasBackdrop={true}
       backdropColor={Colors.modalOverly}
       backdropOpacity={0.5}
-      swipeDirection={["up"]}
+      // swipeDirection={["up"]}
       animationIn={"slideInUp"}
       animationOut={"slideOutDown"}
     >
@@ -68,32 +68,45 @@ const InstructorTypeModal = ({
             />
           </View>
         ) : (
-          <FlatList
-            data={dataArray}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item, index }) => {
-              return (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginTop: 10,
-                  }}
-                >
-                  <RadioButton
-                    color={Colors.blackColor}
-                    size={10}
-                    uncheckedColor={Colors.blackColor}
-                    onPress={() => checkBoxFunc(index, item)}
-                  />
-                  <Text style={styles.text}>{item.title}</Text>
-                </View>
-              );
-            }}
-          />
+          <>
+            <View style={{ justifyContent: "center", alignItems: "flex-end" }}>
+              <IconButton
+                icon="close"
+                color="black"
+                size={20}
+                onPress={() => setModalVisible(false)}
+              />
+            </View>
+
+            <FlatList
+              data={dataArray}
+              contentContainerStyle={{ width: width }}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item, index }) => {
+                return (
+                  <View
+                    style={{
+                      width: width * 0.7,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 10,
+                    }}
+                  >
+                    <RadioButton
+                      color={Colors.blackColor}
+                      size={10}
+                      uncheckedColor={Colors.blackColor}
+                      onPress={() => checkBoxFunc(index, item)}
+                    />
+                    <Text style={styles.text}>{item.title}</Text>
+                  </View>
+                );
+              }}
+            />
+          </>
         )}
       </View>
-    </Modal>
+    </Modal >
   );
 };
 

@@ -38,21 +38,21 @@ const BookingScreen = (props) => {
     BookingServices.getActiveBookings(props?.user?.id, props?.token)
       .then((response) => {
         if (response.data.success) {
-          // setMessage(response.data.msg)
-          // setVisible(true);
+          setMessage(`${response.data.msg}`)
+          setVisible(true);
           setLoading(false)
           setBookings(response.data.coursesDetail.rows);
           console.log("booking details are", bookings);
         }
         else {
-          setMessage(response.data.msg)
+          setMessage(`${response.data.msg}`)
           setVisible(true);
           setLoading(false)
         }
 
       })
       .catch((error) => {
-        setMessage(error)
+        setMessage(`${errorUtils.getError(error)}`)
         setVisible(true);
         setLoading(false)
         console.log("error =", error);
@@ -69,14 +69,14 @@ const BookingScreen = (props) => {
           console.log("booking details are", bookings);
         }
         else {
-          setMessage(response.data.msg)
+          setMessage(`${response.data.msg}`)
           setVisible(true);
           setLoading(false)
         }
 
       })
       .catch((error) => {
-        setMessage(error)
+        setMessage(`${errorUtils.getError(error)}`)
         setVisible(true);
         setLoading(false)
         console.log("error =", error);

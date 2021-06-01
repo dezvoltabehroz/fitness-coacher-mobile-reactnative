@@ -365,19 +365,7 @@ const SplashScreen = (props) => {
                   Forgot your password?
               </Link>
               </View>
-              <View style={styles.snackbarContainerStyle}>
-                <Snackbar
-                  visible={visible}
-                  onDismiss={() => setVisible(!visible)}
-                  action={{
-                    label: 'OK',
-                    onPress: () => {
-                      console.log("hello")
-                    },
-                  }}>
-                  {message}
-                </Snackbar>
-              </View>
+
               {/* </ScrollView> */}
             </Tab>
             <Tab
@@ -474,24 +462,9 @@ const SplashScreen = (props) => {
                     By signing up, you agree to ECHO's Terms of Use & Privacy
                     Policy
                 </Text>
-                  <View style={styles.snackbarContainerStyle}>
-                    <Snackbar
-                      visible={visible}
-                      onDismiss={() => setVisible(!visible)}
-                      action={{
-                        label: 'OK',
-                        onPress: () => {
-                          console.log("hello")
-                        },
-                      }}>
-                      {message}
-                    </Snackbar>
-                  </View>
                   <View style={{ marginBottom: 150 }}></View>
                 </View>
-
               </ScrollView>
-
             </Tab>
           </Tabs>
         </View>
@@ -587,7 +560,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   linkText: {
-    color: "orange",
+    color: Colors.blackColor,
     marginTop: "5%",
     textAlign: "center",
   },
