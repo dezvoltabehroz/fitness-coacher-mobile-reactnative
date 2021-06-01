@@ -23,7 +23,7 @@ const BillingsCard = (props) => {
      <View style={styles.outer}> 
          <View style={styles.inner}>
              <View style={{flexDirection:'row'}}>
-             <Image source={require('../../assets/splash.jpg')} style={styles.image}/>
+             <Image source={require('../../assets/splash.png')} style={styles.image}/>
              <View>
                  <Text style={styles.text}>ZIMR MAYFIELD</Text>
                  <Text style={styles.text}>CCH6784</Text>

@@ -268,7 +268,7 @@ const AccountSettingsScreen = (props) => {
     } else {
       return (
         <Image
-          source={require('../../assets/splash.jpg')}
+          source={require('../../assets/splash.png')}
           style={styles.image}
         />
       );

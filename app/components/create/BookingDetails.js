@@ -172,7 +172,7 @@ const BookingDetails = props => {
                               }}>
                               <Image
                                 resizeMode="contain"
-                                source={bookingDetails.athlete.imageUrl != null ? { uri: bookingDetails.athlete.imageUrl } : require('../../assets/splash.jpg')}
+                                source={bookingDetails.athlete.imageUrl != null ? { uri: bookingDetails.athlete.imageUrl } : require('../../assets/splash.png')}
                                 style={styles.profile}
                               />
                             </TouchableOpacity>
@@ -217,7 +217,7 @@ const BookingDetails = props => {
                         <Text style={[styles.text, { marginLeft: 10 }]}>Media</Text>
                         <Image
                           style={styles.video}
-                          source={require('../../assets/splash.jpg')}
+                          source={require('../../assets/splash.png')}
                         />
                       </View>
                       <TouchableOpacity

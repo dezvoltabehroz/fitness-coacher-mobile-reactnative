@@ -209,6 +209,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.buttonColor,
     width: "80%",
     height: 50,
+    marginTop: "5%",
+    borderRadius: 15,
     alignSelf: "center",
     justifyContent: "center",
     alignItems: "center",

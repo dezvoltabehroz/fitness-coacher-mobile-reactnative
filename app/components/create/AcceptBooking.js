@@ -168,7 +168,7 @@ const AcceptBooking = props => {
                           props.navigation.navigate('AthleteDetails');
                         }}>
                         <Image
-                          source={bookingDetails.athlete.imageUrl != null ? { uri: bookingDetails.athlete.imageUrl } : require('../../assets/splash.jpg')}
+                          source={bookingDetails.athlete.imageUrl != null ? { uri: bookingDetails.athlete.imageUrl } : require('../../assets/splash.png')}
                           style={styles.profile}
                         />
                       </TouchableOpacity>
@@ -214,7 +214,7 @@ const AcceptBooking = props => {
                     <Text style={[styles.text, { marginLeft: 10 }]}>Media</Text>
                     <Image
                       style={styles.video}
-                      source={require('../../assets/splash.jpg')}
+                      source={require('../../assets/splash.png')}
                     />
                   </View>
                   <TouchableOpacity

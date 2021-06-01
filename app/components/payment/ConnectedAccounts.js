@@ -84,7 +84,7 @@ const ConnectedAccounts = props => {
                   props.navigation.navigate('AthleteDetails');
                 }}>
                 <Image
-                  source={require('../../assets/splash.jpg')}
+                  source={require('../../assets/splash.png')}
                   style={styles.profile}
                 />
               </TouchableOpacity>

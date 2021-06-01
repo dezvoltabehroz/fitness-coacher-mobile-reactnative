@@ -25,7 +25,7 @@ const PlayerReviewsCard = props => {
       <View style={styles.main}>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Image
-            source={require('../../assets/splash.jpg')}
+            source={require('../../assets/splash.png')}
             style={styles.profile}
           />
           <View style={{marginLeft: 10}}>

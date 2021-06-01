@@ -77,8 +77,8 @@ const SplashScreen = props => {
           if (res.data.status) {
             await props.authActions.getUserProfile(userData, props.navigation.replace);
           } else {
-            // await props.authActions.getUserProfile(userData, props.navigation.replace);
-            props.actions.removeUser(this.props.navigation.replace)
+            await props.authActions.getUserProfile(userData, props.navigation.replace);
+            // props.actions.removeUser(this.props.navigation.replace)
           }
         })
         .catch((err) => { console.log("err : ", err); props.authActions.removeUser(props.navigation.replace) })
@@ -95,7 +95,7 @@ const SplashScreen = props => {
         backgroundColor={'transparent'}
       />
       <ImageBackground
-        source={require('../../assets/splash.jpg')}
+        source={require('../../assets/splash.png')}
         style={styles.image}>
         <View
           style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }}>

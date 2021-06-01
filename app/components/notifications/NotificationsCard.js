@@ -79,7 +79,7 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
       <View style={styles.outer}>
         <View style={styles.inner}>
           <Image
-            source={require('../../assets/splash.jpg')}
+            source={require('../../assets/splash.png')}
             style={styles.image}
           />
           <View>

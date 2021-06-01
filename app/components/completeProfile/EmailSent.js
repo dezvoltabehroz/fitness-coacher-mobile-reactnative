@@ -186,8 +186,9 @@ const EmailSent = (props) => {
 
 const styles = StyleSheet.create({
   safeArea: {
+    flex: 1,
     backgroundColor: Colors.backgroundColor,
-    height: "100%",
+    // height: "100%",
   },
   snackbarContainerStyle: {
     alignItems: "center"
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
     marginBottom: "10%",
   },
   inputContainer: {
-    height: "100%",
+    // height: "100%",
     justifyContent: "space-evenly",
   },
   btnStyle: {

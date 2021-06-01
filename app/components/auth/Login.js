@@ -138,6 +138,7 @@ const SplashScreen = (props) => {
         if (res.status == 200) {
           console.log("res :", res.data.userData.userInfo);
           await AsyncStorage.setItem('Token', JSON.stringify(res.data.userData.tokenInfo))
+          await AsyncStorage.setItem('USER', JSON.stringify(res.data.userData.tokenInfo))
           let userData = {
             id: res.data.userData.userInfo.id,
             token: res.data.userData.tokenInfo

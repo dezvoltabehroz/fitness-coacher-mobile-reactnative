@@ -38,8 +38,8 @@ const BookingScreen = (props) => {
     BookingServices.getActiveBookings(props?.user?.id, props?.token)
       .then((response) => {
         if (response.data.success) {
-          setMessage(response.data.msg)
-          setVisible(true);
+          // setMessage(response.data.msg)
+          // setVisible(true);
           setLoading(false)
           setBookings(response.data.coursesDetail.rows);
           console.log("booking details are", bookings);
@@ -100,7 +100,7 @@ const BookingScreen = (props) => {
               }}
             >
               <Image
-                source={props?.user?.imageUrl != null ? { uri: props?.user?.imageUrl } : require('../../assets/splash.jpg')}
+                source={props?.user?.imageUrl != null ? { uri: props?.user?.imageUrl } : require('../../assets/splash.png')}
                 resizeMode="contain"
                 style={styles.image1}
               />

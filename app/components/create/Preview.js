@@ -56,7 +56,7 @@ const PreviewScreen = props => {
         <Text style={styles.text}>Video</Text>
         <Image
           style={styles.video}
-          source={require('../../assets/splash.jpg')}
+          source={require('../../assets/splash.png')}
         />
         <Text style={styles.text}>Notes</Text>
         <Text style={styles.text1}>

@@ -43,7 +43,7 @@ const AthleteDetails = props => {
       <ScrollView showsVerticalScrollIndicator={false} style={styles.bottom}>
         <View style={{alignItems: 'center'}}>
           <Image
-            source={require('../../assets/splash.jpg')}
+            source={require('../../assets/splash.png')}
             style={styles.profile}
           />
         </View>
