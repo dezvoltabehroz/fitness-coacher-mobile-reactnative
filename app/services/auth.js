@@ -20,6 +20,9 @@ const Api = {
     getUserProfile: function (userData) {
         return axiosInstance.get(`coach/details/${userData.id}`, configToken(userData.token))
     },
+    getAthleteProfile: function (userData) {
+        return axiosInstance.get(`coach/getAthlete/${userData.id}`, configToken(userData.token))
+    },
     updateProfile: function (id, userData, token) {
         return axiosInstance.put(`coach/updateCoach/${id}`, userData, configToken(token))
     },

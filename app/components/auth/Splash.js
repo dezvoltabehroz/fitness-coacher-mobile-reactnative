@@ -31,7 +31,7 @@ const SplashScreen = props => {
       console.log(userToken)
       if (userToken) {
         AuthServices.validateUser(userToken)
-          .then(async (res) => {
+          .then( (res) => {
             let userData = {
               id: userdata.id,
               token: res.data.userData.tokenInfo
@@ -40,8 +40,8 @@ const SplashScreen = props => {
             requestUserPermission(userData)
             // await props.authActions.getUserProfile(userData, props.navigation.replace);
           })
-          .catch((err) => console.log(err))
-      } else { props.navigation.replace('Login'); }
+          .catch(async(err) => {await props.authActions.removeUser(props.navigation.replace);console.log(err)})
+      } else { await props.authActions.removeUser(props.navigation.replace); }
     }, 2000);
   },[]);
 

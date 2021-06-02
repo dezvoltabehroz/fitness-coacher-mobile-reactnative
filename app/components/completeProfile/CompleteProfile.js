@@ -282,7 +282,7 @@ function CompleteProfile({ navigation, route }) {
   };
 
   const selectingSkills = (iteration) => {
-    var skill = coachSkills;
+    var skill = [...coachSkills];
     // if (skill[iteration].selected) {
     //   skill[iteration].selected = false;
     // } else {

@@ -9,22 +9,25 @@ import {
   ImageBackground,
   Image,
   ActivityIndicator,
-  NativeModules,
+  Modal,
   Platform,
   Dimensions,
   TextInput,
   ToastAndroid,
 } from 'react-native';
 import { Colors } from '../../style/colors';
+import VideoPlayer from 'react-native-video-controls';
 import { FontFamily } from '../../style/typograpy';
 import Button from '../../common/Button';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Icon } from 'native-base';
 import { BookingServices, TrainingCategoryServices } from '../../services';
 import { connect } from 'react-redux';
 import { errorUtils } from '../../common/Utilities';
 import Container from '../../common/Container';
 import moment from 'moment'
+import LinkPreview from 'react-native-link-preview';
 const height = Dimensions.get('window').height;
 const AcceptBooking = props => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -36,6 +39,8 @@ const AcceptBooking = props => {
   const [instructor, setInstructor] = useState("")
   const [instruction, setInstruction] = useState("")
   const [skill, setSkill] = useState("");
+  const [videoModal, setVideoModal] = useState(false)
+  const [preview, setPreview] = useState("");
   useEffect(() => {
     // if (props.route.params != undefined) {
     //   const { flag } = props?.route?.params;
@@ -51,9 +56,14 @@ const AcceptBooking = props => {
     console.log(props.route.params);
     console.log("props?.route?.params?.requestId : ", props?.route?.params)
     BookingServices.getRequestDetails(parseInt(props.route.params.requestId), props?.token)
-      .then((response) => {
+      .then(async (response) => {
         if (!response.data.success) {
           console.log(response.data)
+          await LinkPreview.getPreview(response.data.requestDetail.file)
+            .then(data => {
+              console.debug("Data : ", data);
+              setPreview(data.images[0])
+            });
           setBookingDetails(response.data.requestDetail)
           var trainingType = props?.trainingTypes
           trainingType.forEach((item, index) => {
@@ -82,6 +92,11 @@ const AcceptBooking = props => {
         }
         else {
           setBookingDetails(response.data.requestDetail)
+          await LinkPreview.getPreview(response.data.requestDetail.file)
+            .then(data => {
+              console.debug("Data : ", data);
+              setPreview(data.images[0])
+            });
           console.log(response.data)
           setMessage(`${response.data.msg}`)
           setLoading(false)
@@ -176,7 +191,7 @@ const AcceptBooking = props => {
                       <TouchableOpacity
                         // style={{width: '25%'}}
                         onPress={() => {
-                          props.navigation.navigate('AthleteDetails');
+                          props.navigation.navigate('AthleteDetails', { id: bookingDetails.AthleteId });
                         }}>
                         <Image
                           source={bookingDetails.athlete.imageUrl != null ? { uri: bookingDetails.athlete.imageUrl } : require('../../assets/splash.png')}
@@ -223,10 +238,18 @@ const AcceptBooking = props => {
                       <Text style={styles.text1}>{skill}</Text>
                     </View>
                     <Text style={[styles.text, { marginLeft: 10 }]}>Media</Text>
-                    <Image
-                      style={styles.video}
-                      source={require('../../assets/splash.png')}
-                    />
+                    <TouchableOpacity onPress={() => setVideoModal(!videoModal)}>
+                      <ImageBackground
+                        source={{ uri: preview }}
+                        style={{ height: 150, width: "95%", marginVertical: "5%", marginHorizontal: "5%", }}
+                        imageStyle={{ borderRadius: 20 }}>
+                        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                          <Icon type={"FontAwesome"} name={"play-circle"} style={{ fontSize: 40, color: "lightgray", }} />
+                        </View>
+                      </ImageBackground>
+
+
+                    </TouchableOpacity>
                   </View>
                   {props.route.params.flag ?
 
@@ -260,6 +283,12 @@ const AcceptBooking = props => {
             </>
         }
       </View>
+      <Modal visible={videoModal}>
+        <VideoPlayer
+          source={{ uri: 'https://youtu.be/EngW7tLk6R8.mp4' }}
+          onBack={() => setVideoModal(!videoModal)}
+        />
+      </Modal>
     </Container>
   );
 };

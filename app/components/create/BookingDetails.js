@@ -6,21 +6,24 @@ import {
   View,
   Text,
   StatusBar,
-  ImageBackground,
+  Modal,
   Image,
-  AsyncStorage,
+  ImageBackground,
   ActivityIndicator,
   Platform,
   Dimensions,
   TextInput,
 } from 'react-native';
+import VideoPlayer from 'react-native-video-controls';
+import Video from 'react-native-video';
 import { Colors } from '../../style/colors';
 import { RadioButton, Checkbox, Snackbar } from 'react-native-paper';
 import { FontFamily } from '../../style/typograpy';
 import Button from '../../common/Button';
+import LinkPreview from 'react-native-link-preview';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import DetailsModal from '../../common/DetailsModal';
-import { Container, Header, Content, Tab, Tabs } from 'native-base';
+import { Container, Header, Content, Tab, Tabs, Icon } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { BookingServices } from '../../services';
 import { connect } from 'react-redux';
@@ -33,6 +36,8 @@ const BookingDetails = props => {
   const [message, setMessage] = useState("");
   const [bookingDetails, setBookingDetails] = useState({})
   const [loading, setLoading] = useState(true)
+  const [videoModal, setVideoModal] = useState(false)
+  const [preview, setPreview] = useState("");
   console.log(props.route.params)
   useEffect(() => {
     getBookingDetail();
@@ -50,10 +55,16 @@ const BookingDetails = props => {
   const getBookingDetail = () => {
     setLoading(true)
     BookingServices.getBookingDetails(props?.route?.params?.bookingId, props?.token)
-      .then((response) => {
+      .then(async (response) => {
         if (response.data.success) {
-          console.log(response.data)
+          console.log(response.data.bookingDetail.rows[0].athleteRequest.file)
           setBookingDetails(response.data.bookingDetail.rows[0])
+          console.log(response.data.bookingDetail.rows[0].athleteRequest.file);
+          await LinkPreview.getPreview(response.data.bookingDetail.rows[0].athleteRequest.file)
+            .then(data => {
+              console.debug("Data : ", data);
+              setPreview(data.images[0])
+            });
           setLoading(false)
         } else {
           setMessage(`${response.data.msg}`)
@@ -71,7 +82,7 @@ const BookingDetails = props => {
   }
 
   const handleYes = () => {
-    
+
     let userData = {
       "CoachId": bookingDetails.coach.id,
       "BookingId": bookingDetails.id
@@ -217,10 +228,16 @@ const BookingDetails = props => {
                           <Text style={styles.text1}>{bookingDetails?.athleteRequest?.subCategorySkill?.skill}</Text>
                         </View>
                         <Text style={[styles.text, { marginLeft: 10 }]}>Media</Text>
-                        <Image
-                          style={styles.video}
-                          source={require('../../assets/splash.png')}
-                        />
+                        <TouchableOpacity onPress={() => setVideoModal(!videoModal)}>
+                          <ImageBackground
+                            source={{ uri: preview }}
+                            style={{ height: 150, width: "95%", marginVertical: "5%", marginHorizontal: "5%", }}
+                            imageStyle={{ borderRadius: 20 }}>
+                            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                              <Icon type={"FontAwesome"} name={"play-circle"} style={{ fontSize: 40, color: "lightgray", }} />
+                            </View>
+                          </ImageBackground>
+                        </TouchableOpacity>
                       </View>
                       <TouchableOpacity
                         onPress={() => setModalVisible(true)}
@@ -254,7 +271,12 @@ const BookingDetails = props => {
               </View>
             </>
         }
-
+        <Modal visible={videoModal}>
+          <VideoPlayer
+            source={{ uri: bookingDetails != {} ? bookingDetails.athleteRequest.file : "" }}
+            onBack={() => setVideoModal(!videoModal)}
+          />
+        </Modal>
         <DetailsModal
           onYes={() => handleYes()}
           setModalVisible={setModalVisible}

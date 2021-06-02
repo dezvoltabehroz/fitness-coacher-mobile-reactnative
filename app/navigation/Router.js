@@ -192,6 +192,19 @@ function NotificationsStack() {
           },
         }}
       />
+      <Stack.Screen
+        name="AthleteDetails"
+        component={AthleteDetails}
+        options={{
+          headerShown: null,
+          headerTitleAllowFontScaling: true,
+          headerTransparent: true,
+          headerTitleStyle: {
+            fontFamily: FontFamily.helveticaBold,
+            fontSize: 16,
+          },
+        }}
+      />
     </Stack.Navigator>
   );
 }
@@ -368,7 +381,7 @@ function TabContainer() {
     <Tab.Navigator
       shifting={false}
       tabBarOptions={{
-        unmountOnBlur:true,
+        unmountOnBlur: true,
         headerShown: true,
         activeTintColor: Colors.buttonColor,
         inactiveTintColor: "gray",
@@ -404,7 +417,7 @@ function TabContainer() {
         name="Booking"
         component={BookingStack}
         options={{
-          unmountOnBlur:true,
+          unmountOnBlur: true,
           tabBarLabel: "Booking",
           tabBarIcon: ({ focused }) => (
             <Ionicons
@@ -419,7 +432,7 @@ function TabContainer() {
         name="NotificationsStack"
         component={NotificationsStack}
         options={{
-          unmountOnBlur:true,
+          unmountOnBlur: true,
           tabBarLabel: "Notifications",
           tabBarIcon: ({ focused }) => (
             <Ionicons
@@ -458,7 +471,7 @@ function TabContainer() {
             if (exploreActiveRoute.name === "ChangePassword") { tabBarVisible = false };
           }
           return {
-            unmountOnBlur:true,
+            unmountOnBlur: true,
             headerShown: false,
             tabBarVisible,
             tabBarLabel: "Settings",
