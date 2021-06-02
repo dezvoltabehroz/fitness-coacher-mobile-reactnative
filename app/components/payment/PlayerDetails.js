@@ -93,11 +93,13 @@ const AthleteDetails = props => {
           </View> */}
           <View style={styles.mainView}>
             <Text style={styles.text}>Sport</Text>
-            <Text style={styles.text1}>{athleteDetails.trainingType}</Text>
+            <Text style={styles.text1}>Batting</Text>
+            {/* <Text style={styles.text1}>{athleteDetails.trainingType}</Text> */}
           </View>
           <View style={styles.mainView}>
             <Text style={styles.text}>Skill Level</Text>
-            <Text style={styles.text1}>{athleteDetails.skill}</Text>
+            <Text style={styles.text1}>Expert</Text>
+            {/* <Text style={styles.text1}>{athleteDetails.skill}</Text> */}
           </View>
           <View style={styles.mainView}>
             <Text style={styles.text}>Age Group</Text>
