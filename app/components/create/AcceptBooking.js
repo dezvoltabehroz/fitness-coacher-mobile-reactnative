@@ -47,9 +47,10 @@ const AcceptBooking = props => {
   }, []);
 
   const getRequestDetails = () => {
+    setLoading(true)
     console.log(props.route.params);
     console.log("props?.route?.params?.requestId : ", props?.route?.params)
-    BookingServices.getRequestDetails(props.route.params.requestId, props?.token)
+    BookingServices.getRequestDetails(parseInt(props.route.params.requestId), props?.token)
       .then((response) => {
         if (!response.data.success) {
           console.log(response.data)
@@ -89,7 +90,7 @@ const AcceptBooking = props => {
 
       })
       .catch((err) => {
-        console.log(err.response)
+        console.log(err.response.data)
         setMessage(`${errorUtils.getError(err)}`)
         setVisible(true);
         setLoading(false)
@@ -100,7 +101,7 @@ const AcceptBooking = props => {
   const handleAccept = () => {
     setAcceptLoading(true)
     let userData = {
-      "RequestId": props.route.params.requestId,
+      "RequestId": parseInt(props.route.params.requestId),
       "CoachId": props?.user?.id
     }
     console.log(userData)
@@ -129,8 +130,10 @@ const AcceptBooking = props => {
         setVisible(true);
       })
   }
-
+  console.log(bookingDetails.athlete)
   return (
+    // <>
+    // </>
     <Container onPress={() => setVisible(!visible)} message={message} visible={visible}>
       <View style={styles.container}>
         <StatusBar
@@ -162,7 +165,7 @@ const AcceptBooking = props => {
 
               <View style={styles.bottom}>
                 <ScrollView
-                  contentContainerStyle={{ paddingBottom: '25%' }}
+                  contentContainerStyle={{ paddingBottom: '45%' }}
                   showsVerticalScrollIndicator={false}>
                   <View style={styles.border}>
                     <View
@@ -225,26 +228,33 @@ const AcceptBooking = props => {
                       source={require('../../assets/splash.png')}
                     />
                   </View>
-                  <TouchableOpacity
-                    onPress={handleAccept}
-                    style={styles.btnStyle}>
-                    {
-                      acceptLoading ?
-                        <ActivityIndicator size={20} color={'#FFFFFF'} />
-                        :
-                        <Text style={{ color: 'white', fontWeight: '700' }}>Accept</Text>
-                    }
+                  {props.route.params.flag ?
 
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      styles.btnStyle,
-                      { backgroundColor: 'white', borderWidth: 0.4 },
-                    ]}>
-                    <Text style={{ color: Colors.textColor, fontWeight: '700' }}>
-                      Reject
+                    <>
+                      <TouchableOpacity
+                        onPress={handleAccept}
+                        style={styles.btnStyle}>
+                        {
+                          acceptLoading ?
+                            <ActivityIndicator size={20} color={'#FFFFFF'} />
+                            :
+                            <Text style={{ color: 'white', fontWeight: '700' }}>Accept</Text>
+                        }
+
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[
+                          styles.btnStyle,
+                          { backgroundColor: 'white', borderWidth: 0.4 },
+                        ]}>
+                        <Text style={{ color: Colors.textColor, fontWeight: '700' }}>
+                          Reject
             </Text>
-                  </TouchableOpacity>
+                      </TouchableOpacity>
+                    </>
+                    : null
+                  }
+
                 </ScrollView>
               </View>
             </>

@@ -15,10 +15,10 @@ const Api = {
         return axiosInstance.post('coach/completeBooking', userData, configToken(token))
     },
     getActiveBookings: function (id, token) {
-        return axiosInstance.get(`coach/getBookings?CoachId=${id}`, configToken(token))
+        return axiosInstance.get(`coach/getBookings?CoachId=${id}&sortBy=id&order=DESC`, configToken(token))
     },
     getCompletedBookings: function (id, token) {
-        return axiosInstance.get(`coach/getBookings?CoachId=${id}&status=completed`, configToken(token))
+        return axiosInstance.get(`coach/getBookings?CoachId=${id}&sortBy=id&status=completionAccepted&order=DESC`, configToken(token))
     },
     getBookings: function (id, token) {
         return axiosInstance.get(`coach/getBookings?CoachId=${id}`, configToken(token))
@@ -33,7 +33,7 @@ const Api = {
         return axiosInstance.post(`coach/acceptRequest`, userData, configToken(token))
     },
     getRequestDetails: function (id, token) {
-        return axiosInstance.get(`coach/requestDetails/${id}`,configToken(token))
+        return axiosInstance.get(`coach/requestDetails/${id}`, configToken(token))
     },
 
 };

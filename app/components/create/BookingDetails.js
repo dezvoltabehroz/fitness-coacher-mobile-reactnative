@@ -71,10 +71,12 @@ const BookingDetails = props => {
   }
 
   const handleYes = () => {
+    
     let userData = {
       "CoachId": bookingDetails.coach.id,
       "BookingId": bookingDetails.id
     }
+    console.log(userData)
     BookingServices.completeBooking(userData, props?.token)
       .then((response) => {
         if (response.data.success) {
@@ -90,7 +92,7 @@ const BookingDetails = props => {
       })
       .catch((err) => {
         setMessage(`${errorUtils.getError(err)}`)
-        setVisible(true); setModalVisible(false); console.log(err)
+        setVisible(true); setModalVisible(false); console.log(err.response.data)
       })
   }
 

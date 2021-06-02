@@ -17,6 +17,7 @@ import { connect } from 'react-redux';
 import { BookingServices } from "../../services";
 import { Snackbar } from 'react-native-paper';
 import Container from "../../common/Container";
+import { errorUtils } from "../../common/Utilities";
 
 const height = Dimensions.get("window").height;
 const BookingScreen = (props) => {

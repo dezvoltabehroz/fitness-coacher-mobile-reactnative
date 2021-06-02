@@ -34,12 +34,14 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
     setLoading(true)
     let data = item;
     let parsedData = JSON.parse(data.obj);
+    console.log(parsedData)
     if (data.obj != null) {
+      setId(parseInt(parsedData.id))
       setParsedObj(parsedData);
       var trainingType = [...trainingTypes]
       trainingType.forEach((item, index) => {
-        if ( parsedData.TrainingTypeId == item.id) {
-          setId(parseInt(parsedData.id))
+        if (parsedData.TrainingTypeId == item.id) {
+
           setInstructor(item.title)
           TrainingCategoryServices.subCategories(item.id)
             .then((res) => {
@@ -64,7 +66,7 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
       })
     }
 
-  },[3])
+  }, [3])
 
 
 
@@ -106,10 +108,10 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
                   {moment(item.createdAt).fromNow()}
                 </Text>
               </View>
-            ) : (
+            ) : item.type == "acceptCompletionRequest" || item.type == "successfullyAccepted" || item.type == "rejectCompletionRequest" ? (
               <>
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('Bookingdetails')}>
+                  onPress={() => navigation.navigate('AcceptBooking', { requestId: id, flag: false })}>
                   <Text style={styles.text}>{item.body}</Text>
                 </TouchableOpacity>
 
@@ -125,7 +127,27 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
                   {moment(item.createdAt).fromNow()}
                 </Text>
               </>
-            )}
+            ) :
+              (
+                <>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('AcceptBooking', { requestId: id, flag: false })}>
+                    <Text style={styles.text}>{item.body}</Text>
+                  </TouchableOpacity>
+
+                  <Text
+                    style={[
+                      styles.text,
+                      {
+                        fontSize: 11,
+                        lineHeight: height > 667 ? 10 : 12,
+                        color: Colors.textColor,
+                      },
+                    ]}>
+                    {moment(item.createdAt).fromNow()}
+                  </Text>
+                </>
+              )}
           </View>
         </View>
 
