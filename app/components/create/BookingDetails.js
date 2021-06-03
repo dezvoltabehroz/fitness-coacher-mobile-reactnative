@@ -23,11 +23,12 @@ import Button from '../../common/Button';
 import LinkPreview from 'react-native-link-preview';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import DetailsModal from '../../common/DetailsModal';
-import { Container, Header, Content, Tab, Tabs, Icon } from 'native-base';
+import { Header, Content, Tab, Tabs, Icon } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { BookingServices } from '../../services';
 import { connect } from 'react-redux';
 import moment from 'moment';
+import Container from '../../common/Container';
 import { errorUtils } from '../../common/Utilities';
 const height = Dimensions.get('window').height;
 const BookingDetails = props => {
@@ -181,7 +182,7 @@ const BookingDetails = props => {
                           }}>
                             <TouchableOpacity
                               onPress={() => {
-                                props.navigation.navigate('AthleteDetails',{ id: bookingDetails.AthleteId });
+                                props.navigation.navigate('AthleteDetails', { id: bookingDetails.AthleteId });
                               }}>
                               <Image
                                 resizeMode="contain"
