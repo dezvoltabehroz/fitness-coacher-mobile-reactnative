@@ -181,7 +181,7 @@ const BookingDetails = props => {
                           }}>
                             <TouchableOpacity
                               onPress={() => {
-                                props.navigation.navigate('AthleteDetails');
+                                props.navigation.navigate('AthleteDetails',{ id: bookingDetails.AthleteId });
                               }}>
                               <Image
                                 resizeMode="contain"
@@ -256,7 +256,7 @@ const BookingDetails = props => {
                     activeTextStyle={styles.activeTabText}>
                     <View style={[styles.mainView, { marginTop: 10 }]}>
                       <Text style={styles.text}>Mobile Phone</Text>
-                      <Text style={styles.text1}>{bookingDetails.athlete.phone}</Text>
+                      <Text style={styles.text1}>{bookingDetails?.athlete.phone}</Text>
                     </View>
                     <View style={styles.mainView}>
                       <Text style={styles.text}>Email</Text>
@@ -273,7 +273,7 @@ const BookingDetails = props => {
         }
         <Modal visible={videoModal}>
           <VideoPlayer
-            source={{ uri: bookingDetails != {} ? bookingDetails.athleteRequest.file : "" }}
+            source={{ uri: bookingDetails != {} ? bookingDetails?.athleteRequest?.file : "" }}
             onBack={() => setVideoModal(!videoModal)}
           />
         </Modal>

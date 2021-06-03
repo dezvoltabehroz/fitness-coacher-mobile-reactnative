@@ -37,7 +37,7 @@ const AthleteDetails = props => {
   useEffect(() => {
 
     let userData = {
-      id: props.route.params.id,
+      id: props?.route?.params?.id,
       token: props?.token,
     }
     AuthServices.getAthleteProfile(userData)
@@ -72,20 +72,20 @@ const AthleteDetails = props => {
             <TouchableOpacity onPress={() => props.navigation.goBack()}>
               <Ionicons name="arrow-back" size={height > 667 ? 20 : 16} />
             </TouchableOpacity>
-            <Text style={styles.headertext}>{athleteDetails.firstName} {athleteDetails.lastName}</Text>
+            <Text style={styles.headertext}>{athleteDetails?.firstName} {athleteDetails?.lastName}</Text>
           </View>
         </View>
         <ScrollView showsVerticalScrollIndicator={false} style={styles.bottom}>
           <View style={{ alignItems: 'center' }}>
             <Image
-              source={{ uri: athleteDetails.imageUrl != null ? { uri: athleteDetails.imageUrl } : require('../../assets/splash.png') }}
+              source={ athleteDetails?.imageUrl != null ? { uri: athleteDetails?.imageUrl } : require('../../assets/splash.png') }
               style={styles.profile}
             />
           </View>
 
           <View style={styles.mainView}>
             <Text style={styles.text}>Name</Text>
-            <Text style={styles.text1}>{athleteDetails.firstName} {athleteDetails.lastName}</Text>
+            <Text style={styles.text1}>{athleteDetails?.firstName} {athleteDetails?.lastName}</Text>
           </View>
           {/* <View style={styles.mainView}>
             <Text style={styles.text}>Date of Birth</Text>
@@ -93,24 +93,24 @@ const AthleteDetails = props => {
           </View> */}
           <View style={styles.mainView}>
             <Text style={styles.text}>Sport</Text>
-            <Text style={styles.text1}>Batting</Text>
-            {/* <Text style={styles.text1}>{athleteDetails.trainingType}</Text> */}
+            {/* <Text style={styles.text1}>Batting</Text> */}
+            <Text style={styles.text1}>{athleteDetails?.trainingType}</Text>
           </View>
           <View style={styles.mainView}>
             <Text style={styles.text}>Skill Level</Text>
-            <Text style={styles.text1}>Expert</Text>
-            {/* <Text style={styles.text1}>{athleteDetails.skill}</Text> */}
+            {/* <Text style={styles.text1}>Expert</Text> */}
+            <Text style={styles.text1}>{athleteDetails?.skill}</Text>
           </View>
           <View style={styles.mainView}>
             <Text style={styles.text}>Age Group</Text>
-            <Text style={styles.text1}>18+</Text>
+            <Text style={styles.text1}>{athleteDetails?.ageGroupAthlete}</Text>
           </View>
           <Text style={styles.text1}>Reviews</Text>
           <FlatList
-            data={athleteDetails.rating}
+            data={athleteDetails?.athleteRating}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item, index }) => {
-              return <PlayerReviewsCard item={item} />;
+              return <PlayerReviewsCard item={item} image={athleteDetails?.imageUrl} name={`${athleteDetails?.firstName} ${athleteDetails?.lastName}`} />;
             }}
           />
           <View style={{ height: 40 }}></View>

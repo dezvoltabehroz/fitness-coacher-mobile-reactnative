@@ -45,7 +45,7 @@ const AcceptBooking = props => {
 
 
   const handleSubmit = () => {
-    if (submit && starCount > 0 && review) {
+    if ( starCount > 0 && review) {
       let userData = {
         "AthleteId": bookingData.AthleteId,
         "stars": starCount,

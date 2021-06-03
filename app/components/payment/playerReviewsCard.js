@@ -26,13 +26,12 @@ const PlayerReviewsCard = props => {
       <View style={styles.main}>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Image
-            source={require('../../assets/splash.png')}
+           source={ props?.image != null ? { uri: props?.image } : require('../../assets/splash.png') }
             style={styles.profile}
           />
           <View style={{marginLeft: 10}}>
-            <Text style={styles.text}>Dmitri Albov</Text>
-            <Text style={styles.text1}>{moment(props.item.review).format('MMM DD ,YYYY')}</Text>
-            {/* <Text style={styles.text1}>{moment().format('MMM DD ,YYYY')}</Text> */}
+            <Text style={styles.text}>{props?.name}</Text>
+            <Text style={styles.text1}>{moment(props.item.createdAt).format('MMM DD ,YYYY')}</Text>
           </View>
         </View>
         <View
@@ -45,12 +44,10 @@ const PlayerReviewsCard = props => {
             style={styles.star}
             source={require('../../assets/star.png')}
           />
-          {/* <Text style={[styles.text1, { marginLeft: 10 }]}>{'4.7'}</Text> */}
-         <Text style={[styles.text1, { marginLeft: 10 }]}>{props.item.star}</Text>
+         <Text style={[styles.text1, { marginLeft: 10 }]}>{props?.item?.stars}</Text>
         </View>
       </View>
-      {/* <Text style={[styles.text1, { marginLeft: 10 }]}>{"This is a review "}</Text> */}
-      <Text style={styles.text2}>{props.item.review}</Text>
+      <Text style={styles.text2}>{props?.item?.review}</Text>
     </View>
   );
 };

@@ -52,64 +52,33 @@ const AcceptBooking = props => {
   }, []);
 
   const getRequestDetails = () => {
-    setLoading(true)
-    console.log(props.route.params);
-    console.log("props?.route?.params?.requestId : ", props?.route?.params)
-    BookingServices.getRequestDetails(parseInt(props.route.params.requestId), props?.token)
+    BookingServices.getBookingDetails(props?.route?.params?.requestId, props?.token)
       .then(async (response) => {
-        if (!response.data.success) {
-          console.log(response.data)
-          await LinkPreview.getPreview(response.data.requestDetail.file)
+        if (response.data.success) {
+          console.log(response.data.bookingDetail.rows[0].athleteRequest.file)
+          setBookingDetails(response.data.bookingDetail.rows[0])
+          console.log(response.data.bookingDetail.rows[0].athleteRequest.file);
+          await LinkPreview.getPreview(response.data.bookingDetail.rows[0].athleteRequest.file)
             .then(data => {
               console.debug("Data : ", data);
               setPreview(data.images[0])
+            })
+            .catch((err) => {
+              console.log(err)
             });
-          setBookingDetails(response.data.requestDetail)
-          var trainingType = props?.trainingTypes
-          trainingType.forEach((item, index) => {
-            if (response.data.requestDetail != null && response.data.requestDetail.TrainingTypeId == item.id) {
-              setInstructor(item.title)
-              TrainingCategoryServices.subCategories(item.id)
-                .then((res) => {
-                  var subCategoriesArr = res.data.subCategories
-                  subCategoriesArr.forEach((items, index) => {
-                    if (response.data.requestDetail != null && response.data.requestDetail.TrainingSubCategoryId == items.id) {
-                      setInstruction(items.title)
-                      var skill = [...props?.skills];
-                      for (let index = 0; index < skill.length; index++) {
-                        if (response.data.requestDetail.SkillId == skill[index].id) {
-                          setSkill(skill[index].skill)
-                          setLoading(false)
-                        }
-                      }
-                    }
-                  })
-                })
-                .catch((err) => console.log(err.response))
-            }
-          })
           setLoading(false)
-        }
-        else {
-          setBookingDetails(response.data.requestDetail)
-          await LinkPreview.getPreview(response.data.requestDetail.file)
-            .then(data => {
-              console.debug("Data : ", data);
-              setPreview(data.images[0])
-            });
-          console.log(response.data)
+        } else {
           setMessage(`${response.data.msg}`)
-          setLoading(false)
           setVisible(true);
+          setLoading(false)
+          console.log(response.data)
+          setModalVisible(false)
         }
-
       })
       .catch((err) => {
-        console.log(err.response.data)
         setMessage(`${errorUtils.getError(err)}`)
-        setVisible(true);
         setLoading(false)
-        console.log(err)
+        setVisible(true); setModalVisible(false); console.log(err)
       })
   }
 
@@ -145,7 +114,7 @@ const AcceptBooking = props => {
         setVisible(true);
       })
   }
-  console.log(bookingDetails.athlete)
+  // console.log(bookingDetails.athlete)
   return (
     // <>
     // </>
@@ -194,7 +163,7 @@ const AcceptBooking = props => {
                           props.navigation.navigate('AthleteDetails', { id: bookingDetails.AthleteId });
                         }}>
                         <Image
-                          source={bookingDetails.athlete.imageUrl != null ? { uri: bookingDetails.athlete.imageUrl } : require('../../assets/splash.png')}
+                          source={bookingDetails?.athlete?.imageUrl != null ? { uri: bookingDetails?.athlete?.imageUrl } : require('../../assets/splash.png')}
                           style={styles.profile}
                         />
                       </TouchableOpacity>
@@ -219,23 +188,26 @@ const AcceptBooking = props => {
                     </View>
                     <View style={styles.mainView}>
                       <Text style={styles.text}>Athlete</Text>
-                      <Text style={styles.text1}>{bookingDetails.athlete.firstName} {bookingDetails.athlete.lastName}</Text>
+                      <Text style={styles.text1}>{bookingDetails?.athlete?.firstName} {bookingDetails?.athlete?.lastName}</Text>
                     </View>
                     <View style={styles.mainView}>
                       <Text style={styles.text}>Sports</Text>
-                      <Text style={styles.text1}>{instructor}</Text>
+                      <Text style={styles.text1}>{bookingDetails?.athleteRequest?.trainingType?.title}</Text>
+
                     </View>
                     <View style={styles.mainView}>
                       <Text style={styles.text}>Age Group</Text>
-                      <Text style={styles.text1}>{bookingDetails.coachAgeGroup}</Text>
+                      <Text style={styles.text1}>{bookingDetails?.athleteRequest?.coachAgeGroup}</Text>
+
                     </View>
                     <View style={styles.mainView}>
                       <Text style={styles.text}>Instruction type</Text>
-                      <Text style={styles.text1}>{instruction}</Text>
+                      <Text style={styles.text1}>{bookingDetails?.athleteRequest?.trainingSubCategory.title}</Text>
+
                     </View>
                     <View style={styles.mainView}>
                       <Text style={styles.text}>Skill Type</Text>
-                      <Text style={styles.text1}>{skill}</Text>
+                      <Text style={styles.text1}>{bookingDetails?.athleteRequest?.subCategorySkill?.skill}</Text>
                     </View>
                     <Text style={[styles.text, { marginLeft: 10 }]}>Media</Text>
                     <TouchableOpacity onPress={() => setVideoModal(!videoModal)}>
@@ -285,7 +257,7 @@ const AcceptBooking = props => {
       </View>
       <Modal visible={videoModal}>
         <VideoPlayer
-          source={{ uri: 'https://youtu.be/EngW7tLk6R8.mp4' }}
+          source={{ uri: bookingDetails?.file }}
           onBack={() => setVideoModal(!videoModal)}
         />
       </Modal>

@@ -34,36 +34,11 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
     setLoading(true)
     let data = item;
     let parsedData = JSON.parse(data.obj);
-    console.log(parsedData)
-    if (data.obj != null) {
-      setId(parseInt(parsedData.id))
-      setParsedObj(parsedData);
-      var trainingType = [...trainingTypes]
-      trainingType.forEach((item, index) => {
-        if (parsedData.TrainingTypeId == item.id) {
 
-          setInstructor(item.title)
-          TrainingCategoryServices.subCategories(item.id)
-            .then((res) => {
-              var subCategoriesArr = res.data.subCategories
-              subCategoriesArr.forEach((items, index) => {
-                if (parsedData != null && parsedData.TrainingSubCategoryId == items.id) {
-                  setInstruction(items.title)
-                  var skill = [...skills];
-                  for (let index = 0; index < skill.length; index++) {
-                    if (parsedData.SkillId == skill[index].id) {
-                      console.log(skill[index].skill)
-                      setSkill(skill[index].skill)
-                      setAgeGroup(parsedData.coachAgeGroup)
-                      setLoading(false)
-                    }
-                  }
-                }
-              })
-            })
-            .catch((err) => console.log(err.response))
-        }
-      })
+    console.log("parsedData  : ", parsedData)
+    if (data.obj != null) {
+      setParsedObj(parsedData);
+      console.log(parsedData.RequestId)
     }
 
   }, [3])
@@ -111,7 +86,7 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
             ) : item.type == "acceptCompletionRequest" || item.type == "successfullyAccepted" || item.type == "rejectCompletionRequest" ? (
               <>
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('AcceptBooking', { requestId: id, flag: false })}>
+                  onPress={() => navigation.navigate('AcceptBooking', { requestId: parsedObj?.id, flag: false })}>
                   <Text style={styles.text}>{item.body}</Text>
                 </TouchableOpacity>
 
@@ -131,7 +106,7 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
               (
                 <>
                   <TouchableOpacity
-                    onPress={() => navigation.navigate('AcceptBooking', { requestId: id, flag: false })}>
+                    onPress={() => navigation.navigate('AcceptBooking', { requestId: parsedObj?.id, flag: false })}>
                     <Text style={styles.text}>{item.body}</Text>
                   </TouchableOpacity>
 
@@ -164,19 +139,19 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
               <View>
                 <Text
                   style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
-                  {instructor}
+                  {parsedObj?.trainingType}
                 </Text>
                 <Text
                   style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
-                  {instruction}
+                  {parsedObj?.trainingSubCategory}
                 </Text>
                 <Text
                   style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
-                  {skill}
+                  {parsedObj?.skill}
                 </Text>
                 <Text
                   style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
-                  {ageGroup}
+                  {parsedObj?.coachAgeGroup}
                 </Text>
               </View>
             </View>
@@ -192,7 +167,7 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
               }}>
               <Text
                 style={{ textAlign: 'center', fontSize: height > 667 ? 14 : 12 }}>
-                You'll be earning an expected $200
+                You'll be earning an expected ${parsedObj?.bookingPrice}
               </Text>
             </View>
           </>
@@ -203,7 +178,7 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
           <TouchableOpacity
             style={[styles.button, { borderBottomLeftRadius: 10 }]}
             onPress={() => {
-              navigation.navigate('AcceptBooking', { requestId: parsedObj.id, flag: true });
+              navigation.navigate('AcceptBooking', { requestId: parsedObj.RequestId, flag: true });
             }}>
             <Text style={styles.text3}>Accept</Text>
           </TouchableOpacity>
