@@ -14,8 +14,8 @@ const Api = {
     getAmountOfCoaches: function (id, token) {
         return axiosInstance.get(`coach/getAmounts/${id}`, configToken(token))
     },
-    coachPayout: function (userData, token) {
-        return axiosInstance.get('coach/payout', userData, configToken(token))
+    coachPayout: function (userData) {
+        return axiosInstance.post('coach/payout', { CoachId: parseInt(userData.id), price: parseInt(userData.price) }, configToken(userData.token))
     },
     coachGraphData: function (id, token) {
         return axiosInstance.get(`coach/graphData?CoachId=${id}`, configToken(token))

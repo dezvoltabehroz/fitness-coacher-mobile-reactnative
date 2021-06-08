@@ -9,47 +9,71 @@ import {
   ImageBackground,
   Image,
   AsyncStorage,
-  NativeModules,
+  TouchableOpacity,
   Platform,
   Dimensions,
   ActivityIndicator,
   ToastAndroid,
 } from 'react-native';
 import { Colors } from '../../style/colors';
-import { RadioButton, Checkbox, Snackbar } from 'react-native-paper';
 import { FontFamily } from '../../style/typograpy';
-import Button from '../../common/Button';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import DetailsModal from '../../common/DetailsModal';
-import { Container, Header, Content, Tab, Tabs } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Divider } from 'react-native-elements';
 import { BarChart, Grid } from 'react-native-svg-charts';
 import * as shape from 'd3-shape';
 import { PaymentServices } from '../../services';
 import { connect } from 'react-redux';
 import { errorUtils } from '../../common/Utilities';
+import Modal from 'react-native-modal';
+import Input from '../../common/Input';
+import Container from '../../common/Container'
 const height = Dimensions.get('window').height;
 const Earnings = props => {
   const [visible, setVisible] = useState(false)
   const [message, setMessage] = useState("")
+  const [submit, setSubmit] = useState(false)
   const [totalAmount, setTotalAmount] = useState("")
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const fill = 'rgb(4, 11, 34)';
-  const data = [50, 10, 40, 95, 4, 24];
+  const [withdrawModal, setWithdrawModal] = useState(false)
+  const [graphData, setGraphData] = useState([]);
+  const [respData, setResData] = useState({});
+  const [amount, setAmount] = useState('');
+  const [withdrawLoading, setWithdrawLoading] = useState(false)
   const handleWithdraw = () => {
-    PaymentServices.coachPayout()
-      .then((response) => {
-        if (response.data.success) {
-          props.navigation.replace('TabContainer')
-        }
-      })
-      .catch((error) => {
-        setMessage(`${errorUtils.getError(error)}`)
-        setVisible(true);
-        console.log(error)
-      })
+    if (amount.length) {
+      setWithdrawLoading(true)
+      let userData = {
+        id: props?.user?.id,
+        token: props?.token,
+        price: amount
+      }
+      console.log(userData)
+      PaymentServices.coachPayout(userData)
+        .then((response) => {
+          if (response.data.success) {
+            setWithdrawModal(false)
+            setWithdrawLoading(false)
+            props.navigation.replace('TabContainer')
+          } else {
+            setWithdrawModal(false)
+            setWithdrawLoading(false)
+            setMessage(`${response.data.msg}`)
+            setVisible(true);
+          }
+        })
+        .catch((error) => {
+          setWithdrawModal(false)
+          setWithdrawLoading(false)
+          setMessage(`${errorUtils.getError(error)}`)
+          setVisible(true);
+          console.log(error.response.data)
+        })
+    }
+    else {
+      setSubmit(true)
+    }
+
   }
   useEffect(() => {
     getAmounts()
@@ -64,7 +88,17 @@ const Earnings = props => {
           PaymentServices.coachGraphData(props?.user.id, props?.token)
             .then((resData) => {
               console.log(resData.data)
+              let res = [...resData.data.result.coachBookings];
+              let data = [];
+              res.forEach((item, index) => {
+                data.push(item.price + index)
+              })
+              setResData(resData.data.result);
+              console.log(respData)
+              setGraphData(data)
+              console.log(respData)
               setLoading(false);
+              console.log(respData)
             })
             .catch((err) => {
               setMessage(`${errorUtils.getError(err)}`)
@@ -84,118 +118,139 @@ const Earnings = props => {
         setVisible(true);
       })
   }
-
+  var data = [...graphData]
   return (
-    <View style={styles.container}>
-      <StatusBar
-        barStyle="dark-content"
-        translucent
-        backgroundColor={'transparent'}
-      />
-      <View style={styles.header}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity onPress={() => props.navigation.goBack()}>
-            <Ionicons name="arrow-back" size={height > 667 ? 20 : 16} />
-          </TouchableOpacity>
-          <Text style={styles.headertext}>EARNINGS</Text>
+    <Container onPress={() => setVisible(!visible)} message={message} visible={visible}>
+      <View style={styles.container}>
+        <StatusBar
+          barStyle="dark-content"
+          translucent
+          backgroundColor={'transparent'}
+        />
+        <View style={styles.header}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity onPress={() => props.navigation.goBack()}>
+              <Ionicons name="arrow-back" size={height > 667 ? 20 : 16} />
+            </TouchableOpacity>
+            <Text style={styles.headertext}>EARNINGS</Text>
+          </View>
         </View>
-      </View>
 
-      <View style={styles.bottom}>
-        {
-          loading ?
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-              <ActivityIndicator size={20} color={'#030E2D'} />
-            </View>
-            :
-            <ScrollView
-              contentContainerStyle={{ paddingBottom: '45%' }}
-              showsVerticalScrollIndicator={false}>
-              <View
-                style={{
-                  marginTop: 10,
-                  marginHorizontal: 20,
-                  height: height > 667 ? 100 : 70,
-                  backgroundColor: Colors.lightGreyColor,
-                  padding: 10,
-                  borderRadius: 10,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Text style={{ fontSize: height > 667 ? 14 : 12 }}>
-                  Personal Available Balance
-            </Text>
-                <Text
+        <View style={styles.bottom}>
+          {
+            loading ?
+              <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <ActivityIndicator size={20} color={'#030E2D'} />
+              </View>
+              :
+              <ScrollView
+                contentContainerStyle={{ paddingBottom: '45%' }}
+                showsVerticalScrollIndicator={false}>
+                <View
                   style={{
-                    fontSize: height > 667 ? 18 : 14,
-                    color: 'red',
                     marginTop: 10,
-                    fontWeight: 'bold',
+                    marginHorizontal: 20,
+                    height: height > 667 ? 100 : 70,
+                    backgroundColor: Colors.lightGreyColor,
+                    padding: 10,
+                    borderRadius: 10,
+                    justifyContent: 'center',
+                    alignItems: 'center',
                   }}>
-                  ${totalAmount}
-                </Text>
-              </View>
-              <View style={styles.barChartContainer}>
-                <BarChart
-                  style={{ height: height > 667 ? 200 : 150 }}
-                  data={data}
-                  barStyle={{ borderRadius: 120 }}
-                  svg={{ fill }}
-                  spacingOuter={0.5}
-                  curve={shape.curveNatural}
-                  contentInset={{ top: 30, bottom: 30 }}>
-                  <Grid />
-                </BarChart>
-              </View>
+                  <Text style={{ fontSize: height > 667 ? 14 : 12 }}>
+                    Personal Available Balance
+            </Text>
+                  <Text
+                    style={{
+                      fontSize: height > 667 ? 18 : 14,
+                      color: 'red',
+                      marginTop: 10,
+                      fontWeight: 'bold',
+                    }}>
+                    ${totalAmount}
+                  </Text>
+                </View>
+                <View style={styles.barChartContainer}>
+                  <BarChart
+                    style={{ height: height > 667 ? 200 : 150 }}
+                    data={data.length != 0 ? data : [50, 10, 40, 95, 4, 24]}
+                    barStyle={{ borderRadius: 120 }}
+                    svg={{ fill }}
+                    spacingOuter={0.5}
+                    curve={shape.curveNatural}
+                    contentInset={{ top: 30, bottom: 30 }}>
+                    <Grid />
+                  </BarChart>
+                </View>
 
-              <View style={[styles.barChartContainer, { height: '40%' }]}>
-                <View style={styles.mainView}>
-                  <Text style={{ fontSize: 14, marginTop: 5 }}>Sales Analytics</Text>
+                <View style={[styles.barChartContainer, { height: '40%' }]}>
+                  <View style={styles.mainView}>
+                    <Text style={{ fontSize: 14, marginTop: 15 }}>Sales Analytics</Text>
+                  </View>
+                  <View style={[styles.mainView, { marginTop: 15 }]}>
+                    <Text style={styles.text}>Earned this month</Text>
+                    <Text style={styles.text1}>$ {respData?.earnedThisMonth}</Text>
+                  </View>
+                  {/* <View style={styles.mainView}>
+                    <Text style={styles.text}>Average selling price</Text>
+                    <Text style={styles.text1}>$ 50</Text>
+                  </View> */}
+                  <View style={styles.mainView}>
+                    <Text style={styles.text}>Active bookings</Text>
+                    <Text style={styles.text1}>{respData?.activeBooking}</Text>
+                  </View>
+                  <View style={styles.mainView}>
+                    <Text style={styles.text}>Completed this month</Text>
+                    <Text style={styles.text1}>{respData?.completedThisMonth}</Text>
+                  </View>
+                  <View style={styles.mainView}>
+                    <Text style={styles.text}>Available for withdrawal</Text>
+                    <Text style={styles.text1}>$ {respData?.availableForWithdraw}</Text>
+                  </View>
                 </View>
-                <View style={styles.mainView}>
-                  <Text style={styles.text}>Earned this month</Text>
-                  <Text style={styles.text1}>$300</Text>
-                </View>
-                <View style={styles.mainView}>
-                  <Text style={styles.text}>Average selling price</Text>
-                  <Text style={styles.text1}>$50</Text>
-                </View>
-                <View style={styles.mainView}>
-                  <Text style={styles.text}>Active bookings</Text>
-                  <Text style={styles.text1}>6</Text>
-                </View>
-                <View style={styles.mainView}>
-                  <Text style={styles.text}>Completed this month</Text>
-                  <Text style={styles.text1}>10</Text>
-                </View>
-                <View style={styles.mainView}>
-                  <Text style={styles.text}>Available for withdrawal</Text>
-                  <Text style={styles.text1}>$500</Text>
-                </View>
-              </View>
-              <TouchableOpacity
-                onPress={() => handleWithdraw()}
-                style={styles.btnStyle}>
-                <Text style={{ color: 'white', fontWeight: '700' }}>Withdraw</Text>
-              </TouchableOpacity>
-              <View style={styles.snackbarContainerStyle}>
-                <Snackbar
-                  visible={visible}
-                  onDismiss={() => setVisible(!visible)}
-                  action={{
-                    label: 'OK',
-                    onPress: () => {
-                      console.log("hello")
-                    },
-                  }}>
-                  {message}
-                </Snackbar>
-              </View>
-              <View style={{ height: 50 }}></View>
-            </ScrollView>
-        }
-      </View>
-    </View >
+                <TouchableOpacity
+                  onPress={() => setWithdrawModal(true)}
+                  style={styles.btnStyle}>
+                  <Text style={{ color: 'white', fontWeight: '700' }}>Withdraw</Text>
+                </TouchableOpacity>
+                <View style={{ height: 50 }}></View>
+              </ScrollView>
+          }
+        </View>
+      </View >
+      <Modal isVisible={withdrawModal}
+        onBackdropPress={() => setWithdrawModal(false)}
+      >
+        <View style={{ backgroundColor: "white", padding: "5%", borderRadius: 20 }}>
+          <Input
+            text={"Add aomunt to withdraw"}
+            value={amount}
+            keyboardType={'number-pad'}
+            onChangeText={(value) => {
+              setAmount(value)
+            }}
+          />
+          {
+            submit && !amount.length ?
+              <Text style={styles.errorStyle}>Please add amount to withdraw</Text>
+              : null
+          }
+          <TouchableOpacity
+            onPress={() => handleWithdraw()}
+            style={styles.btnStyle}>
+            {
+              withdrawLoading ?
+                <ActivityIndicator size="small" color="white" />
+                :
+                <Text style={{ color: 'white', fontWeight: '700' }}>Withdraw Amount</Text>
+            }
+
+          </TouchableOpacity>
+
+        </View>
+
+      </Modal>
+    </Container>
   );
 };
 
@@ -313,13 +368,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 0.5,
   },
+  errorStyle: {
+    fontSize: 12,
+    color: "red",
+    paddingLeft: "7%",
+    paddingBottom: 5
+  },
 });
 const mapStateToProps = (state) => ({
   user: state.authReducer.userData || {},
   token: state.authReducer.userToken || {}
 });
-
-
 export default connect(
   mapStateToProps,
 )(Earnings);

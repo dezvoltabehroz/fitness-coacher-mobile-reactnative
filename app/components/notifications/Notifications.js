@@ -23,43 +23,63 @@ import { ActivityIndicator } from 'react-native';
 const height = Dimensions.get('window').height;
 const NotificationsScreen = props => {
   const [loading, setLoading] = useState(true)
+  const [offset, setOffSet] = useState(0)
+  const [reachLoading, setReachLoading] = useState(false)
+  const [data, setdata] = useState([])
+
   useEffect(() => {
     getNotifications();
   }, [])
-  const [data, setdata] = useState([
-    // {
-    //   type: 'completed_booking',
-    //   message: 'You have a new booking opportunity',
-    // },
-    // // {
-    // //   type: 'booking_request',
-    // //   message: 'Zimry Mayfield has responded to your booking request',
-    // // },
-    // {
-    //   type: 'started_booking',
-    //   message: 'Your booking with Porter Shue has started',
-    // },
-    // {
-    //   type: 'review',
-    //   message: 'Porter Shue left a 5 star review',
-    // },
-    // {
-    //   type: 'review',
-    //   message: 'Porter Shue left a 5 star review',
-    // },
-    // {
-    //   type: 'review',
-    //   message: 'Porter Shue left a 5 star review',
-    // },
-  ]);
+  // {
+  //   type: 'completed_booking',
+  //   message: 'You have a new booking opportunity',
+  // },
+  // // {
+  // //   type: 'booking_request',
+  // //   message: 'Zimry Mayfield has responded to your booking request',
+  // // },
+  // {
+  //   type: 'started_booking',
+  //   message: 'Your booking with Porter Shue has started',
+  // },
+  // {
+  //   type: 'review',
+  //   message: 'Porter Shue left a 5 star review',
+  // },
+  // {
+  //   type: 'review',
+  //   message: 'Porter Shue left a 5 star review',
+  // },
+  // {
+  //   type: 'review',
+  //   message: 'Porter Shue left a 5 star review',
+  // },
+  // ]);
 
 
   const getNotifications = () => {
-    NotificationServices.getNotifications(props?.token)
+    NotificationServices.getNotifications(0, props?.token)
       .then((res) => {
         console.log(res.data)
         setdata(res.data.notifications)
         setLoading(false)
+        setOffSet(offset + 10)
+      })
+      .catch((err) => console.log(err))
+  }
+  const getMoreNotifications = () => {
+    setReachLoading(true)
+    NotificationServices.getNotifications(offset, props?.token)
+      .then((res) => {
+        let array = [...data, ...res.data.notifications]
+        if (data.length != array.length) {
+          setdata(array)
+          setOffSet(offset + 10)
+          setReachLoading(false)
+        }
+        else {
+          setReachLoading(false)
+        }
       })
       .catch((err) => console.log(err))
   }
@@ -80,7 +100,7 @@ const NotificationsScreen = props => {
       <ScrollView style={styles.bottom}>
         {
           loading ?
-            <View style={{ flex: 1,marginTop: 200, justifyContent: "center", alignItems: "center" }}>
+            <View style={{ flex: 1, marginTop: 200, justifyContent: "center", alignItems: "center" }}>
               <ActivityIndicator size={20} color={'#030E2D'} />
             </View>
             :
@@ -94,6 +114,18 @@ const NotificationsScreen = props => {
                   data={data}
                   showsVerticalScrollIndicator={false}
                   keyExtractor={(item, index) => index.toString()}
+                  onEndReached={() => {
+                    getMoreNotifications();
+                    // throttled()
+                  }}
+                  // extraData={data}
+                  ListFooterComponent={() => {
+                    if (data?.length > 0 && reachLoading == true) {
+                      return <ActivityIndicator size={'small'} color={'#030E2D'} />
+                    }
+
+                    return <View />
+                  }}
                   renderItem={({ item, index }) => {
                     return (
                       item != null ?

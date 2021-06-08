@@ -11,12 +11,16 @@ let configToken = (token) => {
     }
 }
 const Api = {
-    getNotifications: function (token) {
-        return axiosInstance.get(`coach/notification`, configToken(token))
+    getNotifications: function (offset, token) {
+        return axiosInstance.get(`coach/notification?limit=10&offset=${offset}`, configToken(token))
     },
     notificationSetting: function (userData, token) {
         return axiosInstance.post(`user/notificationSetting`, userData, configToken(token))
+    },
+    notificationRead: function (id, token) {
+        return axiosInstance.put(`user/notification/${id}`, {}, configToken(token))
     }
+
 
 
 };

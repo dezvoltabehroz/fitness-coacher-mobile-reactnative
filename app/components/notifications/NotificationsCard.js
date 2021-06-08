@@ -86,7 +86,7 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
             ) : item.type == "acceptCompletionRequest" || item.type == "successfullyAccepted" || item.type == "rejectCompletionRequest" ? (
               <>
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('AcceptBooking', { requestId: parsedObj?.id, flag: false })}>
+                  onPress={() => navigation.navigate('AcceptBooking', { requestId: parsedObj?.id,notificationId: item.id, flag: false })}>
                   <Text style={styles.text}>{item.body}</Text>
                 </TouchableOpacity>
 
@@ -126,72 +126,82 @@ const NotificationsCard = ({ item, trainingTypes, subCategories, skills, navigat
           </View>
         </View>
 
-        {item.type == 'completed_booking' || item.type == 'coachRequest' ? (
-          <>
-            <View style={styles.detailsView}>
-              <View>
-                <Text style={styles.text1}>Sport Type</Text>
-                <Text style={styles.text1}>Instruction Type</Text>
-                <Text style={styles.text1}>Skill Type</Text>
-                <Text style={styles.text1}>Age Group</Text>
-              </View>
+        {
+          item.isRead == 1 ?
+            null
+            :
+            item.type == 'completed_booking' || item.type == 'coachRequest' ? (
+              <>
+                <View style={styles.detailsView}>
+                  <View>
+                    <Text style={styles.text1}>Sport Type</Text>
+                    <Text style={styles.text1}>Instruction Type</Text>
+                    <Text style={styles.text1}>Skill Type</Text>
+                    <Text style={styles.text1}>Age Group</Text>
+                  </View>
 
-              <View>
-                <Text
-                  style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
-                  {parsedObj?.trainingType}
-                </Text>
-                <Text
-                  style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
-                  {parsedObj?.trainingSubCategory}
-                </Text>
-                <Text
-                  style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
-                  {parsedObj?.skill}
-                </Text>
-                <Text
-                  style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
-                  {parsedObj?.coachAgeGroup}
-                </Text>
-              </View>
-            </View>
-            <View
-              style={{
-                height: height > 667 ? 40 : 35,
-                marginVertical: 5,
-                marginHorizontal: '5%',
-                backgroundColor: '#EBECF3',
-                borderRadius: 10,
-                justifyContent: 'center',
-                paddingHorizontal: 10,
-              }}>
-              <Text
-                style={{ textAlign: 'center', fontSize: height > 667 ? 14 : 12 }}>
-                You'll be earning an expected ${parsedObj?.bookingPrice}
-              </Text>
-            </View>
-          </>
-        ) : null}
+                  <View>
+                    <Text
+                      style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
+                      {parsedObj?.trainingType}
+                    </Text>
+                    <Text
+                      style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
+                      {parsedObj?.trainingSubCategory}
+                    </Text>
+                    <Text
+                      style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
+                      {parsedObj?.skill}
+                    </Text>
+                    <Text
+                      style={[styles.text1, { color: 'black', textAlign: 'right' }]}>
+                      {parsedObj?.coachAgeGroup}
+                    </Text>
+                  </View>
+                </View>
+                <View
+                  style={{
+                    height: height > 667 ? 40 : 35,
+                    marginVertical: 5,
+                    marginHorizontal: '5%',
+                    backgroundColor: '#EBECF3',
+                    borderRadius: 10,
+                    justifyContent: 'center',
+                    paddingHorizontal: 10,
+                  }}>
+                  <Text
+                    style={{ textAlign: 'center', fontSize: height > 667 ? 14 : 12 }}>
+                    You'll be earning an expected ${parsedObj?.bookingPrice}
+                  </Text>
+                </View>
+              </>
+            ) : null}
       </View>
-      {item.type == 'completed_booking' || item.type == 'coachRequest' ? (
-        <View style={styles.buttonView}>
-          <TouchableOpacity
-            style={[styles.button, { borderBottomLeftRadius: 10 }]}
-            onPress={() => {
-              navigation.navigate('AcceptBooking', { requestId: parsedObj.RequestId, flag: true });
-            }}>
-            <Text style={styles.text3}>Accept</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, { borderBottomRightRadius: 10 }]}>
-            <Text style={styles.text3}>Reject</Text>
-          </TouchableOpacity>
-        </View>
-      ) : item.type == 'booking_request' ? (
-        <TouchableOpacity style={styles.booking}>
-          <Text style={styles.text3}>View Profile</Text>
-        </TouchableOpacity>
-      ) : null}
+      {
+        item.isRead == 1 ?
+          null
+          :
+          item.type == 'completed_booking' || item.type == 'coachRequest' ? (
+            <View style={styles.buttonView}>
+              <TouchableOpacity
+                style={[styles.button, { borderBottomLeftRadius: 10 }]}
+                onPress={() => {
+                  navigation.navigate('AcceptBooking', { requestId: parsedObj.RequestId, notificationId: item.id, flag: true });
+                }}>
+                <Text style={styles.text3}>Accept</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => {
+                  navigation.navigate('AcceptBooking', { requestId: parsedObj.RequestId, notificationId: item.id, flag: true });
+                }}
+                style={[styles.button, { borderBottomRightRadius: 10 }]}>
+                <Text style={styles.text3}>Reject</Text>
+              </TouchableOpacity>
+            </View>
+          ) : item.type == 'booking_request' ? (
+            <TouchableOpacity style={styles.booking}>
+              <Text style={styles.text3}>View Profile</Text>
+            </TouchableOpacity>
+          ) : null}
     </View>
   );
 };

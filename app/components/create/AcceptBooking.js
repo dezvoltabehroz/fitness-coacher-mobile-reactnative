@@ -22,7 +22,7 @@ import Button from '../../common/Button';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Icon } from 'native-base';
-import { BookingServices, TrainingCategoryServices } from '../../services';
+import { BookingServices, NotificationServices, TrainingCategoryServices } from '../../services';
 import { connect } from 'react-redux';
 import { errorUtils } from '../../common/Utilities';
 import Container from '../../common/Container';
@@ -52,34 +52,45 @@ const AcceptBooking = props => {
   }, []);
 
   const getRequestDetails = () => {
-    BookingServices.getBookingDetails(props?.route?.params?.requestId, props?.token)
-      .then(async (response) => {
-        if (response.data.success) {
-          console.log(response.data.bookingDetail.rows[0].athleteRequest.file)
-          setBookingDetails(response.data.bookingDetail.rows[0])
-          console.log(response.data.bookingDetail.rows[0].athleteRequest.file);
-          await LinkPreview.getPreview(response.data.bookingDetail.rows[0].athleteRequest.file)
-            .then(data => {
-              console.debug("Data : ", data);
-              setPreview(data.images[0])
-            })
-            .catch((err) => {
-              console.log(err)
-            });
-          setLoading(false)
-        } else {
-          setMessage(`${response.data.msg}`)
-          setVisible(true);
-          setLoading(false)
-          console.log(response.data)
-          setModalVisible(false)
-        }
+    console.log(props?.route?.params?.notificationId)
+    NotificationServices.notificationRead(props?.route?.params?.notificationId, props?.token)
+      .then((responseData) => {
+        console.log(responseData.data)
+        BookingServices.getBookingDetails(props?.route?.params?.requestId, props?.token)
+          .then(async (response) => {
+            if (response.data.success) {
+              console.log(response.data.bookingDetail.rows[0].athleteRequest.file)
+              setBookingDetails(response.data.bookingDetail.rows[0])
+              console.log(response.data.bookingDetail.rows[0].athleteRequest.file);
+              await LinkPreview.getPreview(response.data.bookingDetail.rows[0].athleteRequest.file)
+                .then(data => {
+                  console.debug("Data : ", data);
+                  setPreview(data.images[0])
+                })
+                .catch((err) => {
+                  console.log(err)
+                });
+              setLoading(false)
+            } else {
+              setMessage(`${response.data.msg}`)
+              setVisible(true);
+              setLoading(false)
+              console.log(response.data)
+              setModalVisible(false)
+            }
+          })
+          .catch((err) => {
+            setMessage(`${errorUtils.getError(err)}`)
+            setLoading(false)
+            setVisible(true); setModalVisible(false); console.log(err)
+          })
       })
       .catch((err) => {
         setMessage(`${errorUtils.getError(err)}`)
         setLoading(false)
-        setVisible(true); setModalVisible(false); console.log(err)
+        setVisible(true);
       })
+
   }
 
   const handleAccept = () => {
