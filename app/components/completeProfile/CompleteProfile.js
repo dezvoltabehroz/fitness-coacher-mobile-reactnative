@@ -37,6 +37,7 @@ import axios from "axios";
 import { errorUtils } from "../../common/Utilities";
 import Container from "../../common/Container";
 import { ActivityIndicator } from "react-native";
+import { ImageComponent } from "react-native";
 const height = Dimensions.get("window").height;
 const width = Dimensions.get("window").width;
 function CompleteProfile({ navigation, route }) {
@@ -238,6 +239,7 @@ function CompleteProfile({ navigation, route }) {
       password: route.params.password,
       phone: phoneNumber,
       address: address,
+      imageUrl: image,
       dob: moment(date).format('YYYY-MM-DD'),
       role: 'coach',
       country: country,
@@ -354,6 +356,7 @@ function CompleteProfile({ navigation, route }) {
             fileType: response.type
           }
           console.log("response : ", response);
+          setImage(response.uri);
           AuthServices.getUrl(userData)
             .then((res) => {
               console.log(res.data)
@@ -371,7 +374,7 @@ function CompleteProfile({ navigation, route }) {
                 }).catch((err) => { console.log(err) })
             })
             .catch((err) => { console.log(err) })
-          setImage(response.uri);
+
         }
       })
   }
@@ -768,7 +771,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginBottom: "5%",
-    width: width * 0.9,
+    width: width * 0.8,
   },
   profile: {
     height: height > 667 ? 120 : 100,

@@ -65,9 +65,13 @@ const BookingDetails = props => {
             .then(data => {
               console.debug("Data : ", data);
               setPreview(data.images[0])
+            })
+            .catch((err)=>{
+              console.log(err.error)
             });
           setLoading(false)
         } else {
+          console.log(response.data.msg)
           setMessage(`${response.data.msg}`)
           setVisible(true);
           setLoading(false)

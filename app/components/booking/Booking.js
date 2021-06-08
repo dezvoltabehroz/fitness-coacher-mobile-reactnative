@@ -39,8 +39,8 @@ const BookingScreen = (props) => {
     BookingServices.getActiveBookings(props?.user?.id, props?.token)
       .then((response) => {
         if (response.data.success) {
-          setMessage(`${response.data.msg}`)
-          setVisible(true);
+          // setMessage(`${response.data.msg}`)
+          // setVisible(true);
           setLoading(false)
           setBookings(response.data.coursesDetail.rows);
           console.log("booking details are", bookings);
@@ -62,7 +62,7 @@ const BookingScreen = (props) => {
 
   const getCompletedBookings = async () => {
     setLoading(true)
-    BookingServices.getActiveBookings(props?.user?.id, props?.token)
+    BookingServices.getCompletedBookings(props?.user?.id, props?.token)
       .then((response) => {
         if (response.data.success) {
           setLoading(false)

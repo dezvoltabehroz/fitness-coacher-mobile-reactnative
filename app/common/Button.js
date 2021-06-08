@@ -27,7 +27,7 @@ const Button = ({ text, onPress, flag, loading }) => {
     <TouchableOpacity
       style={[
         styles.container,
-        { backgroundColor: flag ? '#030e2d' : Colors.buttonColor },
+        { backgroundColor:  Colors.buttonColor },
       ]}
       onPress={onPress}>
       {
