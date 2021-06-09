@@ -20,6 +20,9 @@ const Api = {
     coachGraphData: function (id, token) {
         return axiosInstance.get(`coach/graphData?CoachId=${id}`, configToken(token))
     },
+    createStripeAccount: function (userData,token) {
+        return axiosInstance.post(`coach/createStripeAccount`,userData, configToken(token))
+    },
 
 };
 
