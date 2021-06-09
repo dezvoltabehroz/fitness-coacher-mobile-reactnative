@@ -150,11 +150,9 @@ const ConnectedAccounts = props => {
               // disabled={details?.complete == true ? false : true}
               style={[styles.modalbutton, { backgroundColor: Colors.buttonColor }]}
               onPress={async () => {
+                console.log(details)
                 setCofirmLoading(true)
-                const { token, error } = await createToken({
-                  type: "Card",
-                });
-
+                const { token, error } = await createToken({ type: "Card" });
                 if (error) {
                   setCofirmLoading(false)
                   setModalVisible(false)
@@ -178,7 +176,6 @@ const ConnectedAccounts = props => {
                         setMessage(`${res.data.msg}`)
                         setVisible(true);
                       }
-
                     })
                     .catch((err) => {
                       setModalVisible(false)
@@ -186,9 +183,7 @@ const ConnectedAccounts = props => {
                       setMessage(`${errorUtils.getError(err)}`)
                       setVisible(true);
                       console.log(err.response.data)
-
                     })
-
                 }
               }} >
               {
