@@ -19,7 +19,7 @@ import { Colors } from '../../style/colors';
 import { FontFamily } from '../../style/typograpy';
 import NotificationCard from './NotificationsCard';
 import { NotificationServices } from '../../services';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
 import { ActivityIndicator } from 'react-native';
 const height = Dimensions.get('window').height;
 const NotificationsScreen = props => {
@@ -69,22 +69,28 @@ const NotificationsScreen = props => {
       .catch((err) => console.log(err))
   }
   const getMoreNotifications = () => {
-    setReachLoading(true)
-    NotificationServices.getNotifications(offset, props?.token)
-      .then((res) => {
-        let array = [...data, ...res.data.notifications]
-        if (data.length != array.length) {
-          setdata(array)
+
+    if (!scrolled) {
+      return null;
+    }
+    else {
+      setReachLoading(true)
+      NotificationServices.getNotifications(offset, props?.token)
+        .then((res) => {
+          let array = [...data, ...res.data.notifications]
           setOffSet(offset + 10)
+          setdata(array)
           setReachLoading(false)
-        }
-        else {
-          setReachLoading(false)
-        }
-      })
-      .catch((err) => console.log(err))
+          setScrolled(false)
+        })
+        .catch((err) => console.log(err))
+    }
+
   }
 
+  const _scrolled = () => {
+    setScrolled(true)
+  }
 
   return (
     <View style={styles.container}>
@@ -114,12 +120,11 @@ const NotificationsScreen = props => {
                 <FlatList
                   data={data}
                   showsVerticalScrollIndicator={false}
+                  refreshControl={<RefreshControl refreshing={loading} onRefresh={() => getNotifications()} />}
                   keyExtractor={(item, index) => index.toString()}
-                  onEndReached={() => {
-                    throttle(getMoreNotifications, 1000, { leading: true, trailing: false })
-                    // throttled()
-                  }}
-                  // extraData={data}
+                  onEndReached={() => getMoreNotifications()}
+                  onEndReachedThreshold={0.5}
+                  onScrollBeginDrag={() => _scrolled()}
                   ListFooterComponent={() => {
                     if (data?.length > 0 && reachLoading == true) {
                       return <ActivityIndicator size={'small'} color={'#030E2D'} />

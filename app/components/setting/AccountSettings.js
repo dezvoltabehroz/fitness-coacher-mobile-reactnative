@@ -1026,7 +1026,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginBottom: "5%",
-    width: width * 0.9,
+    width: width * 0.8,
   },
   dropDown: {
     height: 45,

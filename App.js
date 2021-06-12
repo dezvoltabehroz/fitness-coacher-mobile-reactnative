@@ -28,14 +28,15 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 import Router from './app/navigation/Router';
 import { Provider } from "react-redux";
+import SplashScreen from 'react-native-splash-screen';
 import createStore from "./app/redux/CreateStore";
 const store = createStore();
 
 
 const App: () => Node = () => {
   LogBox.ignoreAllLogs(true)
+  SplashScreen.hide();
   const isDarkMode = useColorScheme() === 'dark';
-
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };

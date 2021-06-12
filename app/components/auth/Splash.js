@@ -9,7 +9,7 @@ import {
   StatusBar,
   ImageBackground,
   Image,
-  NativeModules,
+  ActivityIndicator,
   Platform,
   Dimensions,
 } from 'react-native';
@@ -87,6 +87,7 @@ const SplashScreen = props => {
     }
 
   }
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -97,11 +98,8 @@ const SplashScreen = props => {
       <ImageBackground
         source={require('../../assets/splash.png')}
         style={styles.image}>
-        <View
-          style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }}>
-        </View>
-        <View
-          style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator color={'white'} size="large" />
         </View>
       </ImageBackground>
     </View>
@@ -111,6 +109,7 @@ const SplashScreen = props => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor:'#030e2d'
   },
   image: {
     width: '100%',
