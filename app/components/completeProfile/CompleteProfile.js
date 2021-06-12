@@ -235,63 +235,25 @@ function CompleteProfile({ navigation, route }) {
     };
 
     let ageObject = age;
-    let userData;
-    if (country == 'United States') {
-      userData = {
-        firstName: route.params.firstName,
-        lastName: route.params.lastName,
-        email: route.params.email,
-        password: route.params.password,
-        phone: phoneNumber,
-        address: address,
-        imageUrl: image,
-        state: state,
-        city: city,
-        zipCode: postalCode,
-        ssn: ssn,
-        nationalId: pId,
-        dob: moment(date).format('YYYY-MM-DD'),
-        role: 'coach',
-        country: country,
-        ageGroupCoach: ageObject,
-        trainingType: trainingType,
-      };
-    }
-    else {
-      userData = {
-        firstName: route.params.firstName,
-        lastName: route.params.lastName,
-        email: route.params.email,
-        password: route.params.password,
-        phone: phoneNumber,
-        address: address,
-        imageUrl: image,
-        state: state,
-        city: city,
-        zipCode: postalCode,
-        ssn: "",
-        nationalId: "",
-        dob: moment(date).format('YYYY-MM-DD'),
-        role: 'coach',
-        country: country,
-        ageGroupCoach: ageObject,
-        trainingType: trainingType,
-      };
-    }
-    // let userData = {
-    //   firstName: route.params.firstName,
-    //   lastName: route.params.lastName,
-    //   email: route.params.email,
-    //   password: route.params.password,
-    //   phone: phoneNumber,
-    //   address: address,
-    //   imageUrl: image,
-    //   dob: moment(date).format('YYYY-MM-DD'),
-    //   role: 'coach',
-    //   country: country,
-    //   ageGroupCoach: ageObject,
-    //   trainingType: trainingType,
-    // };
+    let userData = {
+      firstName: route.params.firstName,
+      lastName: route.params.lastName,
+      email: route.params.email,
+      password: route.params.password,
+      phone: phoneNumber,
+      address: address,
+      imageUrl: image,
+      state: state,
+      city: city,
+      zipCode: postalCode,
+      ssn: country == 'United States' ? ssn : "",
+      nationalId: country == 'United States' ? pId : "",
+      dob: moment(date).format('YYYY-MM-DD'),
+      role: 'coach',
+      country: country,
+      ageGroupCoach: ageObject,
+      trainingType: trainingType,
+    };
     console.log("userdata is", userData);
     AuthServices.userRegister(userData)
       .then((response) => {
