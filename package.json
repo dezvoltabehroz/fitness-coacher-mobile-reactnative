@@ -23,6 +23,7 @@
     "@stripe/stripe-react-native": "^0.1.4",
     "axios": "^0.21.1",
     "buffer": "^6.0.3",
+    "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "native-base": "^2.15.2",
     "react": "17.0.1",

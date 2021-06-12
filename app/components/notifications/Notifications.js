@@ -14,6 +14,7 @@ import {
   Dimensions,
   FlatList,
 } from 'react-native';
+import { throttle } from 'lodash';
 import { Colors } from '../../style/colors';
 import { FontFamily } from '../../style/typograpy';
 import NotificationCard from './NotificationsCard';
@@ -115,7 +116,7 @@ const NotificationsScreen = props => {
                   showsVerticalScrollIndicator={false}
                   keyExtractor={(item, index) => index.toString()}
                   onEndReached={() => {
-                    getMoreNotifications();
+                    throttle(getMoreNotifications, 1000, { leading: true, trailing: false })
                     // throttled()
                   }}
                   // extraData={data}

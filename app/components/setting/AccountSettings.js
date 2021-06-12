@@ -420,7 +420,7 @@ const AccountSettingsScreen = (props) => {
         }
       })
       .catch((error) => {
-        console.log(error.response)
+        console.log(error.response.data)
         setMessage(`${errorUtils.getError(error)}`)
         setVisible(true);
         setBtnLoading(false)
@@ -716,6 +716,7 @@ const AccountSettingsScreen = (props) => {
                 <Input
                   full={true}
                   text={"Postal Code"}
+                  keyboardType={'number-pad'}
                   value={postalCode}
                   onChangeText={(value) => {
                     setPostalCode(value);
@@ -1028,7 +1029,7 @@ const styles = StyleSheet.create({
     width: width * 0.9,
   },
   dropDown: {
-    height: 40,
+    height: 45,
     width: '100%',
     borderWidth: 1,
     borderColor: Colors.textColor,
