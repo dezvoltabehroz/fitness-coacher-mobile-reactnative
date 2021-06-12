@@ -14,6 +14,7 @@ import {
   Dimensions,
   TouchableOpacity,
   ToastAndroid,
+  ImageBackground,
 } from 'react-native';
 import Modal from 'react-native-modal';
 import AccountInput from '../../common/AccountInput';
@@ -36,7 +37,7 @@ import { AuthServices, TrainingCategoryServices } from '../../services';
 import { connect } from 'react-redux';
 import { authActions } from '../../redux/actions/auth';
 import { bindActionCreators } from "redux";
-import { Snackbar } from 'react-native-paper';
+import { Buffer } from 'buffer';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import axios from 'axios';
 import { errorUtils } from '../../common/Utilities';
@@ -47,18 +48,20 @@ const width = Dimensions.get("window").width;
 const AccountSettingsScreen = (props) => {
   const [instructorModalVisible, setInstructorModalVisible] = useState(false);
   const [instructionModalVisible, setInstructionModalVisible] = useState(false);
-  const [instructor, setInstructor] = useState("");
+
   const [instruction, setInstruction] = useState("");
   const [first_name, setFirstname] = useState(props?.user?.firstName);
   const [last_name, setLastname] = useState(props?.user?.lastName);
   const [email, setEmail] = useState(props?.user?.email)
-  const [checkInstructorTypes, setCheckInstructorTypes] = useState(false);
-  const [checkInstructionTypes, setCheckInstructionTypes] = useState(false);
-  const [checkAgeGroup, setCheckAgeGroup] = useState(false);
+
   const [categoriesLoading, setCategoriesLoading] = useState(true);
-  const [selectInstruction, setSelectInstruction] = useState({});
+  const [state, setState] = useState(props?.user?.state);
+  const [postalCode, setPostalCode] = useState(props?.user?.zipCode);
+  const [city, setCity] = useState(props?.user?.city);
+  const [ssn, setSsn] = useState(props?.user?.ssn);
+  const [pId, setPID] = useState(props?.user?.nationalId);
   const [selectInstructor, setSelectInstructor] = useState({});
-  const [dob, setDob] = useState("")
+  const [uploading, setUploading] = useState(false)
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [coachSkills, setCoachSkills] = useState([]);
@@ -262,7 +265,11 @@ const AccountSettingsScreen = (props) => {
   };
 
   const renderFileData = () => {
-    if (filePath != null) {
+    if (uploading) {
+      return <ImageBackground imageStyle={{ borderRadius: 150 }} source={{ uri: filePath }} style={styles.image}>
+        <ActivityIndicator size={20} color={Colors.buttonColor} />
+      </ImageBackground>
+    } else if (filePath != null) {
       return <Image source={{ uri: filePath }} style={styles.image} />;
     } else {
       return (
@@ -304,6 +311,7 @@ const AccountSettingsScreen = (props) => {
     launchImageLibrary(
       {
         title: "Pick photo from storage",
+        includeBase64: true,
         storageOptions: {
           skipBackup: true,
           path: 'images',
@@ -312,26 +320,25 @@ const AccountSettingsScreen = (props) => {
       async (response) => {
         if (response.error) { }
         else if (response.uri != undefined) {
-          let source = response;
           let userData = {
-            fileName: new Date().getTime() + response.fileName,
+            fileName: response.fileName,
             fileType: response.type
           }
-          setFilePath(source.uri);
+          setFilePath(response.uri);
+          setUploading(true)
           AuthServices.getUrl(userData)
             .then((res) => {
-              //console.log(res.data)
-              let formData = new FormData();
-              formData.append(`${userData.fileName}`, {
-                uri: response.uri,
-                name: `${new Date().getTime().toString()}.jpg`,
-                filename: new Date().getTime().toString() + '.jpg',
-                type: 'image/jpg'
+              const buffer = Buffer(`${response.base64}`, "base64");
+              axios.put(res.data.postUrl, buffer, {
+                headers: {
+                  "Content-Type": `${response.type}; charset=utf-8`,
+                  "x-amz-acl": "public-read",
+                },
               })
-              axios.put(res.data.postUrl, formData)
                 .then((responseData) => {
-                  //console.log(responseData)
+                  console.log(responseData.data.status)
                   setFilePath(res.data.getUrl);
+                  setUploading(false)
                 }).catch((err) => { console.log(err) })
             })
             .catch((err) => { console.log(err) })
@@ -382,7 +389,10 @@ const AccountSettingsScreen = (props) => {
         selectedSkill.push(coachSkills[index]);
       }
     }
-    if (first_name && last_name && selectInstructor != undefined && selectedSkill.length != 0 && subCatVal && age.length != 0 && date && country && address && phoneNumber && isPhoneValid(phoneNumber)) {
+
+    if (country == "United States" && ssn.length && postalCode.length && pId.length && first_name && last_name && selectInstructor != undefined && selectedSkill.length != 0 && subCatVal && age.length != 0 && date && country && address && phoneNumber && isPhoneValid(phoneNumber) && state.length && city.length) {
+      getCoachDetails();
+    } else if (first_name && last_name && selectInstructor != undefined && selectedSkill.length != 0 && subCatVal && age.length != 0 && date && country && address && phoneNumber && isPhoneValid(phoneNumber) && state.length && city.length) {
       getCoachDetails();
     } else {
       setBtnLoading(false)
@@ -462,26 +472,78 @@ const AccountSettingsScreen = (props) => {
         }
       }
     })
-
-    let userData = {
-      firstName: first_name,
-      lastName: last_name,
-      email: email,
-      imageUrl: filePath,
-      age: props?.user?.age,
-      phone: phoneNumber,
-      address: address,
-      dob: moment(date).format('YYYY-MM-DD'),
-      role: 'coach',
-      country: country,
-      ageGroupCoach: ageArr,
-      trainingType: {
-        id: props?.user?.CoachTrainingId,
-        TrainingTypeId: selectInstructor.id,
-        SkillId: selectedSkill[0].id,
-        subCategory: selectedSubCategories
-      }
-    };
+    let userData;
+    if (country == 'United States') {
+      userData = {
+        firstName: first_name,
+        lastName: last_name,
+        email: email,
+        phone: phoneNumber,
+        address: address,
+        age: props?.user?.age,
+        imageUrl: filePath,
+        state: state,
+        city: city,
+        zipCode: postalCode,
+        ssn: ssn,
+        nationalId: pId,
+        dob: moment(date).format('YYYY-MM-DD'),
+        role: 'coach',
+        country: country,
+        ageGroupCoach: ageArr,
+        trainingType: {
+          id: props?.user?.CoachTrainingId,
+          TrainingTypeId: selectInstructor.id,
+          SkillId: selectedSkill[0].id,
+          subCategory: selectedSubCategories
+        }
+      };
+    }
+    else {
+      userData = {
+        firstName: first_name,
+        lastName: last_name,
+        email: email,
+        phone: phoneNumber,
+        address: address,
+        age: props?.user?.age,
+        imageUrl: filePath,
+        state: state,
+        city: city,
+        zipCode: postalCode,
+        ssn: "",
+        nationalId: "",
+        dob: moment(date).format('YYYY-MM-DD'),
+        role: 'coach',
+        country: country,
+        ageGroupCoach: ageArr,
+        trainingType: {
+          id: props?.user?.CoachTrainingId,
+          TrainingTypeId: selectInstructor.id,
+          SkillId: selectedSkill[0].id,
+          subCategory: selectedSubCategories
+        }
+      };
+    }
+    // let userData = {
+    //   firstName: first_name,
+    //   lastName: last_name,
+    //   email: email,
+    //   imageUrl: filePath,
+    //   age: props?.user?.age,
+    //   phone: phoneNumber,
+    //   address: address,
+    //   dob: moment(date).format('YYYY-MM-DD'),
+    //   role: 'coach',
+    //   country: country,
+    //   ageGroupCoach: ageArr,
+    //   trainingType: {
+    //     id: props?.user?.CoachTrainingId,
+    //     TrainingTypeId: selectInstructor.id,
+    //     SkillId: selectedSkill[0].id,
+    //     subCategory: selectedSubCategories
+    //   }
+    // };
     console.log("userdata is", userData);
     updateCoach(userData)
   };
@@ -614,6 +676,32 @@ const AccountSettingsScreen = (props) => {
                 )}
                 <Input
                   full={true}
+                  text={"State"}
+                  value={state}
+                  onChangeText={(value) => {
+                    setState(value);
+                  }}
+                />
+                {submit == true && state == "" && (
+                  <Text style={styles.errorStyle}>
+                    State cannot be empty
+                  </Text>
+                )}
+                <Input
+                  full={true}
+                  text={"City"}
+                  value={city}
+                  onChangeText={(value) => {
+                    setCity(value);
+                  }}
+                />
+                {submit == true && city == "" && (
+                  <Text style={styles.errorStyle}>
+                    City cannot be empty
+                  </Text>
+                )}
+                <Input
+                  full={true}
                   text={"Address"}
                   value={address}
                   onChangeText={(value) => {
@@ -625,6 +713,54 @@ const AccountSettingsScreen = (props) => {
                     Address cannot be empty
                   </Text>
                 )}
+                <Input
+                  full={true}
+                  text={"Postal Code"}
+                  value={postalCode}
+                  onChangeText={(value) => {
+                    setPostalCode(value);
+                  }}
+                />
+                {submit == true && postalCode == "" && (
+                  <Text style={styles.errorStyle}>
+                    Postal Code cannot be empty
+                  </Text>
+                )}
+
+                {country == 'United States' ?
+                  <>
+                    <Input
+                      full={true}
+                      text={"Social Security Number"}
+                      keyboardType={'number-pad'}
+                      value={ssn}
+                      onChangeText={(value) => {
+                        setSsn(value)
+                      }}
+                    />
+                    {submit == true && ssn == "" && (
+                      <Text style={styles.errorStyle}>
+                        Social Security Number cannot be empty
+                      </Text>
+                    )}
+                    <Input
+                      full={true}
+                      text={"Personal Id"}
+                      keyboardType={'number-pad'}
+                      value={pId}
+                      onChangeText={(value) => {
+                        setPID(value)
+                      }}
+                    />
+                    {submit == true && pId == "" && (
+                      <Text style={styles.errorStyle}>
+                        Personal ID cannot be empty
+                      </Text>
+                    )}
+                  </>
+                  :
+                  null
+                }
                 <Input
                   full={true}
                   text={"Phone"}
@@ -640,8 +776,9 @@ const AccountSettingsScreen = (props) => {
                 {
                   submit && phoneNumber.length && !isPhoneValid(phoneNumber) ? <Text style={[styles.errorStyle]}>Phone number is incomplete </Text> : null
                 }
-                <Text style={styles.text}>Instructor Type</Text>
-
+                <View style={{ marginTop: "5%" }}>
+                  <Text style={styles.text}>Instructor Type</Text>
+                </View>
                 <FlatList
                   data={categories}
                   // showsVerticalScrollIndicator={false}
@@ -751,6 +888,7 @@ const AccountSettingsScreen = (props) => {
                   <Text style={styles.errorStyle}>  Please select atleast one age group qualified coach</Text>
                 )}
                 <Button
+                  disabled={uploading}
                   loading={btnLoading}
                   text={'Update'}
                   onPress={() => {
@@ -923,6 +1061,8 @@ const styles = StyleSheet.create({
   {
     height: 100,
     width: 100,
+    justifyContent: "center",
+    alignItems: "center",
     borderRadius: 150,
     alignSelf: 'center',
     marginTop: 20

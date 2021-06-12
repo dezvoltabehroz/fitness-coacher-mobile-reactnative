@@ -9,7 +9,7 @@ import {
   Dimensions,
   TouchableOpacity,
   FlatList,
-  ToastAndroid,
+  ImageBackground,
 } from "react-native";
 import { Colors } from "../../style/colors";
 import { FontFamily } from "../../style/typograpy";
@@ -24,7 +24,7 @@ import { AuthServices, TrainingCategoryServices } from '../../services'
 // import {Checkbox} from '../../common/Checkbox';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import NetInfo from "@react-native-community/netinfo";
-import * as coachRegister from "../../../services/registerCoach";
+import { Buffer } from 'buffer';
 import moment from 'moment';
 import Input from "../../common/Input";
 import { Snackbar } from 'react-native-paper';
@@ -45,7 +45,7 @@ function CompleteProfile({ navigation, route }) {
   // console.log("data is", data);
 
   // const [checked, setChecked] = useState("baseBall");
-  const [ageGroup, setAgeGroup] = useState("9");
+  const [uploading, setUploading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
   const [ageModalVisible, setAgeModalVisible] = useState(false);
@@ -54,12 +54,12 @@ function CompleteProfile({ navigation, route }) {
 
   const [instructorModalVisible, setInstructorModalVisible] = useState(false);
   const [instructionModalVisible, setInstructionModalVisible] = useState(false);
-  const [instructor, setInstructor] = useState("");
-  const [instruction, setInstruction] = useState("");
+  const [state, setState] = useState("");
+  const [postalCode, setPostalCode] = useState("");
 
-  const [checkInstructorTypes, setCheckInstructorTypes] = useState(false);
-  const [checkInstructionTypes, setCheckInstructionTypes] = useState(false);
-  const [checkAgeGroup, setCheckAgeGroup] = useState(false);
+  const [city, setCity] = useState("");
+  const [ssn, setSsn] = useState("");
+  const [pId, setPID] = useState("");
 
   const [selectInstruction, setSelectInstruction] = useState({});
   const [selectInstructor, setSelectInstructor] = useState({});
@@ -195,7 +195,10 @@ function CompleteProfile({ navigation, route }) {
     //   console.log(submit)
     // }
     // else {
-    if (selectInstructor != undefined && selectedSkill.length != 0 && subCatVal && age.length != 0 && date && country.length && address.length && phoneNumber.length && isPhoneValid(phoneNumber)) {
+
+    if (country == "United States" && ssn.length && postalCode.length && pId.length && selectInstructor != undefined && selectedSkill.length != 0 && subCatVal && age.length != 0 && date && country.length && address.length && phoneNumber.length && isPhoneValid(phoneNumber) && state.length && city.length) {
+      getCoachDetails();
+    } else if (selectInstructor != undefined && postalCode.length && selectedSkill.length != 0 && subCatVal && age.length != 0 && date && country.length && address.length && phoneNumber.length && isPhoneValid(phoneNumber) && state.length && city.length) {
       getCoachDetails();
     } else {
       setSubmit(true);
@@ -232,20 +235,63 @@ function CompleteProfile({ navigation, route }) {
     };
 
     let ageObject = age;
-    let userData = {
-      firstName: route.params.firstName,
-      lastName: route.params.lastName,
-      email: route.params.email,
-      password: route.params.password,
-      phone: phoneNumber,
-      address: address,
-      imageUrl: image,
-      dob: moment(date).format('YYYY-MM-DD'),
-      role: 'coach',
-      country: country,
-      ageGroupCoach: ageObject,
-      trainingType: trainingType,
-    };
+    let userData;
+    if (country == 'United States') {
+      userData = {
+        firstName: route.params.firstName,
+        lastName: route.params.lastName,
+        email: route.params.email,
+        password: route.params.password,
+        phone: phoneNumber,
+        address: address,
+        imageUrl: image,
+        state: state,
+        city: city,
+        zipCode: postalCode,
+        ssn: ssn,
+        nationalId: pId,
+        dob: moment(date).format('YYYY-MM-DD'),
+        role: 'coach',
+        country: country,
+        ageGroupCoach: ageObject,
+        trainingType: trainingType,
+      };
+    }
+    else {
+      userData = {
+        firstName: route.params.firstName,
+        lastName: route.params.lastName,
+        email: route.params.email,
+        password: route.params.password,
+        phone: phoneNumber,
+        address: address,
+        imageUrl: image,
+        state: state,
+        city: city,
+        zipCode: postalCode,
+        ssn: "",
+        nationalId: "",
+        dob: moment(date).format('YYYY-MM-DD'),
+        role: 'coach',
+        country: country,
+        ageGroupCoach: ageObject,
+        trainingType: trainingType,
+      };
+    }
+    // let userData = {
+    //   firstName: route.params.firstName,
+    //   lastName: route.params.lastName,
+    //   email: route.params.email,
+    //   password: route.params.password,
+    //   phone: phoneNumber,
+    //   address: address,
+    //   imageUrl: image,
+    //   dob: moment(date).format('YYYY-MM-DD'),
+    //   role: 'coach',
+    //   country: country,
+    //   ageGroupCoach: ageObject,
+    //   trainingType: trainingType,
+    // };
     console.log("userdata is", userData);
     AuthServices.userRegister(userData)
       .then((response) => {
@@ -262,7 +308,7 @@ function CompleteProfile({ navigation, route }) {
         setMessage(`${errorUtils.getError(error)}`)
         setVisible(true);
         setLoading(false)
-        console.log(error);
+        console.log(error.response.data);
       })
   };
 
@@ -343,6 +389,7 @@ function CompleteProfile({ navigation, route }) {
     launchImageLibrary(
       {
         title: "Pick photo from storage",
+        includeBase64: true,
         storageOptions: {
           skipBackup: true,
           path: 'images',
@@ -352,25 +399,26 @@ function CompleteProfile({ navigation, route }) {
         if (response.error) { }
         else if (response.uri != undefined) {
           let userData = {
-            fileName: new Date().getTime() + response.fileName,
+            fileName: response.fileName,
             fileType: response.type
           }
           console.log("response : ", response);
           setImage(response.uri);
+          setUploading(true)
           AuthServices.getUrl(userData)
             .then((res) => {
               console.log(res.data)
-              let formData = new FormData();
-              formData.append(`${userData.fileName}`, {
-                uri: response.uri,
-                name: `${new Date().getTime().toString()}.jpg`,
-                filename: new Date().getTime().toString() + '.jpg',
-                type: 'image/jpg'
+              const buffer = Buffer(`${response.base64}`, "base64");
+              axios.put(res.data.postUrl, buffer, {
+                headers: {
+                  "Content-Type": `${response.type}; charset=utf-8`,
+                  "x-amz-acl": "public-read",
+                },
               })
-              axios.put(res.data.postUrl, formData)
                 .then((responseData) => {
-                  console.log(responseData)
+                  console.log(responseData.data.status)
                   setImage(res.data.getUrl);
+                  setUploading(false)
                 }).catch((err) => { console.log(err) })
             })
             .catch((err) => { console.log(err) })
@@ -426,10 +474,15 @@ function CompleteProfile({ navigation, route }) {
         >
           <View style={styles.profile}>
             {
-              image ?
-                <Image source={{ uri: image }} style={styles.avatarStyle} />
+              uploading ?
+                <ImageBackground imageStyle={{ borderRadius: 150 }} source={{ uri: image }} style={styles.avatarStyle}>
+                  <ActivityIndicator size={20} color={Colors.buttonColor} />
+                </ImageBackground>
                 :
-                <Image source={require('../../assets/avatar.png')} style={styles.avatar} />
+                image ?
+                  <Image source={{ uri: image }} style={styles.avatarStyle} />
+                  :
+                  <Image source={require('../../assets/avatar.png')} style={styles.avatar} />
             }
             <TouchableOpacity onPress={() => launchGallery()} style={styles.icon}>
               {
@@ -544,6 +597,32 @@ function CompleteProfile({ navigation, route }) {
           )}
           <Input
             full={true}
+            text={"State"}
+            value={state}
+            onChangeText={(value) => {
+              setState(value);
+            }}
+          />
+          {submit == true && state == "" && (
+            <Text style={styles.errorStyle}>
+              State cannot be empty
+            </Text>
+          )}
+          <Input
+            full={true}
+            text={"City"}
+            value={city}
+            onChangeText={(value) => {
+              setCity(value);
+            }}
+          />
+          {submit == true && city == "" && (
+            <Text style={styles.errorStyle}>
+              City cannot be empty
+            </Text>
+          )}
+          <Input
+            full={true}
             text={"Address"}
             value={address}
             onChangeText={(value) => {
@@ -555,6 +634,55 @@ function CompleteProfile({ navigation, route }) {
               Address cannot be empty
             </Text>
           )}
+          <Input
+            full={true}
+            text={"Postal Code"}
+            value={postalCode}
+            keyboardType={'number-pad'}
+            onChangeText={(value) => {
+              setPostalCode(value);
+            }}
+          />
+          {submit == true && postalCode == "" && (
+            <Text style={styles.errorStyle}>
+              Postal Code cannot be empty
+            </Text>
+          )}
+
+          {country == 'United States' ?
+            <>
+              <Input
+                full={true}
+                text={"Social Security Number"}
+                keyboardType={'number-pad'}
+                value={ssn}
+                onChangeText={(value) => {
+                  setSsn(value)
+                }}
+              />
+              {submit == true && ssn == "" && (
+                <Text style={styles.errorStyle}>
+                  Social Security Number cannot be empty
+                </Text>
+              )}
+              <Input
+                full={true}
+                text={"Personal Id"}
+                keyboardType={'number-pad'}
+                value={pId}
+                onChangeText={(value) => {
+                  setPID(value)
+                }}
+              />
+              {submit == true && pId == "" && (
+                <Text style={styles.errorStyle}>
+                  Personal ID cannot be empty
+                </Text>
+              )}
+            </>
+            :
+            null
+          }
 
           <Input
             full={true}
@@ -679,6 +807,7 @@ function CompleteProfile({ navigation, route }) {
             <Text style={styles.errorStyle}>  Please select atleast one age group qualified coach</Text>
           )}
           <Button
+            disabled={uploading}
             loading={loading}
             text={"Register"}
             onPress={() => {
@@ -795,6 +924,8 @@ const styles = StyleSheet.create({
   avatarStyle: {
     height: 120,
     width: 120,
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 120,
   },
   icon: {
@@ -865,7 +996,7 @@ const styles = StyleSheet.create({
     // backgroundColor: 'red',
   },
   dropDown: {
-    height: 40,
+    height: 45,
     width: "100%",
     borderWidth: 1,
     borderColor: Colors.textColor,

@@ -21,13 +21,14 @@ import { Colors } from '../style/colors';
 const height = Dimensions.get('window').height;
 import { FontFamily } from '../style/typograpy';
 
-const Button = ({ text, onPress, flag, loading }) => {
+const Button = ({ text, onPress, flag, loading, disabled }) => {
   useEffect(() => { });
   return (
     <TouchableOpacity
+      disabled={disabled}
       style={[
         styles.container,
-        { backgroundColor:  Colors.buttonColor },
+        { backgroundColor: disabled ? 'lightgray' : Colors.buttonColor },
       ]}
       onPress={onPress}>
       {
