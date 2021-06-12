@@ -66,7 +66,7 @@ const BookingDetails = props => {
               console.debug("Data : ", data);
               setPreview(data.images[0])
             })
-            .catch((err)=>{
+            .catch((err) => {
               console.log(err.error)
             });
           setLoading(false)
@@ -179,23 +179,22 @@ const BookingDetails = props => {
                             justifyContent: "space-between",
                             alignItems: 'center',
                           }}>
-                          <View style={{
-                            flexDirection: 'row',
-
-                            alignItems: 'center',
-                          }}>
-                            <TouchableOpacity
-                              onPress={() => {
-                                props.navigation.navigate('AthleteDetails', { id: bookingDetails.AthleteId });
-                              }}>
+                          <TouchableOpacity
+                            onPress={() => {
+                              props.navigation.navigate('AthleteDetails', { id: bookingDetails.AthleteId });
+                            }} style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                            }}>
+                            <View >
                               <Image
                                 resizeMode="contain"
                                 source={bookingDetails.athlete.imageUrl != null ? { uri: bookingDetails.athlete.imageUrl } : require('../../assets/splash.png')}
                                 style={styles.profile}
                               />
-                            </TouchableOpacity>
+                            </View>
                             <Text style={{ textAlign: 'left' }}>{bookingDetails.athlete.firstName} {bookingDetails.athlete.lastName}</Text>
-                          </View>
+                          </TouchableOpacity>
                           <View>
                             <Text
                               style={{
