@@ -53,7 +53,7 @@ const AccountSettingsScreen = (props) => {
   const [first_name, setFirstname] = useState(props?.user?.firstName);
   const [last_name, setLastname] = useState(props?.user?.lastName);
   const [email, setEmail] = useState(props?.user?.email)
-
+  const [code, setCode] = useState(props?.user?.country)
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [state, setState] = useState(props?.user?.state);
   const [postalCode, setPostalCode] = useState(props?.user?.zipCode);
@@ -104,10 +104,10 @@ const AccountSettingsScreen = (props) => {
   const [filePath, setFilePath] = useState(props?.user?.imageUrl);
   const [visible, setVisible] = useState(false)
   const [message, setMessage] = useState("")
-  useEffect(() => {
+  useEffect(async () => {
     setLoading(true)
-    getCategories();
-    getSkills()
+    await getCategories();
+    await getSkills()
     for (let index = 0; index < arr.length; index++) {
       props.user.ageGroupCoach.map((item) => {
         if (item.ageGroup == arr[index].age) {
@@ -115,10 +115,10 @@ const AccountSettingsScreen = (props) => {
         }
       })
     }
-    //console.log(arr)
-    setTimeout(() => {
-      setLoading(false)
-    }, 3000);
+    await setLoading(false)
+    // setTimeout(() => {
+    //   setLoading(false)
+    // }, 3000);
   }, []);
 
   const getCategories = () => {
@@ -284,6 +284,7 @@ const AccountSettingsScreen = (props) => {
   const onSelect = async (country) => {
     //console.log(country)
     await setCountry(country.name);
+    setCode(country.cca2)
     await setPhoneNumber(`+${country.callingCode[0]}`);
     await setCountryModal(false)
 
@@ -472,59 +473,31 @@ const AccountSettingsScreen = (props) => {
         }
       }
     })
-    let userData;
-    if (country == 'United States') {
-      userData = {
-        firstName: first_name,
-        lastName: last_name,
-        email: email,
-        phone: phoneNumber,
-        address: address,
-        age: props?.user?.age,
-        imageUrl: filePath,
-        state: state,
-        city: city,
-        zipCode: postalCode,
-        ssn: ssn,
-        nationalId: pId,
-        dob: moment(date).format('YYYY-MM-DD'),
-        role: 'coach',
-        country: country,
-        ageGroupCoach: ageArr,
-        trainingType: {
-          id: props?.user?.CoachTrainingId,
-          TrainingTypeId: selectInstructor.id,
-          SkillId: selectedSkill[0].id,
-          subCategory: selectedSubCategories
-        }
-      };
-    }
-    else {
-      userData = {
-        firstName: first_name,
-        lastName: last_name,
-        email: email,
-        phone: phoneNumber,
-        address: address,
-        age: props?.user?.age,
-        imageUrl: filePath,
-        state: state,
-        city: city,
-        zipCode: postalCode,
-        ssn: "",
-        nationalId: "",
-        dob: moment(date).format('YYYY-MM-DD'),
-        role: 'coach',
-        country: country,
-        ageGroupCoach: ageArr,
-        trainingType: {
-          id: props?.user?.CoachTrainingId,
-          TrainingTypeId: selectInstructor.id,
-          SkillId: selectedSkill[0].id,
-          subCategory: selectedSubCategories
-        }
-      };
-    }
+    let userData = {
+      firstName: first_name,
+      lastName: last_name,
+      email: email,
+      phone: phoneNumber,
+      address: address,
+      age: props?.user?.age,
+      imageUrl: filePath,
+      state: state,
+      city: city,
+      zipCode: postalCode,
+      ssn: code == 'US' ? ssn : "",
+      nationalId: code == 'US' ? pId : "",
+      dob: moment(date).format('YYYY-MM-DD'),
+      role: 'coach',
+      country: code,
+      ageGroupCoach: ageArr,
+      trainingType: {
+        id: props?.user?.CoachTrainingId,
+        TrainingTypeId: selectInstructor.id,
+        SkillId: selectedSkill[0].id,
+        subCategory: selectedSubCategories
+      }
+    };
+
     // let userData = {
     //   firstName: first_name,
     //   lastName: last_name,
@@ -650,7 +623,7 @@ const AccountSettingsScreen = (props) => {
                   <Text style={styles.errorStyle}>Please select your date of birth</Text>
                 )}
 
-                <Text style={styles.text}>Country</Text>
+                {/* <Text style={styles.text}>Country</Text>
                 <View style={styles.outerView}>
                   <TouchableOpacity
                     style={styles.dropDown}
@@ -670,7 +643,16 @@ const AccountSettingsScreen = (props) => {
                       style={styles.dropImage}
                     />
                   </TouchableOpacity>
-                </View>
+                </View> */}
+                <Input
+                  full={true}
+                  placeholder="eg: 'US','EG','GB',... etc"
+                  text={"Country"}
+                  value={country}
+                  onChangeText={(value) => {
+                    setCountry(value);
+                  }}
+                />
                 {submit == true && country == '' && (
                   <Text style={styles.errorStyle}>Please select a Country</Text>
                 )}

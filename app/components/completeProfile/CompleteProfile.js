@@ -77,6 +77,7 @@ function CompleteProfile({ navigation, route }) {
   const [showDatePicker, setShowDatePicker] = useState(false);
   // const [subCategoriesLoading, setSubCategoriesLoading] = useState(true);
   const [skillsLoading, setSkillsLoading] = useState(true);
+  const [code, setCode] = useState("")
   const phoneRef = createRef(null);
   const [visible, setVisible] = useState(false)
   const [message, setMessage] = useState("")
@@ -246,11 +247,11 @@ function CompleteProfile({ navigation, route }) {
       state: state,
       city: city,
       zipCode: postalCode,
-      ssn: country == 'United States' ? ssn : "",
-      nationalId: country == 'United States' ? pId : "",
+      ssn: code == 'US' ? ssn : "",
+      nationalId: code == 'US' ? pId : "",
       dob: moment(date).format('YYYY-MM-DD'),
       role: 'coach',
-      country: country,
+      country: code,
       ageGroupCoach: ageObject,
       trainingType: trainingType,
     };
@@ -318,8 +319,9 @@ function CompleteProfile({ navigation, route }) {
   };
 
   const onSelect = async (country) => {
-    console.log(country)
+    console.log(country.cca2)
     console.log(phoneRef?.current?.selectCountry(country.cca2))
+    setCode(country.cca2)
     await setCountry(country.name);
     await setPhoneNumber(`+${country.callingCode[0]}`);
     await phoneRef?.current?.selectCountry(country.cca2);
@@ -554,8 +556,17 @@ function CompleteProfile({ navigation, route }) {
               />
             </TouchableOpacity>
           </View>
+          {/* <Input
+            full={true}
+            placeholder="eg: 'US','EG','GB',... etc"
+            text={"Country"}
+            value={country}
+            onChangeText={(value) => {
+              setCountry(value);
+            }}
+          /> */}
           {submit == true && country == '' && (
-            <Text style={styles.errorStyle}>Please select a Country</Text>
+            <Text style={styles.errorStyle}>Please enter a Country</Text>
           )}
           <Input
             full={true}
