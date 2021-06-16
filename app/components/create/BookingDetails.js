@@ -188,7 +188,6 @@ const BookingDetails = props => {
                             }}>
                             <View >
                               <Image
-                                resizeMode="contain"
                                 source={bookingDetails.athlete.imageUrl != null ? { uri: bookingDetails.athlete.imageUrl } : require('../../assets/splash.png')}
                                 style={styles.profile}
                               />

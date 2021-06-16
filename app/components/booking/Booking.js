@@ -102,7 +102,7 @@ const BookingScreen = (props) => {
             >
               <Image
                 source={props?.user?.imageUrl != null ? { uri: props?.user?.imageUrl } : require('../../assets/splash.png')}
-                // resizeMode="contain"
+                resizeMode="cover"
                 style={styles.image1}
               />
             </TouchableOpacity>

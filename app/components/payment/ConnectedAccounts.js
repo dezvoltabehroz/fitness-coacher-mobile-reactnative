@@ -152,7 +152,10 @@ const ConnectedAccounts = props => {
               onPress={async () => {
                 console.log(details)
                 setCofirmLoading(true)
-                const { token, error } = await createToken({ type: "Card" });
+                const { token, error } = await createToken({
+                  type: "Card",
+                  currency: "USD"
+                });
                 if (error) {
                   setCofirmLoading(false)
                   setModalVisible(false)

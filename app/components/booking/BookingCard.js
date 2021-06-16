@@ -19,7 +19,6 @@ const BookingCard = props => {
       <View style={styles.outer}>
         <View style={styles.inner}>
           <Image
-            resizeMode="contain"
             source={props.item.athlete.imageUrl != null ? { uri: props.item.athlete.imageUrl } : require('../../assets/splash.png')}
             style={styles.image}
           />
