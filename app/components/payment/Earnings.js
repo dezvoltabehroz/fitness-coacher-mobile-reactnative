@@ -18,8 +18,9 @@ import {
 import { Colors } from '../../style/colors';
 import { FontFamily } from '../../style/typograpy';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { BarChart, Grid } from 'react-native-svg-charts';
+import { BarChart, Grid, YAxis, XAxis } from 'react-native-svg-charts';
 import * as shape from 'd3-shape';
+import * as scale from 'd3-scale'
 import { PaymentServices } from '../../services';
 import { connect } from 'react-redux';
 import { errorUtils } from '../../common/Utilities';
@@ -37,9 +38,12 @@ const Earnings = props => {
   const fill = 'rgb(4, 11, 34)';
   const [withdrawModal, setWithdrawModal] = useState(false)
   const [graphData, setGraphData] = useState([]);
+  const [labelData, setLabelData] = useState([]);
   const [respData, setResData] = useState({});
   const [amount, setAmount] = useState('');
   const [withdrawLoading, setWithdrawLoading] = useState(false)
+  let label = [];
+  let value = [];
   const handleWithdraw = () => {
     if (amount.length) {
       setWithdrawLoading(true)
@@ -80,45 +84,53 @@ const Earnings = props => {
   }, [])
   const getAmounts = () => {
     setLoading(true);
-    PaymentServices.getAmountOfCoaches(props?.user.id, props?.token)
-      .then((response) => {
-        if (response.data.success) {
-          setTotalAmount(response.data.bookings[0].total_amount)
-          console.log(response.data)
-          PaymentServices.coachGraphData(props?.user.id, props?.token)
-            .then((resData) => {
-              console.log(resData.data)
-              let res = [...resData.data.result.coachBookings];
-              let data = [];
-              res.forEach((item, index) => {
-                data.push(item.price + index)
-              })
-              setResData(resData.data.result);
-              console.log(respData)
-              setGraphData(data)
-              console.log(respData)
+    PaymentServices.coachGraphData(props?.user.id, props?.token)
+      .then((resData) => {
+        console.log(resData.data)
+        let res = [...resData.data.result.coachBookings];
+        let data = [];
+        let array = []
+        res.forEach((item, index) => {
+          data.push({ value: parseInt(item.price), label: item.monthName })
+          array.push(parseInt(item.price))
+        })
+        setLabelData(array)
+        console.log(data)
+        setGraphData(data)
+        setResData(resData.data.result);
+        console.log(graphData)
+
+        console.log(graphData)
+
+        console.log(graphData)
+        PaymentServices.getAmountOfCoaches(props?.user.id, props?.token)
+          .then((response) => {
+            if (response.data.success) {
+              setTotalAmount(response.data.bookings[0].total_amount)
+              console.log(response.data)
               setLoading(false);
-              console.log(respData)
-            })
-            .catch((err) => {
-              setMessage(`${errorUtils.getError(err)}`)
-              setVisible(true); console.log(err)
+            }
+            else {
+              setMessage(`${response.data.msg}`)
+              setVisible(true);
               setLoading(false);
-            })
-        }
-        else {
-          setMessage(`${response.data.msg}`)
-          setVisible(true);
-          setLoading(false);
-        }
+            }
+          })
+          .catch((error) => {
+            setLoading(false);
+            setMessage(`${errorUtils.getError(error)}`)
+            setVisible(true);
+          })
       })
-      .catch((error) => {
+      .catch((err) => {
+        setMessage(`${errorUtils.getError(err)}`)
+        setVisible(true); console.log(err)
         setLoading(false);
-        setMessage(`${errorUtils.getError(error)}`)
-        setVisible(true);
       })
+
   }
-  var data = [...graphData]
+  const data = [...graphData]
+
   return (
     <Container onPress={() => setVisible(!visible)} message={message} visible={visible}>
       <View style={styles.container}>
@@ -170,18 +182,69 @@ const Earnings = props => {
                     ${totalAmount}
                   </Text>
                 </View>
-                <View style={styles.barChartContainer}>
-                  <BarChart
-                    style={{ height: height > 667 ? 200 : 150 }}
-                    data={data.length != 0 ? data : [50, 10, 40, 95, 4, 24]}
-                    barStyle={{ borderRadius: 120 }}
-                    svg={{ fill }}
-                    spacingOuter={0.5}
-                    curve={shape.curveNatural}
-                    contentInset={{ top: 30, bottom: 30 }}>
-                    <Grid />
-                  </BarChart>
+
+                <View style={{ position: "absolute", top: "25%", left: 30 }}>
+                  {/* <YAxis
+                    style={{ height: 140 }}
+                    svg={{ fontSize: 10, fill: 'black' }}
+                    data={data.reverse()}
+                    yAccessor={({ item, index }) => item.label}
+                    xAccessor={({ item }) => item.value}
+                    scale={scale.scaleBand}
+                    contentInset={{ left: 0, bottom: 0 }}
+                    spacing={0.2}
+                    formatLabel={(_, index) => graphData[index].value}
+                  /> */}
+
                 </View>
+                <View style={[styles.barChartContainer, { flex: 1, }]}>
+
+                  <BarChart
+                    style={{ height: height > 667 ? 190 : 140, }}
+                    data={graphData}
+                    width={250}
+                    barStyle={{ borderRadius: 120 }}
+                    yAccessor={({ item }) => item.value}
+                    xAccessor={({ item }) => item.value}
+                    svg={{ fill }}
+                    curve={shape.curveNatural}
+                    contentInset={{ top: 30, left: 1, right: 1, bottom: 30 }}
+                    spacing={0.3}
+                    gridMin={0}
+                  >
+
+                    <Grid direction={Grid.Direction.HORIZONTAL} />
+                    <View style={{ paddingHorizontal: 5, flexDirection: "row", justifyContent: "space-between" }}>
+                      {
+                        graphData.map((item, index) => {
+                          return (
+                            <Text
+                              style={{ marginLeft: 10 }}
+                              key={index}
+                              fontSize={14}
+                              fill={'black'}
+                              alignmentBaseline={'middle'}
+                              textAnchor={'middle'}
+                            >
+                              ${item.value}
+                            </Text>
+                          )
+                        })
+
+                      }
+                    </View>
+
+                  </BarChart>
+                  <XAxis
+                    style={{ marginHorizontal: 1, marginTop: -20 }}
+                    data={graphData}
+                    yAccessor={({ item }) => item.label}
+                    formatLabel={(value, index) => graphData[index].label}
+                    contentInset={{ left: 20, right: 30, }}
+                    svg={{ fontSize: 10, fill: 'black' }}
+                  />
+                </View>
+
 
                 <View style={[styles.barChartContainer, { height: '40%' }]}>
                   <View style={styles.mainView}>
@@ -362,9 +425,10 @@ const styles = StyleSheet.create({
   },
   barChartContainer: {
     marginTop: 10,
+    padding: "2.5%",
     // backgroundColor: 'pink',
     marginHorizontal: 20,
-    height: height > 667 ? 200 : 150,
+    // height: height > 667 ? 220 : 170,
     borderRadius: 10,
     borderWidth: 0.5,
   },
