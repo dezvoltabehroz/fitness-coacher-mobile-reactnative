@@ -12,7 +12,7 @@ let configToken = (token) => {
 }
 const Api = {
     userLogin: function (userData) {
-        return axiosInstance.post('login', {
+        return axiosInstance.post('coachLogin', {
             email: userData.email,
             password: userData.password
         }, config)
