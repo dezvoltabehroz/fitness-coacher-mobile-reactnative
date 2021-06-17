@@ -623,7 +623,7 @@ const AccountSettingsScreen = (props) => {
                   <Text style={styles.errorStyle}>Please select your date of birth</Text>
                 )}
 
-                {/* <Text style={styles.text}>Country</Text>
+                <Text style={styles.text}>Country</Text>
                 <View style={styles.outerView}>
                   <TouchableOpacity
                     style={styles.dropDown}
@@ -643,16 +643,8 @@ const AccountSettingsScreen = (props) => {
                       style={styles.dropImage}
                     />
                   </TouchableOpacity>
-                </View> */}
-                <Input
-                  full={true}
-                  placeholder="eg: 'US','EG','GB',... etc"
-                  text={"Country"}
-                  value={country}
-                  onChangeText={(value) => {
-                    setCountry(value);
-                  }}
-                />
+                </View>
+             
                 {submit == true && country == '' && (
                   <Text style={styles.errorStyle}>Please select a Country</Text>
                 )}

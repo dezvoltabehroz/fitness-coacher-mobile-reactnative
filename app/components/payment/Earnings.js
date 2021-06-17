@@ -129,7 +129,7 @@ const Earnings = props => {
       })
 
   }
-  const data = [...graphData]
+  // const data = [...graphData]
 
   return (
     <Container onPress={() => setVisible(!visible)} message={message} visible={visible}>
@@ -183,24 +183,22 @@ const Earnings = props => {
                   </Text>
                 </View>
 
-                <View style={{ position: "absolute", top: "25%", left: 30 }}>
-                  {/* <YAxis
+                {/* <View style={{ position: "absolute", top: "25%", left: 50 }}>
+                  <YAxis
                     style={{ height: 140 }}
                     svg={{ fontSize: 10, fill: 'black' }}
-                    data={data.reverse()}
+                    data={graphData}
                     yAccessor={({ item, index }) => item.label}
-                    xAccessor={({ item }) => item.value}
                     scale={scale.scaleBand}
                     contentInset={{ left: 0, bottom: 0 }}
                     spacing={0.2}
                     formatLabel={(_, index) => graphData[index].value}
-                  /> */}
+                  />
 
-                </View>
+                </View> */}
                 <View style={[styles.barChartContainer, { flex: 1, }]}>
-
                   <BarChart
-                    style={{ height: height > 667 ? 190 : 140, }}
+                    style={{ height: height > 667 ? 200 : 150, }}
                     data={graphData}
                     width={250}
                     barStyle={{ borderRadius: 120 }}
@@ -214,18 +212,11 @@ const Earnings = props => {
                   >
 
                     <Grid direction={Grid.Direction.HORIZONTAL} />
-                    <View style={{ paddingHorizontal: 5, flexDirection: "row", justifyContent: "space-between" }}>
+                    <View style={{ flexDirection: "row", width: "100%", justifyContent: "space-around" }}>
                       {
                         graphData.map((item, index) => {
                           return (
-                            <Text
-                              style={{ marginLeft: 10 }}
-                              key={index}
-                              fontSize={14}
-                              fill={'black'}
-                              alignmentBaseline={'middle'}
-                              textAnchor={'middle'}
-                            >
+                            <Text style={{ fontSize: 10, textAlign: "center" }} >
                               ${item.value}
                             </Text>
                           )
@@ -233,14 +224,13 @@ const Earnings = props => {
 
                       }
                     </View>
-
                   </BarChart>
                   <XAxis
                     style={{ marginHorizontal: 1, marginTop: -20 }}
                     data={graphData}
                     yAccessor={({ item }) => item.label}
                     formatLabel={(value, index) => graphData[index].label}
-                    contentInset={{ left: 20, right: 30, }}
+                    contentInset={{ left: 30, right: 30, }}
                     svg={{ fontSize: 10, fill: 'black' }}
                   />
                 </View>
