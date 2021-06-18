@@ -634,7 +634,7 @@ const AccountSettingsScreen = (props) => {
                   >
                     {country != undefined && country != '' ? (
                       // setCheckInstructorTypes(false)
-                      <Text style={styles.innertext}>{country}</Text>
+                      <Text style={styles.innertext}>{country == 'US' ? 'United States' : country}</Text>
                     ) : (
                       <Text style={styles.innertext}>Select</Text>
                     )}
@@ -644,7 +644,7 @@ const AccountSettingsScreen = (props) => {
                     />
                   </TouchableOpacity>
                 </View>
-             
+
                 {submit == true && country == '' && (
                   <Text style={styles.errorStyle}>Please select a Country</Text>
                 )}
@@ -702,7 +702,7 @@ const AccountSettingsScreen = (props) => {
                   </Text>
                 )}
 
-                {country == 'United States' ?
+                {country == 'US' ?
                   <>
                     <Input
                       full={true}

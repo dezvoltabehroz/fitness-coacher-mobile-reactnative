@@ -13,6 +13,7 @@ import {
   Platform,
   Dimensions,
   FlatList,
+  RefreshControl
 } from 'react-native';
 import { throttle } from 'lodash';
 import { Colors } from '../../style/colors';
@@ -27,7 +28,7 @@ const NotificationsScreen = props => {
   const [offset, setOffSet] = useState(0)
   const [reachLoading, setReachLoading] = useState(false)
   const [data, setdata] = useState([])
-
+  const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
     getNotifications();
   }, [])
