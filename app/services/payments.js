@@ -23,6 +23,12 @@ const Api = {
     createStripeAccount: function (userData,token) {
         return axiosInstance.post(`coach/createStripeAccount`,userData, configToken(token))
     },
+    stripeAccountInfo: function (token) {
+        return axiosInstance.get(`coach/accountInfo`, configToken(token))
+    },
+    stripeAccountVerify: function (token) {
+        return axiosInstance.get(`coach/verifyInfo`, configToken(token))
+    },
 
 };
 

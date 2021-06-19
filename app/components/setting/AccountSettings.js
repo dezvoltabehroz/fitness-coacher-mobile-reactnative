@@ -55,7 +55,7 @@ const AccountSettingsScreen = (props) => {
   const [email, setEmail] = useState(props?.user?.email)
   const [code, setCode] = useState(props?.user?.country)
   const [categoriesLoading, setCategoriesLoading] = useState(true);
-  const [state, setState] = useState(props?.user?.state);
+  const [state, setSState] = useState(props?.user?.state);
   const [postalCode, setPostalCode] = useState(props?.user?.zipCode);
   const [city, setCity] = useState(props?.user?.city);
   const [ssn, setSsn] = useState(props?.user?.ssn);
@@ -653,7 +653,7 @@ const AccountSettingsScreen = (props) => {
                   text={"State"}
                   value={state}
                   onChangeText={(value) => {
-                    setState(value);
+                    setSState(value);
                   }}
                 />
                 {submit == true && state == "" && (

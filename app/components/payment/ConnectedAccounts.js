@@ -32,15 +32,30 @@ import { errorUtils } from '../../common/Utilities';
 const ConnectedAccounts = props => {
   const [modalVisible, setModalVisible] = useState(false);
   const [details, setDetails] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [btnLoading, setBtnLoading] = useState(false)
   const [confirmLoading, setCofirmLoading] = useState(false)
   const [message, setMessage] = useState("")
   const [visible, setVisible] = useState(false)
+  const [result, setResult] = useState({})
   useEffect(() => {
     initStripe({
       publishableKey: 'pk_test_51IVaauJYCYbx3gzyXHFSWqkzjQourDKiOCqDybwCgC1DxjXf7ilt5jEeyoHDJWo9SkdD6uIGasM9SomiSTl2HRPQ002trNTCop'
     });
+    getAccountDetails()
   }, []);
   let { createToken } = useStripe();
+
+  const getAccountDetails = () => {
+    PaymentServices.stripeAccountInfo(props?.token)
+      .then((res) => {
+        console.log(res.data)
+        setLoading(false)
+        setResult(res.data.result)
+      })
+      .catch((err) => { console.log(err.response); setLoading(false) })
+  }
+
   return (
     <Container onPress={() => setVisible(!visible)} message={message} visible={visible}>
       <View style={styles.container}>
@@ -59,66 +74,127 @@ const ConnectedAccounts = props => {
         </View>
 
         <View style={styles.bottom}>
-          <ScrollView contentContainerStyle={{ paddingBottom: '40%' }}>
-            <View
-              style={{
-                height: '40%',
-                flexDirection: 'row',
-                padding: 10,
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}>
-              <Text style={{ paddingLeft: 15 }}>Default Payment Account</Text>
-              <TouchableOpacity onPress={() => setModalVisible(true)}  >
-                <Text
-                  style={{
-                    paddingRight: 15,
-                    color: 'red',
-                    fontSize: height > 667 ? 14 : 12,
-                  }}>
-                  Add New
-              </Text>
-              </TouchableOpacity>
-            </View>
-            <View
-              style={{
-                marginTop: 10,
-                backgroundColor: 'white',
-                marginHorizontal: 20,
-                height: 100,
-                borderRadius: 10,
-                borderWidth: 0.5,
-              }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}>
-                <TouchableOpacity
-                  onPress={() => {
-                    props.navigation.navigate('AthleteDetails');
-                  }}>
-                  <Image
-                    source={require('../../assets/splash.png')}
-                    style={styles.profile}
-                  />
-                </TouchableOpacity>
-                <Text style={{ textAlign: 'left' }}>Porter Shue</Text>
-                <Text
-                  style={{
-                    textAlign: 'right',
-                    marginLeft: height > 667 ? '40%' : '25%',
-                    fontSize: 12,
-                  }}>
-                  ******76352
-              </Text>
+          {
+
+            loading ?
+              <View style={{ marginTop: '50%', justifyContent: "center", alignItems: "center" }}>
+                <ActivityIndicator size={20} color={'#030E2D'} />
               </View>
-              <Divider style={{ width: '70%', alignSelf: 'center' }} />
-              <Text style={{ paddingLeft: '13%', marginTop: 10 }}>
-                Connected on 03/11/2021
-            </Text>
-            </View>
-          </ScrollView>
+              :
+              <ScrollView contentContainerStyle={{ paddingBottom: '40%' }}>
+                <View
+                  style={{
+                    // height: '40%',
+                    paddingTop: "10%",
+                    flexDirection: 'row',
+                    padding: 10,
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}>
+                  <Text style={{ paddingLeft: 15 }}>Default Payment Account</Text>
+                  {!result?.status ? <TouchableOpacity onPress={() => setModalVisible(true)}  >
+                    <Text
+                      style={{
+                        paddingRight: 15,
+                        color: 'red',
+                        fontSize: height > 667 ? 14 : 12,
+                      }}>
+                      Add New
+                    </Text>
+                  </TouchableOpacity>
+                    : null}
+                </View>
+                {
+                  result?.status ?
+                    <View
+                      style={{
+                        marginTop: 10,
+                        backgroundColor: 'white',
+                        marginHorizontal: 20,
+                        paddingVertical: "2.5%",
+                        borderRadius: 10,
+                        borderWidth: 0.5,
+                      }}>
+
+
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                        }}>
+                        <TouchableOpacity
+                          onPress={() => {
+                            props.navigation.navigate('AthleteDetails');
+                          }}>
+                          <Image
+                            source={props?.user?.imageUrl != null ? { uri: props?.user?.imageUrl } : require('../../assets/splash.png')}
+                            style={styles.profile}
+                          />
+                        </TouchableOpacity>
+                        <Text style={{ textAlign: 'left' }}>{props?.user?.firstName} {props?.user?.lastName}</Text>
+                        <Text
+                          style={{
+                            textAlign: 'right',
+                            marginLeft: height > 667 ? '30%' : '15%',
+                            fontSize: 12,
+                          }}>
+                          *******{result?.last4}
+                        </Text>
+                      </View>
+                      <Divider style={{ width: '90%', alignSelf: 'center' }} />
+                      <Text style={{ paddingLeft: '5%', marginTop: 10, textTransform: "capitalize" }}>
+                        Status:  {
+                          result?.status == 'inactive' ?
+                            'Not Connected'
+                            : result.status == 'verifying' ?
+                              'Verification in process'
+                              :
+                              'Connected'
+                        }
+                      </Text>
+                      <View style={{ marginHorizontal: "5%", marginTop: '5%' }}>
+                        {
+                          result.status == 'inactive' ?
+                            <>
+                              <Text >Incorrect personal information. Please update your profile information and verify again.</Text>
+                              <Button
+                                text={"Verify"}
+                                loading={btnLoading}
+                                onPress={() => {
+                                  setBtnLoading(true);
+                                  PaymentServices.stripeAccountVerify(props?.token)
+                                    .then((res) => {
+                                      if (res.data.success) {
+                                        getAccountDetails()
+                                      } else {
+                                        setMessage(`${res.data.msg}`)
+                                        setVisible(true);
+                                      }
+                                    })
+                                    .catch((err) => {
+                                      console.log(err.response.data);
+                                      setMessage(`${errorUtils.getError(error)}`)
+                                      setVisible(true);
+                                    })
+                                }}
+                              />
+                            </>
+                            :
+                            null
+                        }
+                      </View>
+
+                    </View>
+                    :
+                    <View style={{ paddingTop: "10%" }}>
+                      <Text style={{ color: Colors.buttonColor, textAlign: "center", fontFamily: FontFamily.helveticaBold }} >No Connected Account</Text>
+                    </View>
+
+                }
+
+              </ScrollView>
+          }
+
         </View>
 
       </View>
