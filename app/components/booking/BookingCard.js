@@ -43,23 +43,20 @@ const BookingCard = props => {
       <View style={styles.bar}></View>
       <View style={styles.bottom}>
         <Text style={styles.text2}>{props.item.athleteRequest.trainingType.title} Coaching</Text>
-        {
-          !props.active ?
-            null
-            :
-            <TouchableOpacity
-              style={{ flexDirection: 'row', alignItems: 'center', }}
-              onPress={() => {
-                props.navigation.navigate('Bookingdetails', { bookingId: props.item.id });
-              }}>
-              <Text style={[styles.text2, { color: '#030E2D' }]}>View Details</Text>
-              <MaterialIcons
-                name="arrow-right-alt"
-                size={height > 667 ? 20 : 16}
-                color={'#030E2D'}
-              />
-            </TouchableOpacity>
-        }
+
+        <TouchableOpacity
+          style={{ flexDirection: 'row', alignItems: 'center', }}
+          onPress={() => {
+            props.navigation.navigate('Bookingdetails', { bookingId: props.item.id });
+          }}>
+          <Text style={[styles.text2, { color: '#030E2D' }]}>View Details</Text>
+          <MaterialIcons
+            name="arrow-right-alt"
+            size={height > 667 ? 20 : 16}
+            color={'#030E2D'}
+          />
+        </TouchableOpacity>
+
 
       </View>
     </View>

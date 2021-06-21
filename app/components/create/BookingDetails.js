@@ -141,13 +141,16 @@ const BookingDetails = props => {
                   <Text style={styles.headertext}>{bookingDetails.athlete.firstName} {bookingDetails.athlete.lastName} - {bookingDetails.athlete.uniqueId} </Text>
                 </View>
                 <View style={styles.backIconView}>
-                  <TouchableOpacity onPress={() => setModalVisible(true)}>
-                    <Ionicons
-                      name="ellipsis-horizontal"
-                      size={height > 667 ? 20 : 16}
-                      style={{ paddingLeft: 20 }}
-                    />
-                  </TouchableOpacity>
+                  {bookingDetails.status == 'completionAccepted' ?
+                    null
+                    :
+                    <TouchableOpacity onPress={() => setModalVisible(true)}>
+                      <Ionicons
+                        name="ellipsis-horizontal"
+                        size={height > 667 ? 20 : 16}
+                        style={{ paddingLeft: 20 }}
+                      />
+                    </TouchableOpacity>}
                 </View>
               </View>
 
@@ -242,13 +245,17 @@ const BookingDetails = props => {
                           </ImageBackground>
                         </TouchableOpacity>
                       </View>
-                      <TouchableOpacity
-                        onPress={() => setModalVisible(true)}
-                        style={styles.btnStyle}>
-                        <Text style={{ color: 'white', fontWeight: '700' }}>
-                          Mark as Delivered
-                </Text>
-                      </TouchableOpacity>
+                      {bookingDetails.status == 'completionAccepted' ?
+                        null
+                        :
+                        <TouchableOpacity
+                          onPress={() => setModalVisible(true)}
+                          style={styles.btnStyle}>
+                          <Text style={{ color: 'white', fontWeight: '700' }}>
+                            Mark as Delivered
+                          </Text>
+                        </TouchableOpacity>
+                      }
                     </ScrollView>
                   </Tab>
                   <Tab
