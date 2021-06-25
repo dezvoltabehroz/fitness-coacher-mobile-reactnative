@@ -82,7 +82,7 @@ const BookingDetails = props => {
       .catch((err) => {
         setMessage(`${errorUtils.getError(err)}`)
         setLoading(false)
-        setVisible(true); setModalVisible(false); console.log(err)
+        setVisible(true); setModalVisible(false); console.log(err.response.data)
       })
   }
 

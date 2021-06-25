@@ -130,7 +130,7 @@ const SplashScreen = (props) => {
   const loginService = async () => {
     setLoading(true);
     let loginDetails = {
-      email: loginEmail,
+      email: loginEmail.trim(),
       password: loginPassword,
     };
     AuthServices.userLogin(loginDetails)
@@ -151,7 +151,7 @@ const SplashScreen = (props) => {
         setLoading(false);
         setMessage(`${errorUtils.getError(err)}`)
         setVisible(true);
-        console.log(err)
+        console.log(err.response.data)
       })
   };
 
@@ -237,7 +237,7 @@ const SplashScreen = (props) => {
   };
 
   const validateEmail = () => {
-    let email = state.email;
+    let email = state.email.trim();
     let pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return pattern.test(String(email).toLowerCase());
   };

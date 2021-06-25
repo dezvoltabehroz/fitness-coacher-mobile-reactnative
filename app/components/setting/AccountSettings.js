@@ -269,7 +269,7 @@ const AccountSettingsScreen = (props) => {
       return <ImageBackground imageStyle={{ borderRadius: 150 }} source={{ uri: filePath }} style={styles.image}>
         <ActivityIndicator size={20} color={Colors.buttonColor} />
       </ImageBackground>
-    } else if (filePath != null) {
+    } else if (filePath != null && filePath != "") {
       return <Image source={{ uri: filePath }} style={styles.image} />;
     } else {
       return (
@@ -480,7 +480,7 @@ const AccountSettingsScreen = (props) => {
       phone: phoneNumber,
       address: address,
       age: props?.user?.age,
-      imageUrl: filePath,
+      imageUrl: filePath == "" ? 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y' : filePath,
       state: state,
       city: city,
       zipCode: postalCode,

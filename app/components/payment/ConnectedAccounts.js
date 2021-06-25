@@ -121,21 +121,27 @@ const ConnectedAccounts = props => {
                         style={{
                           flexDirection: 'row',
                           alignItems: 'center',
+                          justifyContent: "space-between"
                         }}>
                         <TouchableOpacity
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                          }}
                           onPress={() => {
-                            props.navigation.navigate('AthleteDetails');
+                            // props.navigation.navigate('AthleteDetails');
                           }}>
                           <Image
                             source={props?.user?.imageUrl != null ? { uri: props?.user?.imageUrl } : require('../../assets/splash.png')}
                             style={styles.profile}
                           />
+                          <Text style={{ textAlign: 'left' }}>{props?.user?.firstName} {props?.user?.lastName}</Text>
                         </TouchableOpacity>
-                        <Text style={{ textAlign: 'left' }}>{props?.user?.firstName} {props?.user?.lastName}</Text>
+
                         <Text
                           style={{
                             textAlign: 'right',
-                            marginLeft: height > 667 ? '30%' : '15%',
+                            marginRight: height > 667 ? '5%' : '10%',
                             fontSize: 12,
                           }}>
                           *******{result?.last4}
@@ -223,7 +229,6 @@ const ConnectedAccounts = props => {
           />
           <View style={styles.modalbuttonView}>
             <TouchableOpacity
-              // disabled={details?.complete == true ? false : true}
               style={[styles.modalbutton, { backgroundColor: Colors.buttonColor }]}
               onPress={async () => {
                 console.log(details)
@@ -247,7 +252,7 @@ const ConnectedAccounts = props => {
                   PaymentServices.createStripeAccount(data, props?.token)
                     .then((res) => {
                       if (res.data.success) {
-                        props.navigation.replace('TabContainer')
+                        getAccountDetails();
                       }
                       else {
                         setModalVisible(false)

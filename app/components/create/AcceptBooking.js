@@ -82,10 +82,11 @@ const AcceptBooking = props => {
           .catch((err) => {
             setMessage(`${errorUtils.getError(err)}`)
             setLoading(false)
-            setVisible(true); setModalVisible(false); console.log(err)
+            setVisible(true); setModalVisible(false); console.log(err.response.data)
           })
       })
       .catch((err) => {
+        console.log(err.response.data)
         setMessage(`${errorUtils.getError(err)}`)
         setLoading(false)
         setVisible(true);
@@ -268,7 +269,7 @@ const AcceptBooking = props => {
       </View>
       <Modal visible={videoModal}>
         <VideoPlayer
-          source={{ uri: bookingDetails?.file }}
+          source={{ uri: bookingDetails != {} ? bookingDetails?.athleteRequest?.file : ""}}
           onBack={() => setVideoModal(!videoModal)}
         />
       </Modal>
@@ -279,6 +280,7 @@ const AcceptBooking = props => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor:"white"
   },
   snackbarContainerStyle: {
     justifyContent: "flex-end",
